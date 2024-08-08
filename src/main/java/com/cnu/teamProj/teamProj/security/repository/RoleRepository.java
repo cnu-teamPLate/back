@@ -1,6 +1,6 @@
-package com.cnu.teamProj.teamProj.repository;
+package com.cnu.teamProj.teamProj.security.repository;
 
-import com.cnu.teamProj.teamProj.entity.Role;
+import com.cnu.teamProj.teamProj.security.entity.Role;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

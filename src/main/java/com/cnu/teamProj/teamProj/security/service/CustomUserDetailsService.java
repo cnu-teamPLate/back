@@ -1,9 +1,9 @@
-package com.cnu.teamProj.teamProj.security;
+package com.cnu.teamProj.teamProj.security.service;
 
 
-import com.cnu.teamProj.teamProj.entity.Role;
-import com.cnu.teamProj.teamProj.entity.User;
-import com.cnu.teamProj.teamProj.repository.UserRepository;
+import com.cnu.teamProj.teamProj.security.entity.Role;
+import com.cnu.teamProj.teamProj.security.entity.User;
+import com.cnu.teamProj.teamProj.security.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
