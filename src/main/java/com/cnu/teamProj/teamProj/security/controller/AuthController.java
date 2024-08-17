@@ -1,7 +1,9 @@
 package com.cnu.teamProj.teamProj.security.controller;
 
+import com.cnu.teamProj.teamProj.security.dto.AuthResponseDto;
 import com.cnu.teamProj.teamProj.security.entity.Role;
 import com.cnu.teamProj.teamProj.security.entity.User;
+import com.cnu.teamProj.teamProj.security.jwt.JWTGenerator;
 import com.cnu.teamProj.teamProj.security.repository.RoleRepository;
 import com.cnu.teamProj.teamProj.security.repository.UserRepository;
 import com.cnu.teamProj.teamProj.security.dto.LoginDto;
@@ -28,19 +30,22 @@ public class AuthController {
     private UserRepository userRepository;
     private RoleRepository roleRepository;
     private PasswordEncoder passwordEncoder;
+    private JWTGenerator jwtGenerator;
     @Autowired
-    public AuthController(AuthenticationManager authenticationManager, UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder) {
+    public AuthController(AuthenticationManager authenticationManager, UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder, JWTGenerator jwtGenerator) {
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
+        this.jwtGenerator = jwtGenerator;
     }
 
     @PostMapping("login")
-    public ResponseEntity<String> login(@RequestBody LoginDto loginDto){
+    public ResponseEntity<AuthResponseDto> login(@RequestBody LoginDto loginDto){
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginDto.getName(), loginDto.getPwd()));
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        return new ResponseEntity<>("User signed in successed!", HttpStatus.OK);
+        String token = jwtGenerator.generateToken(authentication);
+        return new ResponseEntity<>(new AuthResponseDto(token), HttpStatus.OK);
     }
 
     @PostMapping("/register")
