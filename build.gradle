@@ -2,6 +2,7 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.3.2'
 	id 'io.spring.dependency-management' version '1.1.6'
+	id "org.springdoc.openapi-gradle-plugin" version "1.9.0"
 }
 
 group = 'com.cnu.teamProj'
@@ -21,6 +22,9 @@ configurations {
 }
 
 repositories {
+	/*maven {
+		url "https://plugins.gradle.org/m2/"
+	}*/
 	mavenCentral()
 }
 
@@ -30,7 +34,6 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-websocket'
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
-	implementation 'org.springframework.boot:spring-boot-'
 	//implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
 	//implementation 'org.springframework.boot:spring-boot-starter-data-mongodb-reactive'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
@@ -41,8 +44,17 @@ dependencies {
 	implementation 'org.springframework.security:spring-security-web'
 
 	implementation group: 'io.jsonwebtoken', name: 'jjwt-api', version: '0.11.5'
+	testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
 	runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-impl', version: '0.11.5'
 	runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-jackson', version: '0.11.5'
+	//스웨거
+	implementation 'javax.servlet:javax.servlet-api:4.0.1'
+
+	implementation group: 'io.springfox', name: 'springfox-swagger2', version: '3.0.0'
+	implementation group: 'io.springfox', name: 'springfox-swagger-ui', version: '2.9.2'
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0'
+	//Guava
+	implementation group: 'com.google.guava', name: 'guava', version: '12.0.1'
 
 	runtimeOnly 'com.mysql:mysql-connector-j'
 	compileOnly 'org.projectlombok:lombok'
