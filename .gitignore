@@ -18,6 +18,7 @@ bin/
 !**/src/test/**/bin/
 
 ### IntelliJ IDEA ###
+#application.properties
 
 .idea
 *.iws
@@ -26,7 +27,7 @@ bin/
 out/
 !**/src/main/**/out/
 !**/src/test/**/out/
-**/src/main/java/com/cnu/teamProj/teamProj/security/SecurityConstants.java
+#**/src/main/java/com/cnu/teamProj/teamProj/security/SecurityConstants.java
 
 ### NetBeans ###
 /nbproject/private/
