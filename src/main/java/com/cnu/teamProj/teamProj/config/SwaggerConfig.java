@@ -27,6 +27,8 @@ import java.util.List;
 
 //@EnableSwagger2
 @Configuration
+@EnableSwagger2
+@EnableWebMvc
 public class SwaggerConfig {
     @Bean
     public Docket openApi() {
