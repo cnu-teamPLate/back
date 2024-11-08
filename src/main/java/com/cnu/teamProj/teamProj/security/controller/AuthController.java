@@ -102,7 +102,7 @@ public class AuthController {
         user.setId(registerDto.getId());
         Role roles = roleRepository.findByName("USER").get();
         user.setRoles(Collections.singletonList(roles));
-
+        user.setUsername(registerDto.getUsername());
         userRepository.save(user);
 
         return new ResponseEntity<>("User registered success", HttpStatus.OK);
