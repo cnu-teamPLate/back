@@ -4,6 +4,7 @@ import com.cnu.teamProj.teamProj.member.dto.ProjMemDto;
 import com.cnu.teamProj.teamProj.member.repository.MemberRepository;
 import com.cnu.teamProj.teamProj.member.service.MemberServiceImpl;
 import com.cnu.teamProj.teamProj.security.entity.User;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +26,7 @@ public class MemberController {
 
     //특정 프로젝트 선택 시 해당 프로젝트의 팀원 불러오는 api
     @GetMapping("/project")
-    @Parameter(name = "userId", description = "학번")
+    @Operation(summary = "프로젝트에 참여중인 멤버", description = "특정 프로젝트에 참여중인 멤버 리스트를 반환")
     public List<ProjMemDto> getProjMem(@RequestParam Map map) {
         return memberService.findProjMemByProjID(String.valueOf(map.get("projId")));
     }

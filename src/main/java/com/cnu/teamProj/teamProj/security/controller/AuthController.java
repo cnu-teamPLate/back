@@ -10,7 +10,6 @@ import com.cnu.teamProj.teamProj.security.dto.LoginDto;
 import com.cnu.teamProj.teamProj.security.dto.RegisterDto;
 import com.cnu.teamProj.teamProj.security.service.UserInfoManageService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +37,8 @@ public class AuthController {
     private JWTGenerator jwtGenerator;
     private UserInfoManageService userInfoManageService;
 
-    private static final Logger log = LoggerFactory.getLogger(AuthController.class);
+    //로그
+    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
     @Autowired
     public AuthController(AuthenticationManager authenticationManager,
                           UserRepository userRepository,
@@ -55,22 +55,23 @@ public class AuthController {
     }
 
     @PostMapping("/login")
+    @Operation(summary = "로그인", description = "로그인 api")
     public ResponseEntity<AuthResponseDto> login(@RequestBody LoginDto loginDto){
         try {
             UsernamePasswordAuthenticationToken tempToken = new UsernamePasswordAuthenticationToken(
                     String.valueOf(loginDto.getId()), loginDto.getPwd());
-            log.info("tempToken.getCredentials(): {}", tempToken.getCredentials());
-            log.info("tempToken.getPrincipal(): {}", tempToken.getPrincipal());
+            logger.info("tempToken.getCredentials(): {}", tempToken.getCredentials());
+            logger.info("tempToken.getPrincipal(): {}", tempToken.getPrincipal());
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
                             loginDto.getId(), loginDto.getPwd()));
-            log.info("authentication.toString(): {}", authentication.toString());
+            logger.info("authentication.toString(): {}", authentication.toString());
             SecurityContextHolder.getContext().setAuthentication(authentication);
             String token = jwtGenerator.generateToken(authentication);
             System.out.println("token = " + token);
-            return new ResponseEntity<>(new AuthResponseDto(token), HttpStatus.OK); //유저 아이디(학번), 이름 필수로 넘겨야 함
+            return new ResponseEntity<>(new AuthResponseDto(token, loginDto.getId(), userRepository.findById(loginDto.getId()).toString()), HttpStatus.OK); //유저 아이디(학번), 이름 필수로 넘겨야 함
         } catch (Exception e){
-            e.printStackTrace();
+            logger.info("로그인 실패 : {}", e.getMessage());
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
     }

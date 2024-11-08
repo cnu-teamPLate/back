@@ -26,7 +26,7 @@ public class ClassController {
         this.classService = classService;
     }
 
-//    @Operation(summary = "새로운 클래스 등록", description = "새로운 수업 코드를 등록합니다")
+    @Operation(summary = "새로운 클래스 등록", description = "새로운 수업 코드를 등록합니다")
 //    @Parameters({
 //            @Parameter(name="classId", description = "과목코드", example = "CSE0000-01"),
 //            @Parameter(name="className", description = "과목명", example = "java언어"),
