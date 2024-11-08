@@ -28,7 +28,7 @@ out/
 !**/src/main/**/out/
 !**/src/test/**/out/
 #**/src/main/java/com/cnu/teamProj/teamProj/security/SecurityConstants.java
-
+.env
 ### NetBeans ###
 /nbproject/private/
 /nbbuild/
