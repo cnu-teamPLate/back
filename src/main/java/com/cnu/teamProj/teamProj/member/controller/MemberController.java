@@ -3,19 +3,18 @@ package com.cnu.teamProj.teamProj.member.controller;
 import com.cnu.teamProj.teamProj.member.dto.ProjMemDto;
 import com.cnu.teamProj.teamProj.member.repository.MemberRepository;
 import com.cnu.teamProj.teamProj.member.service.MemberServiceImpl;
-import io.swagger.annotations.ApiOperation;
+import com.cnu.teamProj.teamProj.security.entity.User;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/teamProj/member")
-@ApiOperation(value="멤버 관리", notes = "멤버 조회와 관련된 코드")
+@Tag(name = "멤버 관리", description = "멤버 조회와 관련된 코드")
 public class MemberController {
 
     private MemberServiceImpl memberService;
@@ -26,7 +25,9 @@ public class MemberController {
 
     //특정 프로젝트 선택 시 해당 프로젝트의 팀원 불러오는 api
     @GetMapping("/project")
+    @Parameter(name = "userId", description = "학번")
     public List<ProjMemDto> getProjMem(@RequestParam Map map) {
         return memberService.findProjMemByProjID(String.valueOf(map.get("projId")));
     }
+
 }

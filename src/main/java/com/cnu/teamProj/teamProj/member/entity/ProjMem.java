@@ -16,6 +16,5 @@ import org.springframework.context.annotation.Primary;
 public class ProjMem {
     @Id
     private String id;
-
     private String projId;
 }
