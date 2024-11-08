@@ -68,10 +68,9 @@ public class AuthController {
             SecurityContextHolder.getContext().setAuthentication(authentication);
             String token = jwtGenerator.generateToken(authentication);
             System.out.println("token = " + token);
-            return new ResponseEntity<>(new AuthResponseDto(token), HttpStatus.OK);
+            return new ResponseEntity<>(new AuthResponseDto(token), HttpStatus.OK); //유저 아이디(학번), 이름 필수로 넘겨야 함
         } catch (Exception e){
             e.printStackTrace();
-            //log.error("Authentication failed: {}", e.);
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
     }
