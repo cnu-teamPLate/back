@@ -1,16 +1,13 @@
 package com.cnu.teamProj.teamProj.config;
 
 import com.google.common.collect.Lists;
-<<<<<<< HEAD
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
-=======
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
->>>>>>> 8eab220069bed35ff4329f8543e77adb7145fa4c
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableAsync;
@@ -41,11 +38,8 @@ import java.util.List;
 public class SwaggerConfig {
 //    @Bean
 //    public Docket openApi() {
-<<<<<<< HEAD
 //        return new Docket(DocumentationType.OAS_30)
-=======
 //        return new Docket(DocumentationType.SWAGGER_2)
->>>>>>> 8eab220069bed35ff4329f8543e77adb7145fa4c
 //                .securityContexts(Collections.singletonList(securityContext())) //시큐리티용
 //                .securitySchemes(List.of(apiKey())) //시큐리티용
 //                .select()
@@ -54,7 +48,6 @@ public class SwaggerConfig {
 //                .build()
 //                .apiInfo(apiInfo());
 //    }
-<<<<<<< HEAD
 //
 //    private ApiInfo apiInfo() {
 //        return new ApiInfoBuilder()
@@ -98,13 +91,6 @@ public class SwaggerConfig {
                 .info(apiInfo())
                 .addSecurityItem(securityRequirement)
                 .components(components);
-=======
-    @Bean
-    public OpenAPI openAPI(){
-        Info info = new Info().version("v1.0.0").title("API-teamPlate").description("API Description");
-        return new OpenAPI().info(info);
-    }
->>>>>>> 8eab220069bed35ff4329f8543e77adb7145fa4c
 
     }
     private Info apiInfo(){
