@@ -1,6 +1,8 @@
 package com.cnu.teamProj.teamProj.config;
 
 import com.google.common.collect.Lists;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Info;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableAsync;
@@ -30,16 +32,21 @@ import java.util.List;
 @EnableSwagger2
 @EnableWebMvc
 public class SwaggerConfig {
+//    @Bean
+//    public Docket openApi() {
+//        return new Docket(DocumentationType.SWAGGER_2)
+//                .securityContexts(Collections.singletonList(securityContext())) //시큐리티용
+//                .securitySchemes(List.of(apiKey())) //시큐리티용
+//                .select()
+//                .apis(RequestHandlerSelectors.basePackage("com.cnu.teamProj.teamProj.*.controller"))
+//                .paths(PathSelectors.any())
+//                .build()
+//                .apiInfo(apiInfo());
+//    }
     @Bean
-    public Docket openApi() {
-        return new Docket(DocumentationType.SWAGGER_2)
-                .securityContexts(Collections.singletonList(securityContext())) //시큐리티용
-                .securitySchemes(List.of(apiKey())) //시큐리티용
-                .select()
-                .apis(RequestHandlerSelectors.basePackage("com.cnu.teamProj.teamProj.*.controller"))
-                .paths(PathSelectors.any())
-                .build()
-                .apiInfo(apiInfo());
+    public OpenAPI openAPI(){
+        Info info = new Info().version("v1.0.0").title("API-teamPlate").description("API Description");
+        return new OpenAPI().info(info);
     }
 
     private ApiInfo apiInfo() {
