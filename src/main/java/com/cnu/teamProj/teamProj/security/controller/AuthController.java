@@ -97,12 +97,12 @@ public class AuthController {
         User user = new User();
         user.setName(registerDto.getName());
         user.setPwd(passwordEncoder.encode(registerDto.getPwd()));
-        user.setMail(registerDto.getMail());
+        user.setMail(registerDto.getEmail());
         user.setPhone(registerDto.getPhone());
-        user.setId(registerDto.getId());
+        user.setId(registerDto.getStudentNumber());
         Role roles = roleRepository.findByName("USER").get();
         user.setRoles(Collections.singletonList(roles));
-        user.setUsername(registerDto.getUsername());
+        user.setUsername(registerDto.getId());
         userRepository.save(user);
 
         return new ResponseEntity<>("User registered success", HttpStatus.OK);

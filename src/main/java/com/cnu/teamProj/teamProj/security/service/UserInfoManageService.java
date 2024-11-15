@@ -18,14 +18,15 @@ public class UserInfoManageService {
 
     //내 정보 수정
     public boolean updateMyInfo(RegisterDto paramUser){
-        String userID = paramUser.getId();
+        String userID = paramUser.getStudentNumber();
         Optional<User> user = userRepository.findById(userID);
         if(user.isPresent()){
             User existUser = user.get();
-            existUser.setName(existUser.getName());
-            existUser.setMail(existUser.getMail());
-            existUser.setPhone(existUser.getPhone());
-            existUser.setPwd(existUser.getPwd());
+            existUser.setName(paramUser.getName());
+            existUser.setMail(paramUser.getEmail());
+            existUser.setPhone(paramUser.getPhone());
+            existUser.setPwd(paramUser.getPwd());
+            existUser.setUsername(paramUser.getId());
             return true;
         }
         return false;

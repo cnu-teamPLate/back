@@ -6,8 +6,8 @@ import lombok.Data;
 public class RegisterDto {
     private String name;
     private String pwd;
-    private String mail;
+    private String email; //mail
     private String phone;
-    private String id;
-    private String username;
+    private String studentNumber; //학번
+    private String id; //username(닉네임)
 }
