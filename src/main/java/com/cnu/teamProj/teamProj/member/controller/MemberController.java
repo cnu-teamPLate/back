@@ -17,7 +17,7 @@ import java.util.Map;
 @RequestMapping("/teamProj/member")
 @Tag(name = "멤버 관리", description = "멤버 조회와 관련된 코드")
 public class MemberController {
-
+    //test
     private MemberServiceImpl memberService;
     @Autowired
     public MemberController(MemberServiceImpl memberService) {
