@@ -22,10 +22,10 @@ public class MemberController {
     }
 
     //특정 프로젝트 선택 시 해당 프로젝트의 팀원 불러오는 api
-    @GetMapping("/project")
+    @GetMapping("/project/{projId}")
     @Operation(summary = "프로젝트에 참여중인 멤버", description = "특정 프로젝트에 참여중인 멤버 리스트를 반환")
-    public List<ProjMemDto> getProjMem(@RequestParam Map map) {
-        return memberService.findProjMemByProjID(String.valueOf(map.get("projId")));
+    public List<ProjMemDto> getProjMem(@PathVariable(value = "projId") String projId) {
+        return memberService.findProjMemByProjID(projId);
     }
 
 }
