@@ -1,11 +1,8 @@
-package com.cnu.teamProj.teamProj.member.controller;
+package com.cnu.teamProj.teamProj.proj.controller;
 
-import com.cnu.teamProj.teamProj.member.dto.ProjMemDto;
-import com.cnu.teamProj.teamProj.member.repository.MemberRepository;
-import com.cnu.teamProj.teamProj.member.service.MemberServiceImpl;
-import com.cnu.teamProj.teamProj.security.entity.User;
+import com.cnu.teamProj.teamProj.proj.dto.ProjMemDto;
+import com.cnu.teamProj.teamProj.proj.service.MemberServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;

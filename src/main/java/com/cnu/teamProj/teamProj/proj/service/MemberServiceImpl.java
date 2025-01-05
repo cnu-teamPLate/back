@@ -1,8 +1,8 @@
-package com.cnu.teamProj.teamProj.member.service;
+package com.cnu.teamProj.teamProj.proj.service;
 
-import com.cnu.teamProj.teamProj.member.dto.ProjMemDto;
-import com.cnu.teamProj.teamProj.member.entity.ProjMem;
-import com.cnu.teamProj.teamProj.member.repository.MemberRepository;
+import com.cnu.teamProj.teamProj.proj.dto.ProjMemDto;
+import com.cnu.teamProj.teamProj.proj.entity.ProjMem;
+import com.cnu.teamProj.teamProj.proj.repository.MemberRepository;
 import com.cnu.teamProj.teamProj.security.entity.User;
 import com.cnu.teamProj.teamProj.security.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class MemberServiceImpl implements MemberService{

@@ -1,4 +1,4 @@
-package com.cnu.teamProj.teamProj.member.dto;
+package com.cnu.teamProj.teamProj.proj.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
