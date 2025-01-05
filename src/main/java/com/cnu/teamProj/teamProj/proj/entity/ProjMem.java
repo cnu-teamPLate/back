@@ -1,4 +1,4 @@
-package com.cnu.teamProj.teamProj.member.entity;
+package com.cnu.teamProj.teamProj.proj.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -6,7 +6,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.context.annotation.Primary;
 
 @Entity
 @Getter
