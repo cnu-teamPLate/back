@@ -1,4 +1,4 @@
-package com.cnu.teamProj.teamProj.cors;
+package com.cnu.teamProj.teamProj.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
