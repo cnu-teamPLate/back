@@ -23,9 +23,11 @@ public class MemberServiceImpl implements MemberService{
 
     @Override
     public List<ProjMemDto> findProjMemByProjID(String projId) {
-        if(!memberRepository.existsById(projId)) return null; //요청이 왔던 projId가 DB에 없다면 null값 반환
+        if(!memberRepository.existsByProjId(projId)) {
+            return null;
+        }//요청이 왔던 projId가 DB에 없다면 null값 반환
         List<ProjMemDto> membersInfo = new ArrayList<>();
-        List<ProjMem> members = memberRepository.findById(projId).stream().toList();
+        List<ProjMem> members = memberRepository.findProjMemsByProjId(projId).stream().toList();
         for(ProjMem mem : members) {
             User user = userRepository.findById(mem.getId()).stream().toList().get(0);
             ProjMemDto memDto = new ProjMemDto(user.getId(), user.getName(), user.getMail(), user.getPhone());
