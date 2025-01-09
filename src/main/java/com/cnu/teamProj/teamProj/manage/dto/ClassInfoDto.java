@@ -1,4 +1,4 @@
-package com.cnu.teamProj.teamProj.cls.dto;
+package com.cnu.teamProj.teamProj.manage.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

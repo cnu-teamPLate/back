@@ -1,12 +1,8 @@
-package com.cnu.teamProj.teamProj.cls.controller;
+package com.cnu.teamProj.teamProj.manage.controller;
 
-import com.cnu.teamProj.teamProj.cls.dto.ClassInfoDto;
-import com.cnu.teamProj.teamProj.cls.service.ClassService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import com.cnu.teamProj.teamProj.manage.dto.ClassInfoDto;
+import com.cnu.teamProj.teamProj.manage.service.ClassService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
