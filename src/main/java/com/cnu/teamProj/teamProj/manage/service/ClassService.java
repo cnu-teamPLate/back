@@ -1,16 +1,11 @@
-package com.cnu.teamProj.teamProj.cls.service;
+package com.cnu.teamProj.teamProj.manage.service;
 
-import com.cnu.teamProj.teamProj.cls.dto.ClassInfoDto;
-import com.cnu.teamProj.teamProj.cls.entity.ClassInfo;
-import com.cnu.teamProj.teamProj.cls.repository.ClassRepository;
-import com.cnu.teamProj.teamProj.security.jwt.JWTAuthenticationFilter;
-import org.apache.commons.logging.LogFactory;
+import com.cnu.teamProj.teamProj.manage.dto.ClassInfoDto;
+import com.cnu.teamProj.teamProj.manage.entity.ClassInfo;
+import com.cnu.teamProj.teamProj.manage.repository.ClassRepository;
 import org.hibernate.tool.schema.spi.SqlScriptException;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.logging.Logger;
 
 @Service
 public class ClassService {

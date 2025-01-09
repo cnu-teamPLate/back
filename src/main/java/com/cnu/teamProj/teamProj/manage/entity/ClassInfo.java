@@ -1,4 +1,4 @@
-package com.cnu.teamProj.teamProj.cls.entity;
+package com.cnu.teamProj.teamProj.manage.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
