@@ -32,7 +32,7 @@ public class MemberServiceImpl implements MemberService{
             User user = userRepository.findById(mem.getId()).stream().toList().get(0);
             ProjMemDto memDto = new ProjMemDto(user.getId(), user.getName(), user.getMail(), user.getPhone());
             membersInfo.add(memDto);
-        }
+        }//
         return membersInfo;
     }
 
