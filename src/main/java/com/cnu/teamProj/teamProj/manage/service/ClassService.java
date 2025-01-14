@@ -16,16 +16,20 @@ public class ClassService {
         this.classRepository = classRepository;
     }
 
-    public boolean enrollClass(ClassInfoDto dto) {
-        if(classRepository.existsById(dto.getClassId())) return false;
-        ClassInfo classInfo = new ClassInfo(dto.getClassId(), dto.getClassName(), dto.getProfessor(), 0);
+    public int enrollClass(ClassInfoDto dto) {
+        if(classRepository.existsById(dto.getClassId())) return 0;
+        ClassInfo classInfo = new ClassInfo();
+        classInfo.setProjCnt(0);
+        classInfo.setProfessor(dto.getProfessor());
+        classInfo.setClassName(dto.getClassName());
+        classInfo.setClassId(dto.getClassId());
+
         try{
             classRepository.save(classInfo);
-            return true;
+            return 1;
         } catch(SqlScriptException e) {
             System.out.println(e.getMessage());
-            e.printStackTrace();
-            return false;
+            return -1;
         }
     }
 }
