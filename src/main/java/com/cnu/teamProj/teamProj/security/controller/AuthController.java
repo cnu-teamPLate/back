@@ -109,7 +109,7 @@ public class AuthController {
     }
 
     //내 정보 수정
-    @PutMapping("/update-my-info")
+    @PutMapping(value = "/update-my-info", produces = "application/json; charset=utf8")
 //    @Operation(summary = "내 정보 수정", description = "수정되지 않은 정보까지 모두 전달하면, 전달된 학번으로 유저를 조회한 후 수정된 정보를 업데이트 (학번은 변경 불가)")
 //    @Parameters({
 //            @Parameter(name="name", description = "유저 이름"),
