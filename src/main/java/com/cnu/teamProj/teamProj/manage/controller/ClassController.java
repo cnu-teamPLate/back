@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping(value = "/teamProj/class", produces = "application/json; charset = utf-8")
 @Tag(name = "수업 관리", description = "수업 관리와 관련된 코드")
 public class ClassController {
-
+//test2
     private ClassService classService;
     @Autowired
     public ClassController(ClassService classService) {
