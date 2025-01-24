@@ -96,6 +96,23 @@ public class MemberServiceImpl {
         return messageDto;
     }
 
-    //메일로 인원 등록
+    //멤버 삭제
+    //public boolean deleteMemberById(String memberId) {
+      //  if (memberRepository.existsById(memberId)) {
+        //    memberRepository.deleteById(memberId);
+          //  return true;
+        //}
+        //return false;
+    //}
+    public boolean deleteMemberByUserAndProj(String userId, String projId) {
+        // 사용자와 프로젝트 ID로 멤버 존재 여부 확인
+        if (memberRepository.existsByIdAndProjId(userId, projId)) {
+            memberRepository.deleteByIdAndProjId(userId, projId);
+            return true;
+        }
+        return false;
+    }
 
 }
+
+

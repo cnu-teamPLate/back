@@ -58,4 +58,37 @@ public class MemberController {
         return memberService.acceptNewMemberByMail(members);
     }
 
+    //멤버 삭제하기//RequestParam, map 으로 받기//userId, projId map.key
+    //@DeleteMapping("/{memberId}")
+    //@Operation(summary = "멤버 삭제", description="특정 멤버를 삭제")
+    //public ResponseEntity<String> deleteMember(@PathVariable(value="memberId") String memberId) {
+      //  boolean isDeleted=memberService.deleteMemberById(memberId);
+       // if (isDeleted) {
+         //   return ResponseEntity.ok("멤버 삭제 성공");
+        //} else {
+          //  return ResponseEntity.status(404).body("멤버를 찾을 수 없습니다.");
+        //}
+    //}
+
+    @DeleteMapping("/delete")
+    @Operation(summary = "멤버 삭제", description = "userId와 projId를 기반으로 특정 멤버를 삭제")
+    public ResponseEntity<String> deleteMember(@RequestParam Map<String, String> params) {
+        String userId = params.get("userId");
+        String projId = params.get("projId");
+
+        if (userId == null || projId == null) {
+            return ResponseEntity.badRequest().body("userId와 projId를 모두 제공해야 합니다.");
+        }
+
+        boolean isDeleted = memberService.deleteMemberByUserAndProj(userId, projId);
+        if (isDeleted) {
+            return ResponseEntity.ok("멤버 삭제 성공");
+        } else {
+            return ResponseEntity.status(404).body("멤버를 찾을 수 없습니다.");
+        }
+    }
+
+
+
+
 }
