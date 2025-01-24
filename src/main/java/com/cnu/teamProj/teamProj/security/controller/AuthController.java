@@ -10,6 +10,10 @@ import com.cnu.teamProj.teamProj.security.dto.LoginDto;
 import com.cnu.teamProj.teamProj.security.dto.RegisterDto;
 import com.cnu.teamProj.teamProj.security.service.UserInfoManageService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,17 +82,17 @@ public class AuthController {
 
     @PostMapping("/register")
     @Operation(summary = "등록하기", description = "회원 가입 api")
-//    @Parameters({
-//            @Parameter(name="name", description = "유저 이름"),
-//            @Parameter(name="pwd", description = "비밀번호"),
-//            @Parameter(name = "mail", description = "메일주소"),
-//            @Parameter(name="phone", description = "핸드폰번호"),
-//            @Parameter(name="id", description = "학번")
-//    })
-//    @ApiResponses(value = {
-//            @ApiResponse(code = 400, message = "이미 존재하는 회원"),
-//            @ApiResponse(code = 200, message = "회원가입 완료")
-//    })
+    @Parameters({
+            @Parameter(name="name", description = "유저 이름"),
+            @Parameter(name="pwd", description = "비밀번호"),
+            @Parameter(name = "mail", description = "메일주소"),
+            @Parameter(name="phone", description = "핸드폰번호"),
+            @Parameter(name="id", description = "학번")
+    })
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "400", description = "이미 존재하는 회원"),
+            @ApiResponse(responseCode = "200", description = "회원가입 완료")
+    })
     public ResponseEntity<String> register(@RequestBody RegisterDto registerDto){
         if(userRepository.existsById(registerDto.getId())){
             return new ResponseEntity<>("Username is taken!", HttpStatus.BAD_REQUEST);

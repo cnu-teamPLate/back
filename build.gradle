@@ -49,13 +49,12 @@ dependencies {
 	runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-jackson', version: '0.11.5'
 	//스웨거
 	implementation 'javax.servlet:javax.servlet-api:4.0.1'
-
-	implementation group: 'io.springfox', name: 'springfox-swagger2', version: '3.0.0'
-	implementation group: 'io.springfox', name: 'springfox-swagger-ui', version: '3.0.0'
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0'
 	//Guava
 	implementation group: 'com.google.guava', name: 'guava', version: '12.0.1'
-
+	//aws s3
+//	implementation 'io.awspring.cloud:spring-cloud-aws-starter:3.0.0'
+	implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
 
 	runtimeOnly 'com.mysql:mysql-connector-j'
 	compileOnly 'org.projectlombok:lombok'

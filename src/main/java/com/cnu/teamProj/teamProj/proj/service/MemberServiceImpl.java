@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-public class MemberServiceImpl implements MemberService{
+public class MemberServiceImpl {
     private MemberRepository memberRepository;
     private UserRepository userRepository;
     private ProjRepository projRepository;
@@ -25,8 +25,8 @@ public class MemberServiceImpl implements MemberService{
         this.projRepository = projRepository;
     }
 
-    @Override
     public List<ProjMemDto> findProjMemByProjID(String projId) {
+
         if(!memberRepository.existsByProjId(projId)) {
             return null;
         }//요청이 왔던 projId가 DB에 없다면 null값 반환
