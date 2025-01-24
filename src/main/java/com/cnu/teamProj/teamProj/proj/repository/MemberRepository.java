@@ -11,4 +11,6 @@ public interface MemberRepository extends JpaRepository<ProjMem, String> {
     List<ProjMem> findProjMemsByProjId(String projId);
     Boolean existsByProjId(String projId);
     Boolean existsProjMemByIdAndProjId(String id, String projId);
+
+
 }

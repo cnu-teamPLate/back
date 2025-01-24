@@ -49,9 +49,10 @@ public class ProjectService {
         //등록된 수업이 아니라면 바로 -1반환
         if(!classRepository.existsById(dto.getClassId())) return -1;
         //날짜 형식 체크
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssX");
+        ZonedDateTime date;
         try{
-            ZonedDateTime.parse(dto.getDate().toString(), formatter);
+            date = ZonedDateTime.parse(dto.getDate().toString(), formatter);
         } catch(DateTimeParseException e){
             return -2;
         }
@@ -64,7 +65,7 @@ public class ProjectService {
         String projId = dto.getClassId()+(classInfo.getProjCnt());
 
         Project project = new Project();
-        project.setDate(dto.getDate());
+        project.setDate(date);
         project.setGoal(dto.getGoal());
         project.setGithub(dto.getGithub());
         project.setProjId(projId);
