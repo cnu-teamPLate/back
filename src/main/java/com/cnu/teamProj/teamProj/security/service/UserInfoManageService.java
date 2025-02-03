@@ -4,16 +4,19 @@ import com.cnu.teamProj.teamProj.security.dto.RegisterDto;
 import com.cnu.teamProj.teamProj.security.entity.User;
 import com.cnu.teamProj.teamProj.security.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 @Service
 public class UserInfoManageService {
     UserRepository userRepository;
+    PasswordEncoder passwordEncoder;
 
     @Autowired
-    public UserInfoManageService(UserRepository userRepository) {
+    public UserInfoManageService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     //내 정보 수정
@@ -25,7 +28,8 @@ public class UserInfoManageService {
             existUser.setName(paramUser.getName());
             existUser.setMail(paramUser.getEmail());
             existUser.setPhone(paramUser.getPhone());
-            existUser.setPwd(paramUser.getPwd());
+
+            existUser.setPwd(passwordEncoder.encode(paramUser.getPwd()));
             existUser.setUsername(paramUser.getId());
             userRepository.save(existUser);
             return true;
