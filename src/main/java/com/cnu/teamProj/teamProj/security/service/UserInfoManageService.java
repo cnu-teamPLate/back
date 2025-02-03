@@ -27,6 +27,7 @@ public class UserInfoManageService {
             existUser.setPhone(paramUser.getPhone());
             existUser.setPwd(paramUser.getPwd());
             existUser.setUsername(paramUser.getId());
+            userRepository.save(existUser);
             return true;
         }
         return false;
