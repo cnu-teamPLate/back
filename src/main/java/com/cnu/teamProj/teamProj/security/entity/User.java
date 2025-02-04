@@ -9,12 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-/*@Entity
-@Data
-@JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator.class, property = "id")
-@NoArgsConstructor
-@ToString(exclude = "Role")*/
-
 @Entity
 @Getter
 @Setter

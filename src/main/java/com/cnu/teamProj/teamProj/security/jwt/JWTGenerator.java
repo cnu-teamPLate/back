@@ -17,17 +17,16 @@ public class JWTGenerator {
         Date currentDate = new Date();
         Date expireDate = new Date(currentDate.getTime()+ SecurityConstants.JWT_EXPIRATION);
 
-        String token = Jwts.builder()
+        return Jwts.builder()
                 .setSubject(username)
                 .setIssuedAt(new Date())
                 .setExpiration(expireDate)
-                .signWith(SignatureAlgorithm.HS256, SecurityConstants.JWT_SECRET)
+                .signWith(SecurityConstants.SECRET_KEY, SignatureAlgorithm.ES256)
                 .compact();
-        return token;
     }
     public String getUserNameFromJWT(String token){
         Claims claims = Jwts.parserBuilder()
-                .setSigningKey(SecurityConstants.JWT_SECRET).build()
+                .setSigningKey(SecurityConstants.SECRET_KEY).build()
                 .parseClaimsJws(token)
                 .getBody();
         return claims.getSubject();//
@@ -35,7 +34,7 @@ public class JWTGenerator {
 
     public boolean validateToken(String token){
         try{
-            Jwts.parserBuilder().setSigningKey(SecurityConstants.JWT_SECRET).build().parseClaimsJws(token);
+            Jwts.parserBuilder().setSigningKey(SecurityConstants.SECRET_KEY).build().parseClaimsJws(token);
             return true;
         } catch(Exception ex){
             throw new AuthenticationCredentialsNotFoundException("JWT was expired or incorrect");

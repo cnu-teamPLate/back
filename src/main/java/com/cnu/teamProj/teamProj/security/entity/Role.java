@@ -9,12 +9,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import lombok.*;
 
-/*@Entity
-@Getter
-@Setter
-@JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator.class, property = "id")
-@ToString(exclude = "User")*/
-
 @Entity
 @Getter
 @Setter
