@@ -1,13 +1,13 @@
 package com.cnu.teamProj.teamProj.config;
 
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3Client;
-import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.s3.S3AsyncClient;
+import software.amazon.awssdk.services.s3.internal.crt.S3CrtAsyncClient;
 
 import java.time.Duration;
 
@@ -18,16 +18,17 @@ public class S3Config {
     @Value("${spring.cloud.aws.credentials.secret-key}")
     private String accessSecret;
     @Value("${spring.cloud.aws.region.static}")
-    private String region;
+    private String regionStr;
 
     @Bean
-    public AmazonS3 amazonS3(){
+    public S3AsyncClient amazonS3(){
         //접근 키와 시크릿 키를 통해 자격증명 생성 = awsCredentials
-        BasicAWSCredentials awsCredentials = new BasicAWSCredentials(accessKey, accessSecret);
+        AwsBasicCredentials awsCredentials = AwsBasicCredentials.create(accessKey, accessSecret);
+        final Region region = Region.of(regionStr);
         //위에서 생성한 자격증명을 바탕으로 client 객체 생성
-        return AmazonS3ClientBuilder.standard()
-                .withRegion(region)
-                .withCredentials(new AWSStaticCredentialsProvider(awsCredentials))
+        return S3CrtAsyncClient.builder()
+                .credentialsProvider(StaticCredentialsProvider.create(awsCredentials))
+                .region(region)
                 .build();
     }
 }

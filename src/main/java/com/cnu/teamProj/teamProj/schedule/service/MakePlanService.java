@@ -3,15 +3,12 @@ package com.cnu.teamProj.teamProj.schedule.service;
 import com.cnu.teamProj.teamProj.proj.entity.Project;
 import com.cnu.teamProj.teamProj.proj.repository.ProjRepository;
 import com.cnu.teamProj.teamProj.schedule.dto.MakePlanDto;
-import com.cnu.teamProj.teamProj.schedule.entity.MakePlanEntity;
+import com.cnu.teamProj.teamProj.schedule.entity.MakePlan;
 import com.cnu.teamProj.teamProj.schedule.repository.MakePlanRepository;
 import com.cnu.teamProj.teamProj.security.entity.User;
 import com.cnu.teamProj.teamProj.security.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.time.ZonedDateTime;
-import java.util.Optional;
 
 @Service
 public class MakePlanService {
@@ -34,7 +31,7 @@ public class MakePlanService {
                     projRepository.findById(param.getProjId()).isPresent()) {
                 userInfo = userRepository.findById(param.getUserId()).get();
                 projInfo = projRepository.findById(param.getProjId()).get();
-                MakePlanEntity entity = new MakePlanEntity();
+                MakePlan entity = new MakePlan();
                 if(param.getEnd().isBefore(param.getStart())) return -2;
                 entity.setEnd(param.getEnd());
                 entity.setStart(param.getStart());

@@ -56,7 +56,8 @@ dependencies {
 	//스타터 (스프링 애플리케이션에서 모듈을 사용하는데 필요한 종속성이 포함되어 있다)
 	implementation 'io.awspring.cloud:spring-cloud-aws-starter:3.1.1'
 	//자바에서 amazon s3 버킷에 접근할 수 있게 해주는 라이브러리
-	implementation 'com.amazonaws:aws-java-sdk-s3:1.12.767'
+	implementation 'software.amazon.awssdk:s3:2.25.64'
+	implementation 'software.amazon.awssdk.crt:aws-crt:0.31.3'
 
 	runtimeOnly 'com.mysql:mysql-connector-j'
 	compileOnly 'org.projectlombok:lombok'

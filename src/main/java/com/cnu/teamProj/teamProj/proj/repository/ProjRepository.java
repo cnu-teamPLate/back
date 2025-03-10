@@ -8,4 +8,5 @@ import java.time.ZonedDateTime;
 
 @Repository
 public interface ProjRepository extends JpaRepository<Project, String> {
+    Project findProjectByProjId(String projId);
 }

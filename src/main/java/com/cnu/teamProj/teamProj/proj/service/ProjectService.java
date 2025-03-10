@@ -65,6 +65,7 @@ public class ProjectService {
         String projId = dto.getClassId()+(classInfo.getProjCnt());
 
         Project project = new Project();
+        project.setScheCnt(0);
         project.setDate(date);
         project.setGoal(dto.getGoal());
         project.setGithub(dto.getGithub());
