@@ -66,13 +66,15 @@ public class AuthController {
                     String.valueOf(loginDto.getId()), loginDto.getPwd());
             logger.info("tempToken.getCredentials(): {}", tempToken.getCredentials());
             logger.info("tempToken.getPrincipal(): {}", tempToken.getPrincipal());
+            //authentication = 현재 인증 정보
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
                             loginDto.getId(), loginDto.getPwd()));
             logger.info("authentication.toString(): {}", authentication.toString());
+            //SecurityContextHolder.getContext() : 현재 사용자의 security context를 가져옴
+            //요청이 들어왔을 때 해당 요청을 처리하는 스레드에 인증 정보를 유지함.
             SecurityContextHolder.getContext().setAuthentication(authentication);
             String token = jwtGenerator.generateToken(authentication);
-            System.out.println("token = " + token);
             return new ResponseEntity<>(new AuthResponseDto(token, loginDto.getId(), userRepository.findById(loginDto.getId()).toString()), HttpStatus.OK); //유저 아이디(학번), 이름 필수로 넘겨야 함
         } catch (Exception e){
             logger.info("로그인 실패 : {}", e.getMessage());
@@ -114,14 +116,18 @@ public class AuthController {
 
     //내 정보 수정
     @PutMapping(value = "/update-my-info", produces = "application/json; charset=utf8")
-//    @Operation(summary = "내 정보 수정", description = "수정되지 않은 정보까지 모두 전달하면, 전달된 학번으로 유저를 조회한 후 수정된 정보를 업데이트 (학번은 변경 불가)")
-//    @Parameters({
-//            @Parameter(name="name", description = "유저 이름"),
-//            @Parameter(name="pwd", description = "비밀번호"),
-//            @Parameter(name = "mail", description = "메일주소"),
-//            @Parameter(name="phone", description = "핸드폰번호"),
-//            @Parameter(name="id", description = "학번")
-//    })
+    @Operation(summary = "내 정보 수정", description = "수정되지 않은 정보까지 모두 전달하면, 전달된 학번으로 유저를 조회한 후 수정된 정보를 업데이트 (학번은 변경 불가)")
+    @Parameters({
+            @Parameter(name="name", description = "유저 이름"),
+            @Parameter(name="pwd", description = "비밀번호"),
+            @Parameter(name = "mail", description = "메일주소"),
+            @Parameter(name="phone", description = "핸드폰번호"),
+            @Parameter(name="id", description = "학번")
+    })
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "400", description = "존재하지 않는 사용자입니다"),
+            @ApiResponse(responseCode = "200", description = "정보가 정상적으로 수정되었습니다")
+    })
     public ResponseEntity<String> updateMyInfo(@RequestBody RegisterDto dto) {
         boolean result = userInfoManageService.updateMyInfo(dto);
         if(result) return new ResponseEntity<>("정보가 정상적으로 수정되었습니다", HttpStatus.OK);
@@ -130,8 +136,8 @@ public class AuthController {
 
     //내 정보 보기
     @GetMapping("/read-my-info")
-//    @Operation(summary = "내 정보 조회", description = "인자로 전달된 학번을 토대로 조회된 정보 반환, 조회된 정보가 없다면 null값 반환")
-//    @Parameter(name = "userId", description = "학번")
+    @Operation(summary = "내 정보 조회", description = "인자로 전달된 학번을 토대로 조회된 정보 반환, 조회된 정보가 없다면 null값 반환")
+    @Parameter(name = "userId", description = "학번")
     public User readMyInfo(@RequestParam Map map){
         return userInfoManageService.findMyInfo(map.get("userId").toString());
     }

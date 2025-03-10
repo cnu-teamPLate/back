@@ -12,7 +12,7 @@ import java.time.ZonedDateTime;
 @Getter
 @Setter
 @Table(name = "make_plan")
-public class MakePlanEntity {
+public class MakePlan {
     @Id
     private int id;
 

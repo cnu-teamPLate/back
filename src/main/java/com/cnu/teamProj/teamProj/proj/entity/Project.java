@@ -18,6 +18,7 @@ public class Project {
     private String projName;
     private String github;
     private String teamName;
+    private int scheCnt;
 
     @ManyToOne
     @JoinColumn(name = "CLASS_ID" , referencedColumnName = "classId")
