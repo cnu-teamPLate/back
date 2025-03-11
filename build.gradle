@@ -51,7 +51,7 @@ dependencies {
 	implementation 'javax.servlet:javax.servlet-api:4.0.1'
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0'
 	//Guava
-	implementation group: 'com.google.guava', name: 'guava', version: '32.0.1'
+	//implementation group: 'com.google.guava', name: 'guava', version: '32.0.1'
 	//aws s3
 	//스타터 (스프링 애플리케이션에서 모듈을 사용하는데 필요한 종속성이 포함되어 있다)
 	implementation 'io.awspring.cloud:spring-cloud-aws-starter:3.1.1'
