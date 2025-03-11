@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @Setter
 @Table(name = "task_comment")
 public class Comment {
-
+//주석
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
