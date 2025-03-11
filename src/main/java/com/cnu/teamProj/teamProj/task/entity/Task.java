@@ -1,5 +1,6 @@
 package com.cnu.teamProj.teamProj.task.entity;
 
+import com.cnu.teamProj.teamProj.schedule.dto.TaskUpdateDto;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -41,5 +42,21 @@ public class Task {
 
     @Column(name = "CHECKBOX") // DB 컬럼명과 일치
     private int checkBox;
+
+    public Task(TaskUpdateDto dto) {
+        this.taskId = dto.getTaskId();
+        this.id = dto.getId();
+        this.projId = dto.getProjId();
+        this.role = dto.getRole();
+        this.detail = dto.getDetail();
+        this.date = dto.getDate();
+        this.level = dto.getLevel();
+        this.cate = dto.getCate();
+        this.checkBox = dto.getCheckBox();
+    }
+
+    public Task() {
+
+    }
 
 }
