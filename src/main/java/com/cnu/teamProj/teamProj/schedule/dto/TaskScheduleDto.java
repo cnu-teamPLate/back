@@ -1,6 +1,6 @@
 package com.cnu.teamProj.teamProj.schedule.dto;
 
-import com.cnu.teamProj.teamProj.schedule.entity.Task;
+import com.cnu.teamProj.teamProj.task.entity.Task;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 

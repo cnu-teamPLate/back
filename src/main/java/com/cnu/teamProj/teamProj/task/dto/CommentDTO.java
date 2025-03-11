@@ -1,6 +1,6 @@
 package com.cnu.teamProj.teamProj.task.dto;
 
-import com.cnu.teamProj.teamProj.task.entity.Comment;
+import com.cnu.teamProj.teamProj.task.entity.TaskComment;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -15,7 +15,7 @@ public class CommentDTO {
     private Long taskId;
     private LocalDateTime createdTime;
 
-    public static CommentDTO toCommentDTO(Comment commentEntity) {
+    public static CommentDTO toCommentDTO(TaskComment commentEntity) {
         CommentDTO commentDTO = new CommentDTO();
         commentDTO.setId(commentEntity.getId());
         commentDTO.setCommentWriter(commentEntity.getCommentWriter());

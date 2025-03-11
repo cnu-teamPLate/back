@@ -11,8 +11,8 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @Table(name = "task_comment")
-public class Comment {
-
+public class TaskComment {
+//주석
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -33,8 +33,8 @@ public class Comment {
     @Column(nullable = false)
     private LocalDateTime updatedTime = LocalDateTime.now();
 
-    public static Comment toSaveEntity(CommentDTO commentDTO, Task taskEntity) {
-        Comment commentEntity = new Comment();
+    public static TaskComment toSaveEntity(CommentDTO commentDTO, Task taskEntity) {
+        TaskComment commentEntity = new TaskComment();
         commentEntity.setCommentWriter(commentDTO.getCommentWriter());
         commentEntity.setCommentContents(commentDTO.getCommentContents());
         commentEntity.setTaskEntity(taskEntity);
