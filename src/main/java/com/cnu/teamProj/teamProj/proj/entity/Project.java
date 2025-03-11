@@ -13,7 +13,6 @@ import java.time.ZonedDateTime;
 public class Project {
     @Id
     private String projId;
-
     private ZonedDateTime date;
     private String goal;
     private String projName;
