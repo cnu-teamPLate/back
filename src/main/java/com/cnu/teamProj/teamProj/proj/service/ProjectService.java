@@ -5,10 +5,14 @@ import com.cnu.teamProj.teamProj.manage.repository.ClassRepository;
 import com.cnu.teamProj.teamProj.proj.dto.ProjCreateDto;
 import com.cnu.teamProj.teamProj.proj.dto.ProjDto;
 import com.cnu.teamProj.teamProj.proj.dto.ProjUpdateDto;
+import com.cnu.teamProj.teamProj.proj.dto.StudentInfoDto;
 import com.cnu.teamProj.teamProj.proj.entity.ProjMem;
 import com.cnu.teamProj.teamProj.proj.entity.Project;
 import com.cnu.teamProj.teamProj.proj.repository.MemberRepository;
+import com.cnu.teamProj.teamProj.proj.repository.ProjMemRepository;
 import com.cnu.teamProj.teamProj.proj.repository.ProjRepository;
+import com.cnu.teamProj.teamProj.security.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,17 +24,12 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class ProjectService {
-    private MemberRepository memberRepository;
-    private ProjRepository projRepository;
-    private ClassRepository classRepository;
-
-    @Autowired
-    public ProjectService(MemberRepository memberRepository, ProjRepository projRepository, ClassRepository classRepository) {
-        this.memberRepository = memberRepository;
-        this.projRepository = projRepository;
-        this.classRepository = classRepository;
-    }
+    private final MemberRepository memberRepository;
+    private final ProjRepository projRepository;
+    private final ClassRepository classRepository;
+    private final UserRepository userRepository;
 
     public List<ProjDto> findProjectsByUserId(String userId) {
         List<ProjDto> ret = new ArrayList<>();
@@ -40,7 +39,19 @@ public class ProjectService {
         for(ProjMem proj : projs) {
             String projId = proj.getProjId();
             Project project = projRepository.findById(projId).stream().toList().get(0);
-            ret.add(new ProjDto(project.getClassId().getClassId(), project.getProjName()));
+            //반환값에 맞게 필터링
+            ProjDto newProject = new ProjDto(project.getClassId().getClassId(), project.getProjName(), project.getDate().toString(), project.getGoal(), project.getGithub(), project.getTeamName(), null);
+            List<StudentInfoDto> newProjectTeamOnes = new ArrayList<>();
+            //프로젝트 id로 프로젝트 정보 불러오기
+            List<ProjMem> projMems = memberRepository.findProjMemsByProjId(projId);
+            //요청값에 맞게 변환
+            for(ProjMem projMem : projMems) {
+                String teamOneID  = projMem.getId();
+                String teamOneName = userRepository.findById(teamOneID).get().getName();
+                newProjectTeamOnes.add(new StudentInfoDto(teamOneID, teamOneName));
+            }
+            newProject.setTeamones(newProjectTeamOnes);
+            ret.add(newProject);
         }
         return ret;
     }
