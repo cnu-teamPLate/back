@@ -3,7 +3,7 @@ name: prcreation
 on:
   push:
     branches:
-      - 'feature/*'  # feature/* 형태의 서브 브랜치에서 push가 발생할 때
+      [feature/*]  # feature/* 형태의 서브 브랜치에서 push가 발생할 때
 
 jobs:
   create-pr:
