@@ -14,7 +14,7 @@ import java.util.List;
 @Service
 public class MemberServiceImpl implements MemberService{
     private MemberRepository memberRepository;
-    private UserRepository userRepository;
+    private UserRepository userRepository;//
     @Autowired
     public MemberServiceImpl(MemberRepository memberRepository, UserRepository userRepository) {
         this.memberRepository = memberRepository;
