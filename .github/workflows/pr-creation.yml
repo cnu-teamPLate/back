@@ -1,4 +1,4 @@
-name: Create PR from Sub-Branch to Main
+name: pr-creation
 
 on:
   push:
