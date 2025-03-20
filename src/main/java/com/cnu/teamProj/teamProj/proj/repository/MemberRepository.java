@@ -8,7 +8,7 @@ import java.util.List;
 
 @Repository
 public interface MemberRepository extends JpaRepository<ProjMem, String> {
-//    Optional<String> findBy
+//    Optional<String> findBy test
     List<ProjMem> findProjMemsByProjId(String projId);
 
     Boolean existsByProjId(String projId);
