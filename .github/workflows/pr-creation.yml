@@ -1,4 +1,4 @@
-name: pr-creation
+name: prcreation
 
 on:
   push:
