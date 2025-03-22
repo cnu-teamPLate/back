@@ -20,4 +20,4 @@ jobs:
 #test
       - name: deploy
         run: |
-          ssh -o StrictHostKeyChecking=no ubuntu@3.34.140.89 'bash /home/ubuntu/deploy.sh'
+          ssh -o StrictHostKeyChecking=no ec2-user@3.34.140.89 'bash /home/ubuntu/deploy.sh'
