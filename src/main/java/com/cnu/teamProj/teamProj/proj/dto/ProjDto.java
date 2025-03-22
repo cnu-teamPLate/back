@@ -10,7 +10,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 public class ProjDto {
-    private String classId; //수업 코드
+    private String classId; //수업 코드 워크플로우 테스트
     private String projName; //프로젝트 이름
     private String date; //마감일
     private String goal; //목표
