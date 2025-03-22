@@ -9,11 +9,10 @@ import com.cnu.teamProj.teamProj.proj.dto.StudentInfoDto;
 import com.cnu.teamProj.teamProj.proj.entity.ProjMem;
 import com.cnu.teamProj.teamProj.proj.entity.Project;
 import com.cnu.teamProj.teamProj.proj.repository.MemberRepository;
-import com.cnu.teamProj.teamProj.proj.repository.ProjMemRepository;
 import com.cnu.teamProj.teamProj.proj.repository.ProjRepository;
+import com.cnu.teamProj.teamProj.security.entity.User;
 import com.cnu.teamProj.teamProj.security.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.ZonedDateTime;
@@ -35,18 +34,20 @@ public class ProjectService {
         List<ProjDto> ret = new ArrayList<>();
 
         //userId를 통해 user가 참여중인 프로젝트 리스트 반환
-        List<ProjMem> projs = memberRepository.findById(userId).stream().toList();
+        if(!userRepository.existsById(userId)) return null;
+        User user = userRepository.findById(userId).get();
+        List<ProjMem> projs = memberRepository.findProjMemsById(user);
         for(ProjMem proj : projs) {
-            String projId = proj.getProjId();
+            String projId = proj.getProjId().getProjId();
             Project project = projRepository.findById(projId).stream().toList().get(0);
             //반환값에 맞게 필터링
             ProjDto newProject = new ProjDto(project.getClassId().getClassId(), project.getProjName(), project.getDate().toString(), project.getGoal(), project.getGithub(), project.getTeamName(), null);
             List<StudentInfoDto> newProjectTeamOnes = new ArrayList<>();
             //프로젝트 id로 프로젝트 정보 불러오기
-            List<ProjMem> projMems = memberRepository.findProjMemsByProjId(projId);
+            List<ProjMem> projMems = memberRepository.findProjMemsByProjId(project);
             //요청값에 맞게 변환
             for(ProjMem projMem : projMems) {
-                String teamOneID  = projMem.getId();
+                String teamOneID  = projMem.getId().getId();
                 String teamOneName = userRepository.findById(teamOneID).get().getName();
                 newProjectTeamOnes.add(new StudentInfoDto(teamOneID, teamOneName));
             }

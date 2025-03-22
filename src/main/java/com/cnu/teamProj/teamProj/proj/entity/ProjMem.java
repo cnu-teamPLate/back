@@ -1,8 +1,7 @@
 package com.cnu.teamProj.teamProj.proj.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import com.cnu.teamProj.teamProj.security.entity.User;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,8 +13,15 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "proj_mem")
+@IdClass(ProjMemId.class)
 public class ProjMem {
     @Id
-    private String id;
-    private String projId;
+    @ManyToOne
+    @JoinColumn(name="id")
+    private User id;
+
+    @Id
+    @ManyToOne
+    @JoinColumn(name="projId")
+    private Project projId;
 }
