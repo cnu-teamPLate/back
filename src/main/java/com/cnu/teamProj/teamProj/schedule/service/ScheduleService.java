@@ -5,7 +5,7 @@ import com.cnu.teamProj.teamProj.comment.CommentRepository;
 import com.cnu.teamProj.teamProj.common.DateToStringMapping;
 import com.cnu.teamProj.teamProj.proj.entity.ProjMem;
 import com.cnu.teamProj.teamProj.proj.entity.Project;
-import com.cnu.teamProj.teamProj.proj.repository.ProjMemRepository;
+import com.cnu.teamProj.teamProj.proj.repository.MemberRepository;
 import com.cnu.teamProj.teamProj.proj.repository.ProjRepository;
 import com.cnu.teamProj.teamProj.schedule.dto.*;
 import com.cnu.teamProj.teamProj.schedule.entity.Participants;
@@ -36,7 +36,7 @@ public class ScheduleService {
     private static final Logger logger = LoggerFactory.getLogger(ScheduleService.class);
     private final ScheduleRepository scheduleRepository;
     private final TaskRepository taskRepository;
-    private final ProjMemRepository projMemRepository;
+    private final MemberRepository projMemRepository;
 
     private final ProjRepository projRepository;
     private final ParticipantsRepository participantsRepository;
