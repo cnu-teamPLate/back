@@ -83,7 +83,7 @@ public class MemberController {
     @Parameter(name = "search", description = "검색어, ?key=value 형태로 전달")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "NOT_FOUND", description = "검색된 데이터가 없을 때"),
-            @ApiResponse(responseCode = "OK", description = "검색된 데이터 값과 함께 반환")
+            @ApiResponse(responseCode = "OK", description = "검색된 데이터 값과 함께 반환!!")
     })
     public ResponseEntity<List<StudentInfoDto>> findUserBySearch(@RequestParam(value = "query") String query) {
         List<StudentInfoDto> ret = memberService.findUserBySearch(query);
