@@ -21,7 +21,7 @@ public class JWTGenerator {
                 .setSubject(username)
                 .setIssuedAt(new Date())
                 .setExpiration(expireDate)
-                .signWith(SecurityConstants.SECRET_KEY, SignatureAlgorithm.ES256)
+                .signWith(SecurityConstants.SECRET_KEY, SignatureAlgorithm.HS256)
                 .compact();
     }
     public String getUserNameFromJWT(String token){
