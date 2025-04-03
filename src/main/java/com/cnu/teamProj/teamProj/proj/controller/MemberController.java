@@ -2,7 +2,9 @@ package com.cnu.teamProj.teamProj.proj.controller;
 
 import com.cnu.teamProj.teamProj.proj.dto.AcceptMemberMessageDto;
 import com.cnu.teamProj.teamProj.proj.dto.ProjMemDto;
+import com.cnu.teamProj.teamProj.proj.dto.StudentInfoDto;
 import com.cnu.teamProj.teamProj.proj.service.MemberServiceImpl;
+import io.lettuce.core.dynamic.annotation.Param;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -58,18 +60,6 @@ public class MemberController {
         return memberService.acceptNewMemberByMail(members);
     }
 
-    //멤버 삭제하기//RequestParam, map 으로 받기//userId, projId map.key
-    //@DeleteMapping("/{memberId}")
-    //@Operation(summary = "멤버 삭제", description="특정 멤버를 삭제")
-    //public ResponseEntity<String> deleteMember(@PathVariable(value="memberId") String memberId) {
-      //  boolean isDeleted=memberService.deleteMemberById(memberId);
-       // if (isDeleted) {
-         //   return ResponseEntity.ok("멤버 삭제 성공");
-        //} else {
-          //  return ResponseEntity.status(404).body("멤버를 찾을 수 없습니다.");
-        //}
-    //}
-
     @DeleteMapping("/delete")
     @Operation(summary = "멤버 삭제", description = "userId와 projId를 기반으로 특정 멤버를 삭제")
     public ResponseEntity<String> deleteMember(@RequestParam Map<String, String> params) {
@@ -88,7 +78,17 @@ public class MemberController {
         }
     }
 
-
-
+    @GetMapping("/search")
+    @Operation(summary = "유저 검색", description = "유저 아이디 혹은 이름으로 검색")
+    @Parameter(name = "search", description = "검색어, ?key=value 형태로 전달")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "NOT_FOUND", description = "검색된 데이터가 없을 때"),
+            @ApiResponse(responseCode = "OK", description = "검색된 데이터 값과 함께 반환!!")
+    })
+    public ResponseEntity<List<StudentInfoDto>> findUserBySearch(@RequestParam(value = "query") String query) {
+        List<StudentInfoDto> ret = memberService.findUserBySearch(query);
+        if(ret == null) return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(ret, HttpStatus.OK);
+    }
 
 }

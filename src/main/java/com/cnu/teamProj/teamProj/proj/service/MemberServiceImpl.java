@@ -2,6 +2,7 @@ package com.cnu.teamProj.teamProj.proj.service;
 
 import com.cnu.teamProj.teamProj.proj.dto.AcceptMemberMessageDto;
 import com.cnu.teamProj.teamProj.proj.dto.ProjMemDto;
+import com.cnu.teamProj.teamProj.proj.dto.StudentInfoDto;
 import com.cnu.teamProj.teamProj.proj.entity.ProjMem;
 import com.cnu.teamProj.teamProj.proj.entity.Project;
 import com.cnu.teamProj.teamProj.proj.repository.MemberRepository;
@@ -132,6 +133,28 @@ public class MemberServiceImpl {
             return true;
         }
         return false;
+    }
+
+    public List<StudentInfoDto> findUserBySearch(String query) {
+        if(query.trim().isEmpty()) return null;
+        logger.info("query: {}", query);
+
+        List<User> users = new ArrayList<>();
+        if (query.matches("\\d+")) {
+            query += "%";
+            users = userRepository.findUsersById(query);
+            logger.info("users: {}", users.size());
+        } else {
+            query += "%";
+            users = userRepository.findUsersByName(query);
+        }
+
+        if(users.isEmpty()) return null;
+        List<StudentInfoDto> results = new ArrayList<>();
+        for(User user : users) {
+            results.add(new StudentInfoDto(user.getId(), user.getName()));
+        }
+        return results;
     }
 
 }
