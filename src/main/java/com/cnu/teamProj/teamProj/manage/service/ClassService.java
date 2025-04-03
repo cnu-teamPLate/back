@@ -6,7 +6,10 @@ import com.cnu.teamProj.teamProj.manage.repository.ClassRepository;
 import org.hibernate.tool.schema.spi.SqlScriptException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class ClassService {
@@ -43,12 +46,14 @@ public class ClassService {
         )).orElse(null);
     }
 
-    public ClassInfoDto findByClassName(String className) {
-        Optional<ClassInfo> optional = classRepository.findByClassName(className);
-        return optional.map(classInfo -> new ClassInfoDto(
-                classInfo.getClassId(),
-                classInfo.getClassName(),
-                classInfo.getProfessor()
-        )).orElse(null);
+    public List<ClassInfoDto> findByClassName(String className) {
+        List<ClassInfo> classList = classRepository.findAllByClassName(className);
+        return classList.stream()
+                .map(classInfo -> new ClassInfoDto(
+                        classInfo.getClassId(),
+                        classInfo.getClassName(),
+                        classInfo.getProfessor()))
+                .collect(Collectors.toList());
     }
+
 }

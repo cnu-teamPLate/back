@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
+import java.util.List;
+
 @Controller
 @RequestMapping(value = "/teamProj/class", produces = "application/json; charset = utf-8")
 @Tag(name = "ClassController", description = "수업 관리와 관련된 API")
@@ -67,10 +69,13 @@ public class ClassController {
             @ApiResponse(responseCode = "200", description = "클래스 정보 반환 성공"),
             @ApiResponse(responseCode = "404", description = "해당 클래스가 존재하지 않음")
     })
-    public ResponseEntity<ClassInfoDto> getClassByName(@PathVariable String className) {
-        ClassInfoDto result = classService.findByClassName(className);
-        if (result == null) return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
-        return new ResponseEntity<>(result, HttpStatus.OK);
+    public ResponseEntity<List<ClassInfoDto>> getClassByName(@PathVariable String className) {
+        List<ClassInfoDto> results = classService.findByClassName(className);
+        if (results == null || results.isEmpty()) {
+            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(results, HttpStatus.OK);
     }
+
 
 }
