@@ -14,21 +14,21 @@ public class TeamProjApplication {
 
 		SpringApplication.run(TeamProjApplication.class, args);//
 	}
-
-	@Bean
-	public WebMvcConfigurer corsConfigurer() {
-		return new WebMvcConfigurer() {
-			@Override
-			public void addCorsMappings(CorsRegistry registry) {
-				registry.addMapping("/**").allowedOrigins("http://localhost:3000")
-						.allowedMethods(
-								HttpMethod.GET.name(),
-								HttpMethod.HEAD.name(),
-								HttpMethod.POST.name(),
-								HttpMethod.PUT.name(),
-								HttpMethod.DELETE.name()
-						);
-			}
-		};
-	}
+//
+//	@Bean
+//	public WebMvcConfigurer corsConfigurer() {
+//		return new WebMvcConfigurer() {
+//			@Override
+//			public void addCorsMappings(CorsRegistry registry) {
+//				registry.addMapping("/**").allowedOrigins("http://localhost:3000")
+//						.allowedMethods(
+//								HttpMethod.GET.name(),
+//								HttpMethod.HEAD.name(),
+//								HttpMethod.POST.name(),
+//								HttpMethod.PUT.name(),
+//								HttpMethod.DELETE.name()
+//						);
+//			}
+//		};
+//	}
 }

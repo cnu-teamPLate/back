@@ -31,7 +31,6 @@ import java.util.Collections;
 import java.util.Map;
 
 @RestController
-@CrossOrigin("http://localhost:3000")
 @RequestMapping("/teamProj/auth")
 @Tag(name = "회원 등록", description = "회원 등록 및 회원 가입")
 public class AuthController {
@@ -59,7 +58,7 @@ public class AuthController {
         this.userInfoManageService = userInfoManageService;
     }
 
-    @PostMapping("/login")
+    @PostMapping("/login") 
     @Operation(summary = "로그인", description = "로그인 api")
     public ResponseEntity<AuthResponseDto> login(@RequestBody LoginDto loginDto){
         try {

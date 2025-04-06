@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +24,7 @@ import java.util.List;
 @Controller
 @RequestMapping(value = "/teamProj/class", produces = "application/json; charset = utf-8")
 @Tag(name = "ClassController", description = "수업 관리와 관련된 API")
+@Slf4j
 public class ClassController {
 //test2
     private ClassService classService;
@@ -69,12 +71,13 @@ public class ClassController {
             @ApiResponse(responseCode = "200", description = "클래스 정보 반환 성공"),
             @ApiResponse(responseCode = "404", description = "해당 클래스가 존재하지 않음")
     })
-
-    public ResponseEntity<List<ClassInfoDto>> getClassByName(@PathVariable String className) {
+    public ResponseEntity<List<ClassInfoDto>> getClassByName(@PathVariable(name = "className") String className) {
         List<ClassInfoDto> results = classService.findByClassName(className);
         if (results == null || results.isEmpty()) {
             return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
         }
+        ResponseEntity<List<ClassInfoDto>> ret = new ResponseEntity<>(results, HttpStatus.OK);
+        log.info("클래스 정보 조회 반환값: {}", ret.toString());
         return new ResponseEntity<>(results, HttpStatus.OK);
     }
 
