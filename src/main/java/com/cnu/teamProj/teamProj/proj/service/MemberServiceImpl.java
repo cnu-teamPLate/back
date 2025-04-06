@@ -137,7 +137,7 @@ public class MemberServiceImpl {
 
     public List<StudentInfoDto> findUserBySearch(String query) {
         if(query.trim().isEmpty()) return null;
-        logger.info("query: {}", query);
+        logger.info("query: {}", query);//test
 
         List<User> users = new ArrayList<>();
         if (query.matches("\\d+")) {
