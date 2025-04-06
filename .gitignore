@@ -29,7 +29,7 @@ out/
 !**/src/test/**/out/
 #**/src/main/java/com/cnu/teamProj/teamProj/security/SecurityConstants.java
 #.env 파일 제거
-#.env
+.env
 ### NetBeans ###
 /nbproject/private/
 /nbbuild/
