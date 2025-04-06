@@ -85,7 +85,7 @@ public class SecurityConfig {
                 HttpMethod.OPTIONS.name()
         ));
         configuration.setMaxAge(6000L);
-        configuration.setAllowedHeaders(List.of("*", "Origin"));
+        configuration.setAllowedHeaders(List.of("*", "Origin"));//test
         configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
