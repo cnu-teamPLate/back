@@ -32,6 +32,7 @@ import java.util.Collections;
 import java.util.Map;
 
 @RestController
+@CrossOrigin("http://localhost:3000")
 @RequestMapping("/teamProj/auth")
 @Tag(name = "회원 등록", description = "회원 등록 및 회원 가입")
 @Slf4j

@@ -15,6 +15,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+
+import java.util.List;
 
 @Controller
 @RequestMapping(value = "/teamProj/class", produces = "application/json; charset = utf-8")
@@ -41,4 +45,38 @@ public class ClassController {
         if(result == 1) return new ResponseEntity<>("등록이 완료되었습니다", HttpStatus.OK);;
         return new ResponseEntity<>("예상치 못한 문제가 발생했습니다.", HttpStatus.METHOD_NOT_ALLOWED);
     }
+
+
+
+
+    @GetMapping("/id/{classId}")
+    @Operation(summary = "클래스 ID로 클래스 정보 조회", description = "클래스 ID로 해당 클래스 정보를 반환합니다")
+    @Parameter(name = "classId", description = "클래스 ID", example = "cse2222")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "클래스 정보 반환 성공"),
+            @ApiResponse(responseCode = "404", description = "해당 클래스가 존재하지 않음")
+    })
+    public ResponseEntity<ClassInfoDto> getClassById(@PathVariable(name = "classId") String classId) {
+        ClassInfoDto result = classService.findByClassId(classId);
+        if (result == null) return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
+    @GetMapping("/name/{className}")
+    @Operation(summary = "클래스 이름으로 클래스 정보 조회", description = "클래스 이름으로 해당 클래스 정보를 반환합니다")
+    @Parameter(name = "className", description = "클래스 이름", example = "JAVA 언어")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "클래스 정보 반환 성공"),
+            @ApiResponse(responseCode = "404", description = "해당 클래스가 존재하지 않음")
+    })
+
+    public ResponseEntity<List<ClassInfoDto>> getClassByName(@PathVariable String className) {
+        List<ClassInfoDto> results = classService.findByClassName(className);
+        if (results == null || results.isEmpty()) {
+            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(results, HttpStatus.OK);
+    }
+
+
 }
