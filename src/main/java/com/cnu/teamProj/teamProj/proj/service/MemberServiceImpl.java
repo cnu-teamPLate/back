@@ -141,10 +141,12 @@ public class MemberServiceImpl {
 
         List<User> users = new ArrayList<>();
         if (query.matches("\\d+")) {
+            logger.info("숫자로 인식됨");
             query += "%";
             users = userRepository.findUsersById(query);
             logger.info("users: {}", users.size());
         } else {
+            logger.info("문자로 인식됨");
             query += "%";
             users = userRepository.findUsersByName(query);
         }
