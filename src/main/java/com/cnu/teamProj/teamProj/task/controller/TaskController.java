@@ -24,7 +24,7 @@ public class TaskController {
     public ResponseEntity<String> createTask(@RequestBody TaskDTO taskDTO) {
         String result = taskService.createTask(taskDTO);
 
-        if (result.startsWith("과제가 성공적으로 등록되었습니다")) {
+        if (result.startsWith("과제가 성공적으로 등록되었습니다!")) {
             return ResponseEntity.ok(result);
         } else {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result);
