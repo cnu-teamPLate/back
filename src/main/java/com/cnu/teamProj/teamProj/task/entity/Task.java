@@ -43,6 +43,9 @@ public class Task {
     @Column(name = "CHECK_BOX") // DB 컬럼명과 일치
     private int checkBox;
 
+    @Column(name = "task_name")
+    private String taskName;
+
     public Task(TaskUpdateDto dto) {
         this.taskId = dto.getTaskId();
         this.id = dto.getId();

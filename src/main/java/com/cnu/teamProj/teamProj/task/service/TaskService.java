@@ -41,6 +41,7 @@ public class TaskService {
             dto.setDate(task.getDate());
             dto.setDetail(task.getDetail());
             dto.setCheckBox(task.getCheckBox());
+            dto.setTaskName(task.getTaskName());
             return dto;
         }).collect(Collectors.toList());
     }
@@ -66,6 +67,7 @@ public class TaskService {
             task.setLevel(taskDTO.getLevel()); // 난이도
             task.setCate(taskDTO.getCate()); // 카테고리
             task.setCheckBox(taskDTO.getCheckBox()); // 체크 여부 (기본값 0)
+            task.setTaskName(taskDTO.getTaskName());
 
             taskRepository.save(task);
             return "과제가 성공적으로 등록되었습니다.";
