@@ -116,7 +116,7 @@ public class AuthService {
         //과제의 담당 유저 알수없음으로 변경
         List<Task> tasks = taskRepository.findTasksById(userId);
         for(Task task : tasks) {
-            task.setId(userId);
+            task.setId("null");
             taskRepository.save(task);
         }
         //웬투밋 관련 레코드 삭제
