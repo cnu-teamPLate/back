@@ -8,6 +8,7 @@ import com.cnu.teamProj.teamProj.security.repository.RoleRepository;
 import com.cnu.teamProj.teamProj.security.repository.UserRepository;
 import com.cnu.teamProj.teamProj.security.dto.LoginDto;
 import com.cnu.teamProj.teamProj.security.dto.RegisterDto;
+import com.cnu.teamProj.teamProj.security.service.AuthService;
 import com.cnu.teamProj.teamProj.security.service.UserInfoManageService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -15,6 +16,9 @@ import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +36,7 @@ import java.util.Collections;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/teamProj/auth")
+@RequestMapping("/auth")
 @Tag(name = "회원 등록", description = "회원 등록 및 회원 가입")
 @Slf4j
 public class AuthController {
@@ -42,6 +46,7 @@ public class AuthController {
     private PasswordEncoder passwordEncoder;
     private JWTGenerator jwtGenerator;
     private UserInfoManageService userInfoManageService;
+    private AuthService authService;
 
     @Autowired
     public AuthController(AuthenticationManager authenticationManager,
@@ -49,18 +54,20 @@ public class AuthController {
                           RoleRepository roleRepository,
                           PasswordEncoder passwordEncoder,
                           JWTGenerator jwtGenerator,
-                          UserInfoManageService userInfoManageService) {
+                          UserInfoManageService userInfoManageService,
+                          AuthService authService) {
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtGenerator = jwtGenerator;
         this.userInfoManageService = userInfoManageService;
+        this.authService = authService;
     }
 
     @PostMapping("/login") 
     @Operation(summary = "로그인", description = "로그인 api")
-    public ResponseEntity<AuthResponseDto> login(@RequestBody LoginDto loginDto){
+    public ResponseEntity<AuthResponseDto> login(@RequestBody LoginDto loginDto, HttpServletResponse response){
         try {
             UsernamePasswordAuthenticationToken tempToken = new UsernamePasswordAuthenticationToken(
                     String.valueOf(loginDto.getId()), loginDto.getPwd());
@@ -75,6 +82,28 @@ public class AuthController {
             //요청이 들어왔을 때 해당 요청을 처리하는 스레드에 인증 정보를 유지함.
             SecurityContextHolder.getContext().setAuthentication(authentication);
             String token = jwtGenerator.generateToken(authentication);
+            log.info("토큰 정보: {}", token);
+
+            /*
+            public void saveTokenInCookie(String token, HttpServletResponse response) {
+        Cookie cookie = new Cookie("User-Token", token);
+        cookie.setHttpOnly(true);
+        int expirationTime = 1000 * 60 * 60; //1시간
+        cookie.setMaxAge(expirationTime);
+        cookie.setPath("/");
+        cookie.setSecure(true);
+        response.addCookie(cookie);
+    }
+            * */
+            Cookie cookie = new Cookie("User-Token", token);
+            cookie.setHttpOnly(true);
+            int expirationTime = 1000 * 60 * 60; // 쿠키 만료시간 : 1시간
+            cookie.setMaxAge(expirationTime);
+            cookie.setPath("/");
+            cookie.setSecure(true);
+            response.addCookie(cookie);
+
+
             return new ResponseEntity<>(new AuthResponseDto(token, loginDto.getId(), userRepository.findById(loginDto.getId()).toString()), HttpStatus.OK); //유저 아이디(학번), 이름 필수로 넘겨야 함
         } catch (Exception e){
             log.info("로그인 실패 : {}", e.getMessage());
@@ -144,5 +173,18 @@ public class AuthController {
     @Parameter(name = "userId", description = "학번")
     public User readMyInfo(@RequestParam Map map){
         return userInfoManageService.findMyInfo(map.get("userId").toString());
+    }
+
+    //회원탈퇴
+    @DeleteMapping("/withdraw")
+    public ResponseEntity<String> withdraw(HttpServletRequest request, HttpServletResponse response) {
+        return authService.withDraw(request, response);
+    }
+
+    //비밀번호 찾기
+    @PostMapping("/send-password-mail")
+    public ResponseEntity<String> sendRandomPassword(@RequestBody Map<String,String> userMail) {
+        String email = userMail.get("email");
+        return authService.sendRandomPassword(email);
     }
 }

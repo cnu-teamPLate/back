@@ -2,7 +2,7 @@ package com.cnu.teamProj.teamProj.file.service;
 
 import com.cnu.teamProj.teamProj.file.dto.DocsDto;
 import com.cnu.teamProj.teamProj.file.entity.Docs;
-import com.cnu.teamProj.teamProj.file.repository.DocsRepostiroy;
+import com.cnu.teamProj.teamProj.file.repository.DocsRepository;
 import com.cnu.teamProj.teamProj.proj.repository.ProjRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,11 +14,11 @@ import java.io.IOException;
 @Service
 public class DocsService {
     private static final Logger logger = LoggerFactory.getLogger(DocsService.class);
-    private DocsRepostiroy docsRepostiroy;
+    private DocsRepository docsRepostiroy;
     private S3Service s3Service;
     private ProjRepository projRepository;
 
-    public DocsService(DocsRepostiroy docsRepostiroy, S3Service s3Service, ProjRepository projRepository) {
+    public DocsService(DocsRepository docsRepostiroy, S3Service s3Service, ProjRepository projRepository) {
         this.docsRepostiroy = docsRepostiroy;
         this.s3Service = s3Service;
         this.projRepository = projRepository;
