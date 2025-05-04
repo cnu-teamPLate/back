@@ -60,7 +60,8 @@ dependencies {
 	//redis 의존성 주입
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 	implementation 'org.springframework.boot:spring-boot-starter-mail:3.4.2'
-
+	//구글 stt
+	implementation 'com.google.cloud:google-cloud-speech:4.55.0'
 
 
 	runtimeOnly 'com.mysql:mysql-connector-j'

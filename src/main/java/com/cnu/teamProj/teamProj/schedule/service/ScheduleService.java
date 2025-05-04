@@ -3,7 +3,6 @@ package com.cnu.teamProj.teamProj.schedule.service;
 import com.cnu.teamProj.teamProj.comment.Comment;
 import com.cnu.teamProj.teamProj.comment.CommentRepository;
 import com.cnu.teamProj.teamProj.common.DateToStringMapping;
-import com.cnu.teamProj.teamProj.proj.entity.ProjMem;
 import com.cnu.teamProj.teamProj.proj.entity.Project;
 import com.cnu.teamProj.teamProj.proj.repository.MemberRepository;
 import com.cnu.teamProj.teamProj.proj.repository.ProjRepository;
@@ -71,18 +70,19 @@ public class ScheduleService {
         }
         return 1;
     }
-
-    //스케줄 조회
     /**
+     * 스케쥴을 조회하는 메소드
      * @param param
      *  - id : 유저 아이디
      *  - projId : 프로젝트 아이디
      *  - date : 날짜 정보 (필수)
-     *  - term : "w" or "m"
+     *  - term(기한설정) : w(=주) or m(=달) - 프론트에서 전달해주지 않아도 됨
+     *  - category : 분류 - 회의(meeting)/과제(task)/일정(plan)/
+     *      - category 값이 없으면 전체 스케줄을 반환
+     *      - 일정과 회의는 같은 테이블로 묶임
      * */
-
     public ResponseEntity<CalendarScheduleDto> getSchedule(Map<String, Object> param) {
-        boolean isIdExistInParam = param.containsKey("id");
+        boolean isIdExistInParam = param.containsKey("userId");
         if(isIdExistInParam) {
             if(!userRepository.existsById(param.get("userId").toString()))
                 return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
@@ -92,7 +92,11 @@ public class ScheduleService {
             if(!projRepository.existsById(param.get("projId").toString()))
                 return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
         }
-
+        String category = null;
+        if(param.containsKey("cate")) {
+            category = param.get("cate").toString();
+            logger.info("요청으로 들어온 category 값: {}", category);
+        }
         if(!isIdExistInParam && !isProjIdExistInParam)
             return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
 
@@ -102,125 +106,158 @@ public class ScheduleService {
         ZonedDateTime endDate;
         if(param.get("term").toString().equalsIgnoreCase("w")) { //주간 일정 불러오기
             endDate = standardDate.plusWeeks(1);
-        } else {
+        } else { //월간 일정 불러오기
             endDate = standardDate.plusMonths(1);
         }
 
         Map<String, List<TeamScheduleDto>> teamSchedules = new HashMap<>();
         Map<String, List<TaskScheduleDto>> taskSchedules = new HashMap<>();
 
-        //해당 프로젝트의 유저와 관련된 일정 불러오기
+        //✅특정 프로젝트의 유저와 관련된 일정 불러오기
         if(isIdExistInParam && isProjIdExistInParam) {
+            logger.info("isIdExistInParam && isProjIdExistInParam");
             String projId = param.get("projId").toString();
             String userId = param.get("userId").toString();
-            //이 경우 한 개의 프로젝트 아이디만 키 값으로 가짐
-            teamSchedules.put(projId, new ArrayList<>());
-            taskSchedules.put(projId, new ArrayList<>());
 
-            Project project = projRepository.findById(projId).stream().toList().get(0);
-            String projName = project.getProjName();
-            //해당 프로젝트 아이디로 등록된 스케쥴 모두 불러오기
-            List<Schedule> schedules = scheduleRepository.findSchedulesByProjId(project);
-            //팀 스케줄 불러오기
-            for(Schedule schedule : schedules) {
-                String scheduleId = schedule.getScheId();
-                boolean isInPeriod = schedule.getDate().isAfter(standardDate) && schedule.getDate().isBefore(endDate);
-                if(participantsRepository.existsByIdAndScheId(userId, scheduleId) && isInPeriod) {
-                    TeamScheduleDto teamScheduleDto = new TeamScheduleDto(schedule);
-//                    List<Participants> participants = participantsRepository.findParticipantsByScheId(scheduleId);
-//                    List<String> participantIds = new ArrayList<>();
-//                    for(Participants participant : participants) {
-//                        participantIds.add(participant.getId());
-//                    }
-                    teamScheduleDto.setProjName(projName);
-                    teamSchedules.get(projId).add(teamScheduleDto);
+            //프로젝트 일정 불러오기
+            if(category==null || !category.equalsIgnoreCase("task")) { //범주가 '과제'라면 팀스케줄 정보까지 가져올 필요가 없음
+                teamSchedules.put(projId, new ArrayList<>());
+                Project project = projRepository.findById(projId).stream().toList().get(0);
+                String projName = project.getProjName();
+                //해당 프로젝트 아이디로 등록된 스케쥴 모두 불러오기
+                List<Schedule> schedules = scheduleRepository.findSchedulesByProjId(project);
+                //팀 스케줄 불러오기
+                for(Schedule schedule : schedules) {
+                    String scheduleId = schedule.getScheId();
+                    boolean isInPeriod = schedule.getDate().isAfter(standardDate) && schedule.getDate().isBefore(endDate);
+                    if(participantsRepository.existsByIdAndScheId(userId, scheduleId) && isInPeriod) {
+                        TeamScheduleDto teamScheduleDto = new TeamScheduleDto(schedule);
+                        teamScheduleDto.setProjName(projName);
+                        
+                        if(category != null) { //일정의 종류가 요청으로 들어왔으면 해당 카테고리에 해당되는 일정만 포함
+                            if(schedule.getCategory().equalsIgnoreCase(category)) {
+                                teamSchedules.get(projId).add(teamScheduleDto);
+                            }
+                        } else { //카테고리가 없으면 모두 포함
+                            teamSchedules.get(projId).add(teamScheduleDto);
+                        }
+                    }
                 }
             }
+            logger.info("조건문 확인: {}", category.equalsIgnoreCase("task"));
             //개인 과제 불러오기
-            List<Task> tasks = taskRepository.findTasksByProjIdAndId(projId, userId);
-            for(Task task : tasks) {
-                boolean isInPeriod = task.getDate().isAfter(standardDate) && task.getDate().isBefore(endDate);
-                if(isInPeriod) {
-                    TaskScheduleDto taskScheduleDto = new TaskScheduleDto(task);
-                    taskSchedules.get(projId).add(taskScheduleDto);
+            if(category == null || category.equalsIgnoreCase("task")) {
+                logger.info("안으로 들어옴");
+                taskSchedules.put(projId, new ArrayList<>());
+                List<Task> tasks = taskRepository.findTasksByProjIdAndId(projId, userId);
+                logger.info("tasks의 개수: {}", tasks.size());
+                for(Task task : tasks) {
+                    boolean isInPeriod = task.getDate().isAfter(standardDate) && task.getDate().isBefore(endDate);
+                    if(isInPeriod) {
+                        TaskScheduleDto taskScheduleDto = new TaskScheduleDto(task);
+                        String projName = projRepository.findById(task.getProjId()).orElseThrow().getProjName();
+                        taskScheduleDto.setProjName(projName);
+                        taskSchedules.get(projId).add(taskScheduleDto);
+                    }
                 }
             }
         }
-        else if (isIdExistInParam) { //아이디 값만 들어온 경우
+        //✅유저가 참여중인 스케줄 불러오기
+        else if (isIdExistInParam) {
+            logger.info("isIdExistInParam");
             String userId = param.get("userId").toString();
 
-            //팀 스케쥴 불러오기
-            //participants 테이블에서 아이디로 record값을 조회해서 scheId를 가지고 오고 scheId로 schedule 테이블에서 값 가져오기
-            List<Participants> participants = participantsRepository.findAllById(userId);
-            for(Participants participant : participants) {
-                String scheId = participant.getScheId();
-                String projId = participant.getProjId();
-                Schedule schedule = scheduleRepository.findByScheId(scheId);
-                boolean isInPeriod = schedule.getDate().isAfter(standardDate) && schedule.getDate().isBefore(endDate);
-                if(isInPeriod) {
-                    if(!teamSchedules.containsKey(projId)) teamSchedules.put(projId, new ArrayList<>());
+            //프로젝트 일정 불러오기
+            if(category==null || !category.equalsIgnoreCase("task")) {
+                List<Participants> participants = participantsRepository.findAllById(userId); //유저가 참여중인 프로젝트 및 일정 정보 가져오기
+                for(Participants participant : participants) {
+                    String scheId = participant.getScheId();
+                    String projId = participant.getProjId();
+                    Schedule schedule = scheduleRepository.findByScheId(scheId);
+                    boolean isInPeriod = schedule.getDate().isAfter(standardDate) && schedule.getDate().isBefore(endDate);
+                    if(isInPeriod) {
+                        if(!teamSchedules.containsKey(projId)) teamSchedules.put(projId, new ArrayList<>());
 
-                    TeamScheduleDto teamScheduleDto = new TeamScheduleDto(schedule);
-                    String projName = schedule.getProjId().getProjName();
-                    teamScheduleDto.setProjName(projName);
-
-                    teamSchedules.get(projId).add(teamScheduleDto);
+                        getTeamSchedule(category, teamSchedules, projId, schedule);
+                    }
                 }
             }
+
             //과제 불러오기
-            List<Task> tasks = taskRepository.findTasksById(userId);
-            for(Task task : tasks) {
-                boolean isInPeriod = task.getDate().isAfter(standardDate) && task.getDate().isBefore(endDate);
-                if(isInPeriod) {
-                    TaskScheduleDto taskScheduleDto = new TaskScheduleDto(task);
-                    String projName = projRepository.findById(task.getProjId()).stream().toList().get(0).getProjName();
-                    taskScheduleDto.setProjName(projName);
+            if(category == null || category.equalsIgnoreCase("task")) {
+                List<Task> tasks = taskRepository.findTasksById(userId);
+                for(Task task : tasks) {
+                    boolean isInPeriod = task.getDate().isAfter(standardDate) && task.getDate().isBefore(endDate);
+                    if(isInPeriod) {
+                        TaskScheduleDto taskScheduleDto = new TaskScheduleDto(task);
+                        String projName = projRepository.findById(task.getProjId()).stream().toList().get(0).getProjName();
+                        taskScheduleDto.setProjName(projName);
 
-                    String projId = task.getProjId();
-                    if(!taskSchedules.containsKey(projId)) taskSchedules.put(projId, new ArrayList<>());
+                        String projId = task.getProjId();
+                        if(!taskSchedules.containsKey(projId)) taskSchedules.put(projId, new ArrayList<>());
 
-                    taskSchedules.get(projId).add(taskScheduleDto);
+                        taskSchedules.get(projId).add(taskScheduleDto);
+                    }
                 }
             }
         }
-        else { //프로젝트 아이디를 기준으로 스케줄 불러오기
+        //✅프로젝트 아이디를 기준으로 스케줄 불러오기
+        else {
+            logger.info("프로젝트 아이디만");
             String projId = param.get("projId").toString();
-            teamSchedules.put(projId, new ArrayList<>());
-            taskSchedules.put(projId, new ArrayList<>());
 
             Project project = projRepository.findById(projId).get();
 
-            //팀 스케줄 가져오기
-            List<Schedule> schedules = scheduleRepository.findSchedulesByProjId(project);
+            if(category==null || !category.equalsIgnoreCase("task")) {
+                //팀 스케줄 가져오기
+                teamSchedules.put(projId, new ArrayList<>());
+                List<Schedule> schedules = scheduleRepository.findSchedulesByProjId(project);
 
-            for(Schedule schedule : schedules) {
-                boolean isInPeriod = schedule.getDate().isAfter(standardDate) && schedule.getDate().isBefore(endDate);
-                if(isInPeriod) {
-                    TeamScheduleDto teamScheduleDto = new TeamScheduleDto(schedule);
-                    String projName = schedule.getProjId().getProjName();
-                    teamScheduleDto.setProjName(projName);
+                for(Schedule schedule : schedules) {
+                    boolean isInPeriod = schedule.getDate().isAfter(standardDate) && schedule.getDate().isBefore(endDate);
+                    if(isInPeriod) {
+                        getTeamSchedule(category, teamSchedules, projId, schedule);
+                    }
+                }
 
-                    teamSchedules.get(projId).add(teamScheduleDto);
+            }
+
+            //과제 가져오기 - 과제는 정해진 카테고리가 없을 때만 불러오기
+            if(category == null || category.equalsIgnoreCase("task")) {
+                taskSchedules.put(projId, new ArrayList<>());
+                if(category==null) {
+                    List<Task> tasks = taskRepository.findTasksByProjId(projId);
+
+                    for(Task task : tasks) {
+                        boolean isInPeriod = task.getDate().isAfter(standardDate) && task.getDate().isBefore(endDate);
+                        if(isInPeriod) {
+                            TaskScheduleDto taskScheduleDto = new TaskScheduleDto(task);
+                            String projName = projRepository.findById(task.getProjId()).stream().toList().get(0).getProjName();
+                            taskScheduleDto.setProjName(projName);
+
+                            taskSchedules.get(projId).add(taskScheduleDto);
+                        }
+                    }
                 }
             }
 
-            //과제 가져오기
-            List<Task> tasks = taskRepository.findTasksByProjId(projId);
-
-            for(Task task : tasks) {
-                boolean isInPeriod = task.getDate().isAfter(standardDate) && task.getDate().isBefore(endDate);
-                if(isInPeriod) {
-                    TaskScheduleDto taskScheduleDto = new TaskScheduleDto(task);
-                    String projName = projRepository.findById(task.getProjId()).stream().toList().get(0).getProjName();
-                    taskScheduleDto.setProjName(projName);
-
-                    taskSchedules.get(projId).add(taskScheduleDto);
-                }
-            }
         }
         if(teamSchedules.isEmpty() && taskSchedules.isEmpty())
             return new ResponseEntity<>(null, HttpStatus.OK);
         return new ResponseEntity<>(new CalendarScheduleDto(teamSchedules, taskSchedules), HttpStatus.OK);
+    }
+
+    private void getTeamSchedule(String category, Map<String, List<TeamScheduleDto>> teamSchedules, String projId, Schedule schedule) {
+        TeamScheduleDto teamScheduleDto = new TeamScheduleDto(schedule);
+        String projName = schedule.getProjId().getProjName();
+        teamScheduleDto.setProjName(projName);
+        if(category != null) { //일정의 종류가 요청으로 들어왔으면 해당 카테고리에 해당되는 일정만 포함
+            if(schedule.getCategory().equalsIgnoreCase(category)) {
+                teamSchedules.get(projId).add(teamScheduleDto);
+            }
+        } else { //카테고리가 없으면 모두 포함
+            teamSchedules.get(projId).add(teamScheduleDto);
+        }
     }
 
     public ResponseEntity<Object> getObjectResponseEntity(@RequestBody Map<String, Object> param) {

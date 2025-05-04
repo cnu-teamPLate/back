@@ -10,8 +10,10 @@ import java.util.Map;
 @Repository
 public interface ParticipantsRepository extends JpaRepository<Participants, String> {
     boolean existsByIdAndScheId(String id, String scheId);
+    boolean existsByIdAndProjId(String id, String projId);
     List<Participants> findParticipantsByScheId(String scheID);
     List<Participants> findAllById(String id);
     Participants findParticipantsByScheIdAndId(String scheId, String id);
+
 
 }
