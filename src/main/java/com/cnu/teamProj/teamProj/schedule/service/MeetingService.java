@@ -14,12 +14,16 @@ import com.cnu.teamProj.teamProj.schedule.repository.ParticipantsRepository;
 import com.cnu.teamProj.teamProj.schedule.repository.ScheduleRepository;
 import com.cnu.teamProj.teamProj.security.entity.User;
 import com.cnu.teamProj.teamProj.security.repository.UserRepository;
+import com.cnu.teamProj.teamProj.util.STTUtil;
 import com.cnu.teamProj.teamProj.util.SecurityUtil;
+import com.google.api.Http;
+import com.google.cloud.speech.v1.SpeechSettings;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.*;
 
@@ -33,6 +37,7 @@ public class MeetingService {
     private final ParticipantsRepository participantsRepository;
     private final UserRepository userRepository;
     private final MemberRepository memberRepository;
+    private final STTUtil sttUtil;
 
     /**
      * 회의록 업로드
@@ -101,5 +106,27 @@ public class MeetingService {
         result.put("확정사항", meetingLog.getFix());
 
         return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
+    /**
+     * 회의 녹음본 문자로 변환
+     */
+    public ResponseEntity<String> convertSpeechToText(MultipartFile audioFile) {
+        try{
+            if(audioFile.isEmpty()) {
+                return new ResponseEntity<>("파일 데이터가 없습니다", HttpStatus.BAD_REQUEST);
+            }
+            String fileType = audioFile.getContentType();
+            assert fileType != null;
+            if(!fileType.equalsIgnoreCase("audio/wave") && !fileType.equalsIgnoreCase("audio/x-flac")) {
+                log.info("파일형식: {}", fileType);
+                return new ResponseEntity<>("지원되지 않는 오디오 형식입니다", HttpStatus.BAD_REQUEST);
+            }
+            String text = sttUtil.asyncRecognizeGcs(audioFile);
+            return new ResponseEntity<>(text, HttpStatus.OK);
+        } catch(Exception e) {
+            log.error("인코딩 중 문제가 발생했습니다: {}", e.getMessage());
+            return new ResponseEntity<>("인코딩 중 문제가 발생했습니다", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }

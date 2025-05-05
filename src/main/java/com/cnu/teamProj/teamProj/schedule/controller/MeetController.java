@@ -5,15 +5,18 @@ import com.cnu.teamProj.teamProj.schedule.dto.MeetingLogDto;
 import com.cnu.teamProj.teamProj.schedule.service.MakePlanService;
 import com.cnu.teamProj.teamProj.schedule.service.MeetingService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Map;
 
 @RestController
 @RequestMapping(value ="/test/schedule/meeting", produces = "application/json; charset=utf8")
 @RequiredArgsConstructor
+@Slf4j
 public class MeetController {
     private final MakePlanService makePlanService;
     private final MeetingService meetingService;
@@ -36,5 +39,10 @@ public class MeetController {
     @PostMapping("/upload/log")
     public ResponseEntity<String> uploadMeetingLog(@RequestBody MeetingLogDto param) {
         return meetingService.updateMeetingLog(param);
+    }
+
+    @PostMapping("/convert-speech")
+    public ResponseEntity<String> convertSpeechToText(@RequestParam("file")MultipartFile file) {
+        return meetingService.convertSpeechToText(file);
     }
 }
