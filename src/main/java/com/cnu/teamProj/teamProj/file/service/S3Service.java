@@ -3,9 +3,8 @@ package com.cnu.teamProj.teamProj.file.service;
 import com.cnu.teamProj.teamProj.file.dto.FileDto;
 import com.cnu.teamProj.teamProj.file.repository.DocsRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -20,19 +19,15 @@ import java.util.concurrent.CompletableFuture;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class S3Service {
     private final S3AsyncClient amazonS3;
     private final DocsRepository docsRepository;
 
     @Value("${spring.cloud.aws.s3.bucket}")
     private String bucket;
-    @Value("${spring.cloud.aws.credentials.access-key}")
-    private String accessKey;
     @Value("${spring.cloud.aws.region.static}")
     private String regionStr;
-
-    private static final Logger logger = LoggerFactory.getLogger(S3Service.class);
-
 
     /**
      * S3에 파일 업로드해주는 메소드
@@ -67,13 +62,13 @@ public class S3Service {
 
             PutObjectResponse resp = amazonS3.putObject(putObjectRequest, AsyncRequestBody.fromBytes(bytes)).get();
             String url = getPublicUrl(filename);
-            logger.info("파일 등록 결과: {}", resp);
+            log.info("파일 등록 결과: {}", resp);
             return new FileDto(url, file.getOriginalFilename());
         } catch(IOException e) {
-            logger.warn("파일 등록에 실패하셨습니다: {}", e.getMessage());
+            log.warn("파일 등록에 실패하셨습니다: {}", e.getMessage());
             return null;
         } catch(Exception e) {
-            logger.error("결과 에러: {}", e.getMessage());
+            log.error("결과 에러: {}", e.getMessage());
             return null;
         }
     }
@@ -100,14 +95,14 @@ public class S3Service {
                     .versionId(null)
                     .build();
 
-            logger.info("전달된 파일명: {}", filename);
+            log.info("전달된 파일명: {}", filename);
             DeleteObjectResponse response = amazonS3.deleteObject(deleteObjectRequest).get();
-            logger.info("Responses: {}", response);
+            log.info("Responses: {}", response);
             return true;
         } catch (Exception e) {
             System.out.println(e);
             System.out.println(e.getMessage());
-            logger.error("에러 발생: {}", e.getMessage());
+            log.error("에러 발생: {}", e.getMessage());
             return false;
         }
 
