@@ -26,7 +26,7 @@ public class S3Controller {
     @PostMapping("/upload")
     public ResponseEntity<String> uploadFile(@RequestParam("file")MultipartFile file) {
         try{
-            String fileUrl = s3Service.uploadFile(file, UUID.randomUUID().toString());
+            String fileUrl = s3Service.uploadFile(file, UUID.randomUUID().toString()).getUrl();
             return new ResponseEntity<>(String.format("파일 업로드에 성공! url 정보 : %s", fileUrl), HttpStatus.OK);
         } catch(IOException e) {
             logger.info(e.getMessage());
