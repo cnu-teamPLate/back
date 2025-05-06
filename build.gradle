@@ -56,7 +56,8 @@ dependencies {
 	//자바에서 amazon s3 버킷에 접근할 수 있게 해주는 라이브러리
 	implementation 'software.amazon.awssdk:s3:2.25.64'
 	implementation 'software.amazon.awssdk.crt:aws-crt:0.31.3'
-	implementation 'software.amazon.awssdk:core:2.20.0'
+	implementation 'software.amazon.awssdk:core:2.25.64'
+
 	//redis 의존성 주입
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 	implementation 'org.springframework.boot:spring-boot-starter-mail:3.4.2'

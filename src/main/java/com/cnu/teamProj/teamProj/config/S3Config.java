@@ -4,9 +4,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3AsyncClient;
+import software.amazon.awssdk.services.s3.crt.S3CrtHttpConfiguration;
 import software.amazon.awssdk.services.s3.internal.crt.S3CrtAsyncClient;
 
 import java.time.Duration;
@@ -26,7 +28,8 @@ public class S3Config {
         AwsBasicCredentials awsCredentials = AwsBasicCredentials.create(accessKey, accessSecret);
         final Region region = Region.of(regionStr);
         //위에서 생성한 자격증명을 바탕으로 client 객체 생성
-        return S3CrtAsyncClient.builder()
+        return S3AsyncClient.builder()
+                .credentialsProvider(DefaultCredentialsProvider.create())
                 .credentialsProvider(StaticCredentialsProvider.create(awsCredentials))
                 .region(region)
                 .build();
