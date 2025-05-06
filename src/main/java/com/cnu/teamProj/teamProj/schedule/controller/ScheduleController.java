@@ -15,7 +15,7 @@ import java.time.ZonedDateTime;
 import java.util.Map;
 
 @RestController
-@RequestMapping(value = "/schedule/check", produces = "application/json; charset=utf8")
+@RequestMapping(value = "/test/api/schedule/check", produces = "application/json; charset=utf8")
 @Tag(name = "ScheduleController", description = "일정 관리와 관련된 api 입니다")
 public class ScheduleController {
 
@@ -32,7 +32,10 @@ public class ScheduleController {
      *  - id : 유저 아이디
      *  - projId : 프로젝트 아이디
      *  - date : 날짜 정보
-     *  - term : w or m
+     *  - term(기한설정) : w(=주) or m(=달) - 프론트에서 전달해주지 않아도 됨
+     *  - category : 분류 - 회의/과제/일정/
+     *      - category 값이 없으면 전체 스케줄을 반환
+     *      - 일정과 회의는 같은 테이블로 묶임
      * */
     @GetMapping("/weekly")
     public ResponseEntity<Object> viewWeekly(@RequestBody Map<String, Object> param) {
