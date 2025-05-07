@@ -56,7 +56,7 @@ public class ClassController {
             @ApiResponse(responseCode = "200", description = "클래스 정보 반환 성공"),
             @ApiResponse(responseCode = "404", description = "해당 클래스가 존재하지 않음")
     })
-    public ResponseEntity<ClassInfoDto> getClassById(@PathVariable String classId) {
+    public ResponseEntity<ClassInfoDto> getClassById(@PathVariable(name = "classId") String classId) {
         ClassInfoDto result = classService.findByClassId(classId);
         if (result == null) return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
         return new ResponseEntity<>(result, HttpStatus.OK);
@@ -69,6 +69,7 @@ public class ClassController {
             @ApiResponse(responseCode = "200", description = "클래스 정보 반환 성공"),
             @ApiResponse(responseCode = "404", description = "해당 클래스가 존재하지 않음")
     })
+
     public ResponseEntity<List<ClassInfoDto>> getClassByName(@PathVariable String className) {
         List<ClassInfoDto> results = classService.findByClassName(className);
         if (results == null || results.isEmpty()) {

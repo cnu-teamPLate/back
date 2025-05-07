@@ -15,6 +15,7 @@ import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,8 +32,10 @@ import java.util.Collections;
 import java.util.Map;
 
 @RestController
+@CrossOrigin("http://localhost:3000")
 @RequestMapping("/teamProj/auth")
 @Tag(name = "회원 등록", description = "회원 등록 및 회원 가입")
+@Slf4j
 public class AuthController {
     private AuthenticationManager authenticationManager;
     private UserRepository userRepository;
@@ -41,8 +44,6 @@ public class AuthController {
     private JWTGenerator jwtGenerator;
     private UserInfoManageService userInfoManageService;
 
-    //로그
-    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
     @Autowired
     public AuthController(AuthenticationManager authenticationManager,
                           UserRepository userRepository,
@@ -64,20 +65,20 @@ public class AuthController {
         try {
             UsernamePasswordAuthenticationToken tempToken = new UsernamePasswordAuthenticationToken(
                     String.valueOf(loginDto.getId()), loginDto.getPwd());
-            logger.info("tempToken.getCredentials(): {}", tempToken.getCredentials());
-            logger.info("tempToken.getPrincipal(): {}", tempToken.getPrincipal());
+            log.info("tempToken.getCredentials(): {}", tempToken.getCredentials());
+            log.info("tempToken.getPrincipal(): {}", tempToken.getPrincipal());
             //authentication = 현재 인증 정보
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
                             loginDto.getId(), loginDto.getPwd()));
-            logger.info("authentication.toString(): {}", authentication.toString());
+            log.info("authentication.toString(): {}", authentication.toString());
             //SecurityContextHolder.getContext() : 현재 사용자의 security context를 가져옴
             //요청이 들어왔을 때 해당 요청을 처리하는 스레드에 인증 정보를 유지함.
             SecurityContextHolder.getContext().setAuthentication(authentication);
             String token = jwtGenerator.generateToken(authentication);
             return new ResponseEntity<>(new AuthResponseDto(token, loginDto.getId(), userRepository.findById(loginDto.getId()).toString()), HttpStatus.OK); //유저 아이디(학번), 이름 필수로 넘겨야 함
         } catch (Exception e){
-            logger.info("로그인 실패 : {}", e.getMessage());
+            log.info("로그인 실패 : {}", e.getMessage());
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
     }
@@ -106,7 +107,11 @@ public class AuthController {
         user.setMail(registerDto.getEmail());
         user.setPhone(registerDto.getPhone());
         user.setId(registerDto.getStudentNumber());
-        Role roles = roleRepository.findByName("USER").get();
+        if(roleRepository.findByName("ROLE_USER").isEmpty()) {
+            log.error("존재하는 역할이 없습니다");
+            return new ResponseEntity<>("Server Error", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        Role roles = roleRepository.findByName("ROLE_USER").get();
         user.setRoles(Collections.singletonList(roles));
         user.setUsername(registerDto.getId());
         userRepository.save(user);
