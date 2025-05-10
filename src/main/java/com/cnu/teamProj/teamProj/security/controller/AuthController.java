@@ -125,7 +125,7 @@ public class AuthController {
             @ApiResponse(responseCode = "200", description = "회원가입 완료")
     })
     public ResponseEntity<String> register(@RequestBody RegisterDto registerDto){
-        if(userRepository.existsById(registerDto.getId())){
+        if(userRepository.existsById(registerDto.getStudentNumber())){ //registerDto.getId()
             return new ResponseEntity<>("Username is taken!", HttpStatus.BAD_REQUEST);
         }
 
