@@ -14,15 +14,16 @@ public class SecurityConstants {
             "/auth/register",
             "/auth/send-password-mail",
             "/error",
-            "/test/**"
+            "/test/**",
+            "/**"
     );
     public static final List<String> USER_ENDPOINTS = List.of( //가입한 유저만 접근 가능한 url
-            "/api/**",
-            "/file/**",
-            "/bucket/**",
-            "/teamProj/**",
-            "/projects/**",
-            "/schedule/**",
-            "/permission-check" //테스트용
+//            "/api/**",
+//            "/file/**",
+//            "/bucket/**",
+//            "/teamProj/**",
+//            "/projects/**",
+//            "/schedule/**",
+//            "/permission-check" //테스트용
     );
 }

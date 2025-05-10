@@ -11,6 +11,6 @@ public class DocsDto {
     private String projId;
     private String title;
     private String detail;
-    private ZonedDateTime uploadDate;
-    private String category;
+    private int category;
+    private String url;
 }

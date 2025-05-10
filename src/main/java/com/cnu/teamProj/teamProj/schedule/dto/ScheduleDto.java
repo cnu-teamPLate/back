@@ -20,6 +20,7 @@ public class ScheduleDto {
     private List<String> participants;
 
     public ScheduleDto(Schedule schedule) {
+        this.scheId = schedule.getScheId();
         this.projId = schedule.getProjId().getProjId();
         this.date = schedule.getDate();
         this.scheName = schedule.getScheName();
