@@ -3,6 +3,7 @@ package com.cnu.teamProj.teamProj.schedule.service;
 import com.cnu.teamProj.teamProj.comment.Comment;
 import com.cnu.teamProj.teamProj.comment.CommentRepository;
 import com.cnu.teamProj.teamProj.common.DateToStringMapping;
+import com.cnu.teamProj.teamProj.common.ResultConstant;
 import com.cnu.teamProj.teamProj.proj.entity.Project;
 import com.cnu.teamProj.teamProj.proj.repository.MemberRepository;
 import com.cnu.teamProj.teamProj.proj.repository.ProjRepository;
@@ -11,6 +12,7 @@ import com.cnu.teamProj.teamProj.schedule.entity.Participants;
 import com.cnu.teamProj.teamProj.schedule.entity.Schedule;
 import com.cnu.teamProj.teamProj.schedule.repository.ParticipantsRepository;
 import com.cnu.teamProj.teamProj.schedule.repository.ScheduleRepository;
+import com.cnu.teamProj.teamProj.security.entity.User;
 import com.cnu.teamProj.teamProj.security.repository.UserRepository;
 import com.cnu.teamProj.teamProj.task.entity.Task;
 import com.cnu.teamProj.teamProj.task.repository.TaskRepository;
@@ -308,22 +310,36 @@ public class ScheduleService {
     }
 
     @Transactional
-    public int updateSchedule(ScheduleUpdateDto scheduleDto) {
-        if(!scheduleRepository.existsById(scheduleDto.getScheId())) return -1;
+    public ResponseEntity<String> updateSchedule(ScheduleUpdateDto scheduleDto) {
+        if(!scheduleRepository.existsById(scheduleDto.getScheId()))
+            return ResultConstant.returnResultCustom(ResultConstant.NOT_EXIST, "해당 아이디의 스케줄 레코드가 존재하지 않습니다");
+        Project project = projRepository.findById(scheduleDto.getProjId()).orElse(null);
+        if(project==null)
+            return ResultConstant.returnResultCustom(ResultConstant.NOT_EXIST, "존재하는 프로젝트가 아닙니다");
+
         String scheId = scheduleDto.getScheId();
+        logger.info("scheId: {}", scheId);
 
         //참가자 목록 업데이트
         for(String userId : scheduleDto.getParticipants().keySet()) {
+            User user = userRepository.findById(userId).orElse(null);
+            if(user==null)
+                return ResultConstant.returnResultCustom(ResultConstant.NOT_EXIST, "존재하는 유저가 아닙니다");
+
             int status = scheduleDto.getParticipants().get(userId);
             Participants participant = participantsRepository.findParticipantsByScheIdAndId(scheId, userId);
-            if(participant == null) return -1;
-            if(status == -1) participantsRepository.delete(participant);
-            else participantsRepository.save(participant);
+            if(!projMemRepository.existsByIdAndProjId(user, project))
+                return ResultConstant.returnResultCustom(ResultConstant.NOT_EXIST, "프로젝트 구성원이 아닌 유저는 참여자로 추가할 수 없습니다");
+            if(status == -1 && participant != null) participantsRepository.delete(participant);
+            else {
+                Participants newParticipant = new Participants(scheId, userId, scheduleDto.getProjId());
+                participantsRepository.save(newParticipant);
+            }
         }
 
         Schedule schedule = new Schedule(scheduleDto);
         schedule.setProjId(projRepository.findProjectByProjId(scheduleDto.getProjId()));
         scheduleRepository.save(schedule);
-        return 1;
+        return ResultConstant.returnResult(1);
     }
 }

@@ -42,4 +42,27 @@ public class ResultConstant {
 
         return new ResponseEntity<>(message, status);
     }
+
+    public static ResponseEntity<String> returnResultCustom(int result, String message) {
+        HttpStatus status;
+        switch (result) {
+            case NOT_EXIST :
+                status = HttpStatus.NOT_FOUND;
+                break;
+            case UNEXPECTED_ERROR:
+                status = HttpStatus.INTERNAL_SERVER_ERROR;
+                break;
+            case REQUIRED_PARAM_NON, INVALID_PARAM:
+                status = HttpStatus.BAD_REQUEST;
+                break;
+            case NO_PERMISSION:
+                status = HttpStatus.NOT_ACCEPTABLE;
+                break;
+            default:
+                message = "요청이 성공적으로 처리되었습니다";
+                status = HttpStatus.OK;
+        }
+
+        return new ResponseEntity<>(message, status);
+    }
 }
