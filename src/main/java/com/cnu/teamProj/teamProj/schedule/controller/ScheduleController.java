@@ -15,7 +15,7 @@ import java.time.ZonedDateTime;
 import java.util.Map;
 
 @RestController
-@RequestMapping(value = "/test/api/schedule/check", produces = "application/json; charset=utf8")
+@RequestMapping(value = "/api/schedule/check", produces = "application/json; charset=utf8")
 @Tag(name = "ScheduleController", description = "일정 관리와 관련된 api 입니다")
 public class ScheduleController {
 
@@ -78,9 +78,7 @@ public class ScheduleController {
 
     @PutMapping("/update/team-schedule")
     public ResponseEntity<String> updateSchedule(@RequestBody ScheduleUpdateDto dto) {
-        int ret = scheduleService.updateSchedule(dto);
-        if(ret==1) return new ResponseEntity<>("성공적으로 업데이트 되었습니다", HttpStatus.OK);
-        else return new ResponseEntity<>("해당 스케줄 아이디에 속하는 레코드 값이 없습니다", HttpStatus.OK);
+        return scheduleService.updateSchedule(dto);
     }
 
     @PutMapping("/update/task")
