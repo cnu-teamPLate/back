@@ -1,5 +1,6 @@
 package com.cnu.teamProj.teamProj.security.controller;
 
+import com.cnu.teamProj.teamProj.common.ResultConstant;
 import com.cnu.teamProj.teamProj.security.dto.AuthResponseDto;
 import com.cnu.teamProj.teamProj.security.entity.Role;
 import com.cnu.teamProj.teamProj.security.entity.User;
@@ -19,6 +20,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,34 +38,18 @@ import java.util.Collections;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping(value = "/auth", produces = "application/json; charset = utf-8")
 @Tag(name = "회원 등록", description = "회원 등록 및 회원 가입")
 @Slf4j
+@RequiredArgsConstructor
 public class AuthController {
-    private AuthenticationManager authenticationManager;
-    private UserRepository userRepository;
-    private RoleRepository roleRepository;
-    private PasswordEncoder passwordEncoder;
-    private JWTGenerator jwtGenerator;
-    private UserInfoManageService userInfoManageService;
-    private AuthService authService;
-
-    @Autowired
-    public AuthController(AuthenticationManager authenticationManager,
-                          UserRepository userRepository,
-                          RoleRepository roleRepository,
-                          PasswordEncoder passwordEncoder,
-                          JWTGenerator jwtGenerator,
-                          UserInfoManageService userInfoManageService,
-                          AuthService authService) {
-        this.authenticationManager = authenticationManager;
-        this.userRepository = userRepository;
-        this.roleRepository = roleRepository;
-        this.passwordEncoder = passwordEncoder;
-        this.jwtGenerator = jwtGenerator;
-        this.userInfoManageService = userInfoManageService;
-        this.authService = authService;
-    }
+    private final AuthenticationManager authenticationManager;
+    private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final JWTGenerator jwtGenerator;
+    private final UserInfoManageService userInfoManageService;
+    private final AuthService authService;
 
     @PostMapping("/login") 
     @Operation(summary = "로그인", description = "로그인 api")
@@ -125,26 +111,8 @@ public class AuthController {
             @ApiResponse(responseCode = "200", description = "회원가입 완료")
     })
     public ResponseEntity<String> register(@RequestBody RegisterDto registerDto){
-        if(userRepository.existsById(registerDto.getId())){
-            return new ResponseEntity<>("Username is taken!", HttpStatus.BAD_REQUEST);
-        }
-
-        User user = new User();
-        user.setName(registerDto.getName());
-        user.setPwd(passwordEncoder.encode(registerDto.getPwd()));
-        user.setMail(registerDto.getEmail());
-        user.setPhone(registerDto.getPhone());
-        user.setId(registerDto.getStudentNumber());
-        if(roleRepository.findByName("ROLE_USER").isEmpty()) {
-            log.error("존재하는 역할이 없습니다");
-            return new ResponseEntity<>("Server Error", HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-        Role roles = roleRepository.findByName("ROLE_USER").get();
-        user.setRoles(Collections.singletonList(roles));
-        user.setUsername(registerDto.getId());
-        userRepository.save(user);
-
-        return new ResponseEntity<>("User registered success", HttpStatus.OK);
+        int ret = authService.registerUser(registerDto);
+        return ResultConstant.returnResult(ret);
     }
 
     //내 정보 수정
@@ -162,9 +130,8 @@ public class AuthController {
             @ApiResponse(responseCode = "200", description = "정보가 정상적으로 수정되었습니다")
     })
     public ResponseEntity<String> updateMyInfo(@RequestBody RegisterDto dto) {
-        boolean result = userInfoManageService.updateMyInfo(dto);
-        if(result) return new ResponseEntity<>("정보가 정상적으로 수정되었습니다", HttpStatus.OK);
-        return new ResponseEntity<>("존재하지 않는 사용자입니다", HttpStatus.BAD_REQUEST);
+        int result = userInfoManageService.updateMyInfo(dto);
+        return ResultConstant.returnResult(result);
     }
 
     //내 정보 보기
