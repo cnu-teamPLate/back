@@ -77,7 +77,10 @@ public class DocsController {
         } else if(ret == ResultConstant.UNEXPECTED_ERROR) {
             status = HttpStatus.INTERNAL_SERVER_ERROR;
             resultText = "예상치 못한 오류가 발생했습니다";
-        } else {
+        } else if (ret == ResultConstant.NO_PERMISSION) {
+            status = HttpStatus.NOT_ACCEPTABLE;
+            resultText = "파일에 대한 권한이 없습니다";
+        }else {
             status = HttpStatus.OK;
             resultText = "파일이 성공적으로 삭제되었습니다";
         }

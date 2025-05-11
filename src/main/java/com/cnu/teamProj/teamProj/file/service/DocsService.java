@@ -77,6 +77,9 @@ public class DocsService {
     public int deleteFile(int fileId) {
         Docs docs = docsRepostiroy.findByFileId(fileId);
         if(docs == null) return ResultConstant.NOT_EXIST;
+        String ownerId = docs.getId();
+
+        if(!SecurityUtil.getCurrentUser().equals(ownerId)) return ResultConstant.NO_PERMISSION;
         docsRepostiroy.delete(docs);
         String url = docs.getUrl();
         //문서가 버켓에 올라가 있는 파일일 경우 삭제
