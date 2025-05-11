@@ -16,4 +16,5 @@ public class TaskDTO {
     private ZonedDateTime date; // `deadline` → `date`로 수정 (DB 컬럼명과 맞춤)
     private String detail;
     private int checkBox; // `checkbox` → `checkBox`로 수정
+    private String taskName;
 }

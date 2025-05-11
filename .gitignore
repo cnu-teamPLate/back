@@ -1,6 +1,8 @@
 HELP.md
 .gradle
 build/
+src/main/resources/stt-google.json
+src/main/test
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
 !**/src/test/**/build/
@@ -23,6 +25,7 @@ bin/
 ### IntelliJ IDEA ###
 #application.properties
 
+
 .idea
 *.iws
 *.iml
@@ -41,3 +44,4 @@ out/
 
 ### VS Code ###
 .vscode/
+
