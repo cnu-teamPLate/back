@@ -1,5 +1,6 @@
 package com.cnu.teamProj.teamProj.schedule.service;
 
+import com.cnu.teamProj.teamProj.common.ResultConstant;
 import com.cnu.teamProj.teamProj.proj.entity.Project;
 import com.cnu.teamProj.teamProj.proj.repository.MemberRepository;
 import com.cnu.teamProj.teamProj.proj.repository.ProjRepository;
@@ -65,13 +66,17 @@ public class MeetingService {
      */
     public ResponseEntity<Map<String, Object>> getMeetingLog(Map dto) {
 
+        Map<String, Object> result = new HashMap();
         String userId = SecurityUtil.getCurrentUser();
-        User client = userRepository.findById(userId).orElseThrow();
+        User client = userRepository.findById(userId).orElse(null);
+        if(client == null) {
+            result.put("유효하지 않은 유저입니다", null);
+            return new ResponseEntity<>(result, HttpStatus.NOT_ACCEPTABLE);
+        }
         String scheId = dto.get("scheId").toString();
         String projId = dto.get("projId").toString();
         Project project = projRepository.findProjectByProjId(projId);
         log.info("요청을 보낸 유저{}", userId);
-        Map<String, Object> result = new HashMap();
         if(!memberRepository.existsByIdAndProjId(client, project)) {
             result.put("회의록을 요청할 자격이 없는 유저입니다", null);
             return new ResponseEntity<>(result, HttpStatus.NOT_ACCEPTABLE);

@@ -15,7 +15,7 @@ import java.time.ZonedDateTime;
 import java.util.Map;
 
 @RestController
-@RequestMapping(value = "/test/api/schedule/check", produces = "application/json; charset=utf8")
+@RequestMapping(value = "/api/schedule/check", produces = "application/json; charset=utf8")
 @Tag(name = "ScheduleController", description = "일정 관리와 관련된 api 입니다")
 public class ScheduleController {
 

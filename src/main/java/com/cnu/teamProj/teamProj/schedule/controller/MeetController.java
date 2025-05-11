@@ -14,7 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.Map;
 
 @RestController
-@RequestMapping(value ="/test/schedule/meeting", produces = "application/json; charset=utf8")
+@RequestMapping(value ="/schedule/meeting", produces = "application/json; charset=utf8")
 @RequiredArgsConstructor
 @Slf4j
 public class MeetController {
@@ -32,7 +32,7 @@ public class MeetController {
     }
 
     @GetMapping("/view/log")
-    public ResponseEntity<Map<String, Object>> getMeetingLog(@RequestParam Map param) {
+    public ResponseEntity<Map<String, Object>> getMeetingLog(@RequestParam Map<String, String> param) {
         return meetingService.getMeetingLog(param);
     }
 
@@ -42,7 +42,7 @@ public class MeetController {
     }
 
     @PostMapping("/convert-speech")
-    public ResponseEntity<String> convertSpeechToText(@RequestParam("file")MultipartFile file) {
+    public ResponseEntity<String> convertSpeechToText(@RequestPart("file")MultipartFile file) {
         return meetingService.convertSpeechToText(file);
     }
 }
