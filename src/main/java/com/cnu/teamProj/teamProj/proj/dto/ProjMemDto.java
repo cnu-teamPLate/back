@@ -2,9 +2,11 @@ package com.cnu.teamProj.teamProj.proj.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class ProjMemDto {
     private String id;
     private String name;
