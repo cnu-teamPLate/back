@@ -26,4 +26,8 @@ public class SecurityConstants {
 //            "/schedule/**",
 //            "/permission-check" //테스트용
     );
+
+    public static final List<String> MANAGER_ENDPOINTS = List.of(
+//            "/teamProj/member/delete"
+    );
 }
