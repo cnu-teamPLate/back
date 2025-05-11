@@ -3,6 +3,8 @@ HELP.md
 build/
 src/main/resources/stt-google.json
 src/main/test
+#jwt secret 키가 저장되어 있기 때문에 깃 추적에서 제외
+src/main/java/com/cnu/teamProj/teamProj/security/SecurityConstants.java
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
 !**/src/test/**/build/
