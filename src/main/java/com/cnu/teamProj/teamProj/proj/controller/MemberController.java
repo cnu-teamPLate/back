@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/teamProj/member")
+@RequestMapping(value = "/teamProj/member", produces = "application/json; charset=utf-8;")
 @Tag(name = "MemberController", description = "프로젝트 멤버 관리와 관련된 API")
 public class MemberController {
     //test

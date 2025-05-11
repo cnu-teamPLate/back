@@ -9,6 +9,9 @@ src/main/java/com/cnu/teamProj/teamProj/security/SecurityConstants.java
 !**/src/main/**/build/
 !**/src/test/**/build/
 
+.env
+src/main/resources/stt-google.json
+
 ### STS ###
 .apt_generated
 .classpath
@@ -34,7 +37,6 @@ out/
 !**/src/test/**/out/
 #**/src/main/java/com/cnu/teamProj/teamProj/security/SecurityConstants.java
 #.env 파일 제거
-.env
 ### NetBeans ###
 /nbproject/private/
 /nbbuild/

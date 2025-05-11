@@ -1,5 +1,6 @@
 package com.cnu.teamProj.teamProj.security.service;
 
+import com.cnu.teamProj.teamProj.common.ResultConstant;
 import com.cnu.teamProj.teamProj.security.dto.RegisterDto;
 import com.cnu.teamProj.teamProj.security.entity.User;
 import com.cnu.teamProj.teamProj.security.repository.UserRepository;
@@ -7,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Objects;
 import java.util.Optional;
 @Service
 public class UserInfoManageService {
@@ -20,11 +22,16 @@ public class UserInfoManageService {
     }
 
     //내 정보 수정
-    public boolean updateMyInfo(RegisterDto paramUser){
+    public int updateMyInfo(RegisterDto paramUser){
         String userID = paramUser.getStudentNumber();
         Optional<User> user = userRepository.findById(userID);
         if(user.isPresent()){
             User existUser = user.get();
+            if(userRepository.findByMail(paramUser.getEmail()).isPresent()) {
+                if(!Objects.equals(userRepository.findByMail(paramUser.getEmail()).orElseThrow().getId(), existUser.getId())) {
+                    return ResultConstant.ALREADY_EXIST;
+                }
+            }
             existUser.setName(paramUser.getName());
             existUser.setMail(paramUser.getEmail());
             existUser.setPhone(paramUser.getPhone());
@@ -32,9 +39,9 @@ public class UserInfoManageService {
             existUser.setPwd(passwordEncoder.encode(paramUser.getPwd()));
             existUser.setUsername(paramUser.getId());
             userRepository.save(existUser);
-            return true;
+            return ResultConstant.OK;
         }
-        return false;
+        return ResultConstant.NOT_EXIST;
     }
 
     //내 정보 보기

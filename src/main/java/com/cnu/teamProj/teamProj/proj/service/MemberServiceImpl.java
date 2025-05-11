@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -113,13 +114,7 @@ public class MemberServiceImpl {
     }
 
     //멤버 삭제
-    //public boolean deleteMemberById(String memberId) {
-      //  if (memberRepository.existsById(memberId)) {
-        //    memberRepository.deleteById(memberId);
-          //  return true;
-        //}
-        //return false;
-    //}
+    @Transactional
     public boolean deleteMemberByUserAndProj(String userId, String projId) {
         if(!userRepository.existsById(userId) || !projRepository.existsById(projId)) {
             return false;
