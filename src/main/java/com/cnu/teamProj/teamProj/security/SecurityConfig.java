@@ -73,6 +73,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(requests -> {
                     requests.requestMatchers(PUBLIC_ENDPOINTS.toArray(new String[0])).permitAll()
                             .requestMatchers(USER_ENDPOINTS.toArray(new String[0])).hasRole("USER")
+                            .requestMatchers(MANAGER_ENDPOINTS.toArray(new String[0])).hasRole("MANAGER")
                             .anyRequest().authenticated();
                 }) //,"/v3/api-docs/**","/swagger-resources/**", "/webjars/**", "/api/logistics"
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
