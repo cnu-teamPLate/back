@@ -144,12 +144,15 @@ public class AuthController {
 
     //회원탈퇴
     @DeleteMapping("/withdraw")
+    @Operation(summary = "회원 탈퇴", description = "요청한 사용자를 회원탈퇴시킵니다.<br/>테스트 시 토큰 값도 같이 전달해줘야 함.")
     public ResponseEntity<String> withdraw(HttpServletRequest request, HttpServletResponse response) {
         return authService.withDraw(request, response);
     }
 
     //비밀번호 찾기
     @PostMapping("/send-password-mail")
+    @Operation(summary = "비밀번호 찾기", description = "메일을 보내면 해당 메일로 임시 비밀번호를 발급함")
+    @Parameter(name = "email", example = "esybd02@naver.com")
     public ResponseEntity<String> sendRandomPassword(@RequestBody Map<String,String> userMail) {
         String email = userMail.get("email");
         return authService.sendRandomPassword(email);

@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import java.util.List;
 
 @Controller
-@RequestMapping(value = "/teamProj/class", produces = "application/json; charset = utf-8")
+@RequestMapping(value = "/class", produces = "application/json; charset = utf-8")
 @Tag(name = "ClassController", description = "수업 관리와 관련된 API")
 @Slf4j
 public class ClassController {

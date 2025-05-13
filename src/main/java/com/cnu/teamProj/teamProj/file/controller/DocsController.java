@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@Tag(name = "DocsController", description = "파일과 관련된 API")
+@Tag(name = "DocsController", description = "문서와 관련된 API")
 @RequestMapping(value = "/file" , produces = "application/json; charset=utf8")
 public class DocsController {
     private DocsService docsService;
@@ -50,7 +50,6 @@ public class DocsController {
             @ApiResponse(responseCode = "200 OK", description = "성공적으로 저장되었습니다"),
             @ApiResponse(responseCode = "400 BAD_REQUEST", description = "예상치 못한 문제가 발생했습니다")
     })
-
     public ResponseEntity<String> uploadFile(
             @RequestPart(value = "docs", required = false) DocsDto docsDto,
             @RequestPart(value = "file", required = false)MultipartFile file) {
@@ -66,6 +65,8 @@ public class DocsController {
     }
 
 
+    @Operation(summary = "문서 삭제", description = "파일 삭제 시 사용하는 api로, 작성자 본인만 삭제가 가능")
+    @Parameter(name="fileId", description = "파일 레코드 아이디", example = "10")
     @DeleteMapping("/delete")
     public ResponseEntity<String> deleteFile(@RequestBody Map<String, Integer> map) {
         int ret = docsService.deleteFile(map.get("fileId"));
@@ -87,11 +88,29 @@ public class DocsController {
         return new ResponseEntity<>(resultText, status);
     }
 
+    @Operation(summary = "문서 불러오기", description = "프로젝트에 등록된 파일을 모두 불러오고 싶다면 -> projId값<br/>특정 유저가 등록한 파일을 불러오고 싶다면 -> userId값<br/>프로젝트에 등록된 파일 중 특정 유저의 파일을 불러오고 싶다면 -> projId값과 userId모두<br/>특정 과제에 등록된 파일을 불러오고 싶다면 -> taskId값<br/>을 넘겨야 합니다.")
+    @Parameters(value = {
+            @Parameter(name = "projId", example = "cse00001",required = true, description = "프로젝트에 "),
+            @Parameter(name = "userId", example = "01111111",required = true, description = "프로젝트 아이디 값 혹은 유저 아이디 값 중 하나는 필수로 들어가야 합니다"),
+            @Parameter(name = "taskId", example = "4", description = "파일 아이디는 필요한 경우에만 지정해주면 됩니다.")
+
+    })
     @GetMapping("/view")
     public ResponseEntity<List<DocsViewResponseDto>> loadFile(@RequestParam Map<String, String> map) {
         return docsService.getDocs(map);
     }
 
+    @Operation(summary = "문서 수정", description = "문서를 수정할 때 사용되는 api 입니다")
+    @Parameters(value = {
+            @Parameter(name = "docs", description = "문서와 관련된 모든 정보", example =
+                    "{\n" +
+                            "\t\"title\" : \"펭귄에 대하여\",\n" +
+                            "\t\"detail\" : \"펭귄에 대해 자료조사한 내용입니다\",\n" +
+                            "\t\"fileId\" : \"13\",\n" +
+                            "\t\"url\" : \"https://yozm.wishket.com/magazine/detail/2955/\"\n" +
+                            "}"),
+            @Parameter(name = "file", description = "파일 데이터를 MultipartFile 형식으로 받음")
+    })
     @PutMapping("/put")
     public ResponseEntity<String> updateFile(
             @RequestPart(value = "docs", required = false) DocsPutDto docsDto,
