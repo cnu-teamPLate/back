@@ -13,11 +13,34 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
+      - name: Check for deleted files
+        id: check_deleted
+        run: |
+          echo "삭제된 파일 검사 중"
+          git fetch origin main
+          DELETED=$(git diff --name-status ${{ github.event.before }} ${{ github.sha }} | grep '^D' | awk '{print $2}' || true)
+          
+          if [ -n "$DELETED" ]; then
+            echo "삭제된 파일 발견됨"
+            echo "$DELETED"
+            echo "has_deleted=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "삭제된 파일 없음"
+            echo "has_deleted=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Set up SSH
+        if: steps.check_deleted.outputs.has_deleted == 'false'
         uses: webfactory/ssh-agent@v0.5.3
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-#test
+      #test
       - name: deploy
+        if: steps.check_deleted.outputs.has_deleted == 'false'
         run: |
           ssh -o StrictHostKeyChecking=no ec2-user@3.34.140.89 'bash /home/ubuntu/deploy.sh'
+
+      - name: Skip deploy
+        if: steps.check_deleted.outputs.has_deleted == 'true'
+        run: |
+          echo "삭제된 파일이 있어 배포를 중단합니다"
