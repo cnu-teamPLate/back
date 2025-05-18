@@ -1,19 +1,20 @@
 package com.cnu.teamProj.teamProj.security.controller;
 
+import com.cnu.teamProj.teamProj.common.ResponseDto;
 import com.cnu.teamProj.teamProj.common.ResultConstant;
-import com.cnu.teamProj.teamProj.security.dto.AuthResponseDto;
+import com.cnu.teamProj.teamProj.security.dto.*;
 import com.cnu.teamProj.teamProj.security.entity.Role;
 import com.cnu.teamProj.teamProj.security.entity.User;
 import com.cnu.teamProj.teamProj.security.jwt.JWTGenerator;
 import com.cnu.teamProj.teamProj.security.repository.RoleRepository;
 import com.cnu.teamProj.teamProj.security.repository.UserRepository;
-import com.cnu.teamProj.teamProj.security.dto.LoginDto;
-import com.cnu.teamProj.teamProj.security.dto.RegisterDto;
 import com.cnu.teamProj.teamProj.security.service.AuthService;
 import com.cnu.teamProj.teamProj.security.service.UserInfoManageService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -34,12 +35,13 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import javax.xml.transform.Result;
 import java.util.Collections;
 import java.util.Map;
 
 @RestController
 @RequestMapping(value = "/auth", produces = "application/json; charset = utf-8")
-@Tag(name = "회원 등록", description = "회원 등록 및 회원 가입")
+@Tag(name = "인증/인가", description = "회원 등록 및 회원 가입")
 @Slf4j
 @RequiredArgsConstructor
 public class AuthController {
@@ -53,7 +55,14 @@ public class AuthController {
 
     @PostMapping("/login") 
     @Operation(summary = "로그인", description = "로그인 api")
-    public ResponseEntity<AuthResponseDto> login(@RequestBody LoginDto loginDto, HttpServletResponse response){
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "로그인 성공", content = @Content(schema = @Schema(implementation = AuthResponseDto.class))),
+            @ApiResponse(responseCode = "401", description = "로그인 정보가 일치하지 않습니다", content = @Content(schema = @Schema(implementation = ResponseDto.class)))
+    })
+    public ResponseEntity<?> login(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "로그인 시 요청값")
+            @RequestBody LoginDto loginDto,
+            HttpServletResponse response){
         try {
             UsernamePasswordAuthenticationToken tempToken = new UsernamePasswordAuthenticationToken(
                     String.valueOf(loginDto.getId()), loginDto.getPwd());
@@ -70,17 +79,6 @@ public class AuthController {
             String token = jwtGenerator.generateToken(authentication);
             log.info("토큰 정보: {}", token);
 
-            /*
-            public void saveTokenInCookie(String token, HttpServletResponse response) {
-        Cookie cookie = new Cookie("User-Token", token);
-        cookie.setHttpOnly(true);
-        int expirationTime = 1000 * 60 * 60; //1시간
-        cookie.setMaxAge(expirationTime);
-        cookie.setPath("/");
-        cookie.setSecure(true);
-        response.addCookie(cookie);
-    }
-            * */
             Cookie cookie = new Cookie("User-Token", token);
             cookie.setHttpOnly(true);
             int expirationTime = 1000 * 60 * 60; // 쿠키 만료시간 : 1시간
@@ -90,71 +88,75 @@ public class AuthController {
             response.addCookie(cookie);
 
 
-            return new ResponseEntity<>(new AuthResponseDto(token, loginDto.getId(), userRepository.findById(loginDto.getId()).toString()), HttpStatus.OK); //유저 아이디(학번), 이름 필수로 넘겨야 함
+            return new ResponseEntity<>( new AuthResponseDto(token, loginDto.getId(), userRepository.findById(loginDto.getId()).get().getUsername()), HttpStatus.OK); //유저 아이디(학번), 이름 필수로 넘겨야 함
         } catch (Exception e){
-            log.info("로그인 실패 : {}", e.getMessage());
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+            return ResultConstant.returnResultCustom(ResultConstant.NO_PERMISSION, "로그인 정보가 일치하지 않습니다");
         }
     }
 
     @PostMapping("/register")
     @Operation(summary = "등록하기", description = "회원 가입 api")
-    @Parameters({
-            @Parameter(name="name", description = "유저 이름"),
-            @Parameter(name="pwd", description = "비밀번호"),
-            @Parameter(name = "mail", description = "메일주소"),
-            @Parameter(name="phone", description = "핸드폰번호"),
-            @Parameter(name="id", description = "학번")
-    })
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "400", description = "이미 존재하는 회원"),
-            @ApiResponse(responseCode = "200", description = "회원가입 완료")
+            @ApiResponse(responseCode = "400", description = "이미 값이 존재합니다.(이미 존재하는 아이디 값 혹은 메일 정보입니다.)", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "200", description = "회원가입 완료", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "500", description = "등록된 역할 정보가 없습니다", content = @Content(schema = @Schema(implementation = ResponseDto.class)))
     })
-    public ResponseEntity<String> register(@RequestBody RegisterDto registerDto){
-        int ret = authService.registerUser(registerDto);
-        return ResultConstant.returnResult(ret);
+    public ResponseEntity<?> register(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody
+            @RequestBody RegisterDto registerDto){
+        return authService.registerUser(registerDto);
     }
 
     //내 정보 수정
     @PutMapping(value = "/update-my-info", produces = "application/json; charset=utf8")
     @Operation(summary = "내 정보 수정", description = "수정되지 않은 정보까지 모두 전달하면, 전달된 학번으로 유저를 조회한 후 수정된 정보를 업데이트 (학번은 변경 불가)")
-    @Parameters({
-            @Parameter(name="name", description = "유저 이름"),
-            @Parameter(name="pwd", description = "비밀번호"),
-            @Parameter(name = "mail", description = "메일주소"),
-            @Parameter(name="phone", description = "핸드폰번호"),
-            @Parameter(name="id", description = "학번")
-    })
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "400", description = "존재하지 않는 사용자입니다"),
-            @ApiResponse(responseCode = "200", description = "정보가 정상적으로 수정되었습니다")
+            @ApiResponse(responseCode = "404", description = "해당 학번의 회원이 존재하지 않습니다", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "400", description = "이미 존재하는 이메일 입니다", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "401", description = "요청 권한이 없습니다", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "200", description = "정보가 정상적으로 수정되었습니다", content = @Content(schema = @Schema(implementation = ResponseDto.class)))
     })
-    public ResponseEntity<String> updateMyInfo(@RequestBody RegisterDto dto) {
-        int result = userInfoManageService.updateMyInfo(dto);
-        return ResultConstant.returnResult(result);
+    public ResponseEntity<?> updateMyInfo(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody
+            @RequestBody RegisterDto dto) {
+        return userInfoManageService.updateMyInfo(dto);
     }
 
     //내 정보 보기
     @GetMapping("/read-my-info")
     @Operation(summary = "내 정보 조회", description = "인자로 전달된 학번을 토대로 조회된 정보 반환, 조회된 정보가 없다면 null값 반환")
-    @Parameter(name = "userId", description = "학번")
-    public User readMyInfo(@RequestParam Map map){
-        return userInfoManageService.findMyInfo(map.get("userId").toString());
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = UserInfoResponseDto.class))),
+            @ApiResponse(responseCode = "404", description = "해당 학번의 유저가 존재하지 않을 때", content = @Content(schema = @Schema(implementation = ResponseDto.class)))
+    })
+    public ResponseEntity<?> readMyInfo(@Parameter(name="userId", description = "학번", example = "20211079") @RequestParam Map map){
+        UserInfoResponseDto ret =  userInfoManageService.findMyInfo(map.get("userId").toString());
+        if(ret == null) return ResultConstant.returnResultCustom(ResultConstant.NOT_EXIST, "회원 정보가 존재하지 않습니다");
+        return new ResponseEntity<>(ret, HttpStatus.OK);
     }
 
     //회원탈퇴
     @DeleteMapping("/withdraw")
     @Operation(summary = "회원 탈퇴", description = "요청한 사용자를 회원탈퇴시킵니다.<br/>테스트 시 토큰 값도 같이 전달해줘야 함.")
-    public ResponseEntity<String> withdraw(HttpServletRequest request, HttpServletResponse response) {
+    @ApiResponses(value={
+            @ApiResponse(responseCode = "400", description = "액세스 토큰이 만료되었습니다. 재로그인해주세요.", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "404", description = "존재하지 않는 유저입니다.", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "200", description = "요청이 성공적으로 처리되었습니다", content = @Content(schema = @Schema(implementation = ResponseDto.class)))
+    })
+    public ResponseEntity<?> withdraw(HttpServletRequest request, HttpServletResponse response) {
         return authService.withDraw(request, response);
     }
 
     //비밀번호 찾기
     @PostMapping("/send-password-mail")
     @Operation(summary = "비밀번호 찾기", description = "메일을 보내면 해당 메일로 임시 비밀번호를 발급함")
-    @Parameter(name = "email", example = "esybd02@naver.com")
-    public ResponseEntity<String> sendRandomPassword(@RequestBody Map<String,String> userMail) {
-        String email = userMail.get("email");
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "404", description = "존재하는 메일이 없습니다", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "500", description = "메일 발송 중 에러가 발생했습니다", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "200", description = "메일 발송이 완료되었습니다", content = @Content(schema = @Schema(implementation = ResponseDto.class)))
+    })
+    public ResponseEntity<?> sendRandomPassword(@io.swagger.v3.oas.annotations.parameters.RequestBody @RequestBody EmailRequestDto dto) {
+        String email = dto.getEmail();
         return authService.sendRandomPassword(email);
     }
 }

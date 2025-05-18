@@ -12,7 +12,7 @@ public class ResultConstant {
     public static final int INVALID_PARAM = -4;
     public static final int ALREADY_EXIST = -6;
 
-    public static ResponseEntity<String> returnResult(int result) {
+    public static ResponseEntity<ResponseDto> returnResult(int result) {
         String message = "";
         HttpStatus status;
         switch (result) {
@@ -30,7 +30,7 @@ public class ResultConstant {
                 break;
             case NO_PERMISSION:
                 message = "요청 권한이 없습니다";
-                status = HttpStatus.NOT_ACCEPTABLE;
+                status = HttpStatus.UNAUTHORIZED;
                 break;
             case INVALID_PARAM:
                 message = "요청 값이 조건에 부합하지 않습니다";
@@ -45,29 +45,23 @@ public class ResultConstant {
                 status = HttpStatus.OK;
         }
 
-        return new ResponseEntity<>(message, status);
+        return new ResponseEntity<>(new ResponseDto(message, status.value()), status);
     }
 
-    public static ResponseEntity<String> returnResultCustom(int result, String message) {
-        HttpStatus status;
-        switch (result) {
-            case NOT_EXIST :
-                status = HttpStatus.NOT_FOUND;
-                break;
-            case UNEXPECTED_ERROR:
-                status = HttpStatus.INTERNAL_SERVER_ERROR;
-                break;
-            case REQUIRED_PARAM_NON, INVALID_PARAM:
-                status = HttpStatus.BAD_REQUEST;
-                break;
-            case NO_PERMISSION:
-                status = HttpStatus.NOT_ACCEPTABLE;
-                break;
-            default:
+    public static ResponseEntity<?> returnResultCustom(int result, String message) {
+        HttpStatus status = switch (result) {
+            case NOT_EXIST -> HttpStatus.NOT_FOUND;
+            case UNEXPECTED_ERROR -> HttpStatus.INTERNAL_SERVER_ERROR;
+            case REQUIRED_PARAM_NON, INVALID_PARAM -> HttpStatus.BAD_REQUEST;
+            case NO_PERMISSION -> HttpStatus.UNAUTHORIZED;
+            default -> {
                 message = "요청이 성공적으로 처리되었습니다";
-                status = HttpStatus.OK;
+                yield HttpStatus.OK;
+            }
+        };
+        if(message==null || message.trim().isEmpty()) {
+            message = status.getReasonPhrase();
         }
-
-        return new ResponseEntity<>(message, status);
+        return new ResponseEntity<>(new ResponseDto(message, status.value()), status);
     }
 }

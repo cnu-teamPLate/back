@@ -310,7 +310,7 @@ public class ScheduleService {
     }
 
     @Transactional
-    public ResponseEntity<String> updateSchedule(ScheduleUpdateDto scheduleDto) {
+    public ResponseEntity<?> updateSchedule(ScheduleUpdateDto scheduleDto) {
         if(!scheduleRepository.existsById(scheduleDto.getScheId()))
             return ResultConstant.returnResultCustom(ResultConstant.NOT_EXIST, "해당 아이디의 스케줄 레코드가 존재하지 않습니다");
         Project project = projRepository.findById(scheduleDto.getProjId()).orElse(null);

@@ -2,6 +2,7 @@ package com.cnu.teamProj.teamProj.security.service;
 
 import com.cnu.teamProj.teamProj.comment.Comment;
 import com.cnu.teamProj.teamProj.comment.CommentRepository;
+import com.cnu.teamProj.teamProj.common.ResponseDto;
 import com.cnu.teamProj.teamProj.common.ResultConstant;
 import com.cnu.teamProj.teamProj.file.entity.Docs;
 import com.cnu.teamProj.teamProj.file.repository.DocsRepository;
@@ -75,13 +76,13 @@ public class AuthService {
      * - pwd : 비밀번호
      * @return 요청 상태
      */
-    public int registerUser(RegisterDto registerDto) {
+    public ResponseEntity<?> registerUser(RegisterDto registerDto) {
         if(userRepository.existsById(registerDto.getId())){
-            return ResultConstant.ALREADY_EXIST;
+            return ResultConstant.returnResultCustom(ResultConstant.ALREADY_EXIST, "이미 존재하는 학번입니다");
         }
 
         if(userRepository.existsByMail(registerDto.getEmail())) {
-            return ResultConstant.ALREADY_EXIST;
+            return ResultConstant.returnResultCustom(ResultConstant.ALREADY_EXIST, "이미 존재하는 메일입니다");
         }
 
         User user = new User();
@@ -92,13 +93,13 @@ public class AuthService {
         user.setId(registerDto.getId());
         if(roleRepository.findByName("ROLE_USER").isEmpty()) {
             log.error("존재하는 역할이 없습니다");
-            return ResultConstant.INVALID_PARAM;
+            return ResultConstant.returnResultCustom(ResultConstant.UNEXPECTED_ERROR, "등록된 역할 정보가 없습니다");
         }
         Role roles = roleRepository.findByName("ROLE_USER").get();
         user.setRoles(Collections.singletonList(roles));
         user.setUsername(registerDto.getId());
         userRepository.save(user);
-        return ResultConstant.OK;
+        return ResultConstant.returnResult(ResultConstant.OK);
     }
 
     /**
@@ -106,32 +107,32 @@ public class AuthService {
      * @param email 회원가입 시 등록했던 이메일
      * @return 응답 상태
      */
-    public ResponseEntity<String> sendRandomPassword(String email) {
+    public ResponseEntity<?> sendRandomPassword(String email) {
         if(userRepository.findByMail(email).isEmpty()) {
-            return new ResponseEntity<>("존재하는 메일이 없습니다", HttpStatus.NOT_FOUND);
+            return ResultConstant.returnResultCustom(ResultConstant.NOT_EXIST, "존재하는 메일이 없습니다");
         }
         User user = userRepository.findByMail(email).orElseThrow();
         String password = emailProvider.sendCertificationMail(email); //임시 메일 발급
         if(password == null) {
-            return new ResponseEntity<>("메일 발송 중 에러가 발생했습니다", HttpStatus.OK);
+            return ResultConstant.returnResultCustom(ResultConstant.UNEXPECTED_ERROR, "메일 발송 중 에러가 발생했습니다");
         }
         user.setPwd(passwordEncoder.encode(password)); //
         userRepository.save(user);
-        return new ResponseEntity<>("메일 발송이 완료되었습니다", HttpStatus.OK);
+        return ResultConstant.returnResultCustom(ResultConstant.OK, "메일 발송이 완료되었습니다");
     }
 
     /**
      * 회원 탈퇴 로직
      */
     @Transactional
-    public ResponseEntity<String> withDraw(HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<?> withDraw(HttpServletRequest request, HttpServletResponse response) {
         //액세스 토큰 확인
         String userId = invalidateToken(request, "withdraw");
         if(userId==null) {
-            return new ResponseEntity<>("액세스 토큰이 만료되었습니다. 재로그인해주세요.", HttpStatus.BAD_REQUEST);
+            return ResultConstant.returnResultCustom(ResultConstant.NO_PERMISSION, "액세스 토큰이 만료되었습니다. 재로그인해주세요.");
         }
         if(userRepository.findById(userId).isEmpty()) {
-            return new ResponseEntity<>("존재하지 않는 유저입니다.", HttpStatus.BAD_REQUEST);
+            return ResultConstant.returnResultCustom(ResultConstant.NOT_EXIST, "존재하지 않는 유저입니다.");
         }
 
         //DB 정보 삭제
@@ -181,8 +182,7 @@ public class AuthService {
         cookie.setPath("/");
         response.addCookie(cookie);
 
-
-        return new ResponseEntity<>("회원탈퇴 완료", HttpStatus.OK);
+        return ResultConstant.returnResult(ResultConstant.OK);
     }
 
 }

@@ -112,7 +112,7 @@ public class DocsController {
             @Parameter(name = "file", description = "파일 데이터를 MultipartFile 형식으로 받음")
     })
     @PutMapping("/put")
-    public ResponseEntity<String> updateFile(
+    public ResponseEntity<?> updateFile(
             @RequestPart(value = "docs", required = false) DocsPutDto docsDto,
             @RequestPart(value = "file", required = false)MultipartFile file) {
         int ret = docsService.updateDocs(docsDto, file);

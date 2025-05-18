@@ -105,7 +105,7 @@ public class ScheduleController {
 
     @PutMapping("/update/team-schedule")
     @Operation(summary = "팀 스케줄 수정")
-    public ResponseEntity<String> updateSchedule(@io.swagger.v3.oas.annotations.parameters.RequestBody(description = "스케줄 수정 시 요청 값") @RequestBody ScheduleUpdateDto dto) {
+    public ResponseEntity<?> updateSchedule(@io.swagger.v3.oas.annotations.parameters.RequestBody(description = "스케줄 수정 시 요청 값") @RequestBody ScheduleUpdateDto dto) {
         return scheduleService.updateSchedule(dto);
     }
 
