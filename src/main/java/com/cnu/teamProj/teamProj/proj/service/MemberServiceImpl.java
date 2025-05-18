@@ -43,7 +43,7 @@ public class MemberServiceImpl {
         List<ProjMem> members = memberRepository.findProjMemsByProjId(project).stream().toList();
         for(ProjMem mem : members) {
             User user = userRepository.findById(mem.getId().getId()).stream().toList().get(0);
-            ProjMemDto memDto = new ProjMemDto(user.getId(), user.getName(), user.getMail(), user.getPhone(), null);
+            ProjMemDto memDto = new ProjMemDto(user.getId(), user.getUsername(), user.getMail(), user.getPhone(), null);
             membersInfo.add(memDto);
         }//
         return membersInfo;
@@ -149,7 +149,7 @@ public class MemberServiceImpl {
         if(users.isEmpty()) return null;
         List<StudentInfoDto> results = new ArrayList<>();
         for(User user : users) {
-            results.add(new StudentInfoDto(user.getId(), user.getName()));
+            results.add(new StudentInfoDto(user.getId(), user.getUsername()));
         }
         return results;
     }

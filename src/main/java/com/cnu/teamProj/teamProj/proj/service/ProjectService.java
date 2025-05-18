@@ -48,7 +48,12 @@ public class ProjectService {
             //요청값에 맞게 변환
             for(ProjMem projMem : projMems) {
                 String teamOneID  = projMem.getId().getId();
-                String teamOneName = userRepository.findById(teamOneID).get().getName();
+                String teamOneName = "";
+                try{
+                    teamOneName = userRepository.findById(teamOneID).orElseThrow().getUsername();
+                } catch(Exception e) {
+                    return null;
+                }
                 newProjectTeamOnes.add(new StudentInfoDto(teamOneID, teamOneName));
             }
             newProject.setTeamones(newProjectTeamOnes);

@@ -32,7 +32,6 @@ public class UserInfoManageService {
                     return ResultConstant.ALREADY_EXIST;
                 }
             }
-            existUser.setName(paramUser.getName());
             existUser.setMail(paramUser.getEmail());
             existUser.setPhone(paramUser.getPhone());
 

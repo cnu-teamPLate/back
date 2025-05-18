@@ -37,7 +37,7 @@ public class MakePlanService {
                 entity.setStart(param.getStart());
                 entity.setProjId(projInfo);
                 entity.setUserId(userInfo);
-                entity.setUserName(userInfo.getName());
+                entity.setUserName(userInfo.getUsername());
                 makePlanRepository.save(entity);
                 return 1;
             }
