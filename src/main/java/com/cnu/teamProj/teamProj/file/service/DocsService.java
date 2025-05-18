@@ -45,22 +45,28 @@ public class DocsService {
      *      - 존재하지 않는 프로젝트일 경우 -2 반환
      *      - 성공 시 1 반환
      * */
-    public int uploadFileInfoToDocs(DocsDto dto, MultipartFile file) {
+    @Transactional
+    public int uploadFileInfoToDocs(DocsDto dto, List<MultipartFile> files) {
         if(dto == null) return 0;
         try{
             if(!projRepository.existsById(dto.getProjId())) {
                 logger.warn("존재하지 않는 프로젝트 아이디가 들어왔습니다");
                 return -3;
             }
-            FileDto fileResult;
+            FileDto fileResult = new FileDto();
+            List<Docs> results = new ArrayList<>();
             if(dto.getUrl() == null) {
-                fileResult = s3Service.uploadFile(file, dto.getProjId());
+                for(MultipartFile file : files) {
+                    fileResult = s3Service.uploadFile(file, dto.getProjId());
+                    if(fileResult == null) return -5;
+                    else results.add(new Docs(dto.getId(), dto.getProjId(), fileResult.getUrl(), dto.getTitle(), dto.getDetail(),  dto.getCategory(), fileResult.getFilename()));
+                }
             } else {
                 fileResult = new FileDto(dto.getUrl(), "");
+                results.add(new Docs(dto.getId(), dto.getProjId(), fileResult.getUrl(), dto.getTitle(), dto.getDetail(),  dto.getCategory(), fileResult.getFilename()));
             }
-            if(fileResult == null) return -5;
-            Docs docs = new Docs(dto.getId(), dto.getProjId(), fileResult.getUrl(), dto.getTitle(), dto.getDetail(),  dto.getCategory(), fileResult.getFilename());
-            docsRepostiroy.save(docs);
+
+            docsRepostiroy.saveAll(results);
             return 1;
         } catch (IOException e) {
             logger.warn("파일 등록에 실패하셨습니다");

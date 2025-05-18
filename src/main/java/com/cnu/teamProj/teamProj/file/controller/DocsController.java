@@ -52,8 +52,8 @@ public class DocsController {
     })
     public ResponseEntity<String> uploadFile(
             @RequestPart(value = "docs", required = false) DocsDto docsDto,
-            @RequestPart(value = "file", required = false)MultipartFile file) {
-        int ret = docsService.uploadFileInfoToDocs(docsDto, file);
+            @RequestPart(value = "file", required = false)List<MultipartFile> files) {
+        int ret = docsService.uploadFileInfoToDocs(docsDto, files);
         return switch (ret) {
             case 0 -> new ResponseEntity<>("입력값이 들어오지 않았습니다", HttpStatus.NO_CONTENT);
             case -1 -> new ResponseEntity<>("파일 등록에 실패했습니다", HttpStatus.INTERNAL_SERVER_ERROR);
