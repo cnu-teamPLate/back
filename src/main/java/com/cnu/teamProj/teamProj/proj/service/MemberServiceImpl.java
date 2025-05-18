@@ -143,7 +143,7 @@ public class MemberServiceImpl {
         } else {
             logger.info("문자로 인식됨");
             query += "%";
-            users = userRepository.findUsersByName(query);
+            users = userRepository.findUsersByUsername(query);
         }
 
         if(users.isEmpty()) return null;

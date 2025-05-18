@@ -7,7 +7,7 @@ public class AuthResponseDto {
     private String accessToken;
     private String tokenType = "Bearer ";
     private String userId;
-    private String name;
+    private String name; //username
 
     public AuthResponseDto(String accessToken) {
         this.accessToken = accessToken;

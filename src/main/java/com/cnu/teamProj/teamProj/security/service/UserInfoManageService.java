@@ -23,7 +23,7 @@ public class UserInfoManageService {
 
     //내 정보 수정
     public int updateMyInfo(RegisterDto paramUser){
-        String userID = paramUser.getStudentNumber();
+        String userID = paramUser.getId();
         Optional<User> user = userRepository.findById(userID);
         if(user.isPresent()){
             User existUser = user.get();

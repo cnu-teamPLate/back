@@ -76,7 +76,7 @@ public class AuthService {
      * @return 요청 상태
      */
     public int registerUser(RegisterDto registerDto) {
-        if(userRepository.existsById(registerDto.getStudentNumber())){
+        if(userRepository.existsById(registerDto.getId())){
             return ResultConstant.ALREADY_EXIST;
         }
 
@@ -85,11 +85,11 @@ public class AuthService {
         }
 
         User user = new User();
-        user.setName(registerDto.getName());
+        user.setUsername(registerDto.getName());
         user.setPwd(passwordEncoder.encode(registerDto.getPwd()));
         user.setMail(registerDto.getEmail());
         user.setPhone(registerDto.getPhone());
-        user.setId(registerDto.getStudentNumber());
+        user.setId(registerDto.getId());
         if(roleRepository.findByName("ROLE_USER").isEmpty()) {
             log.error("존재하는 역할이 없습니다");
             return ResultConstant.INVALID_PARAM;

@@ -19,7 +19,6 @@ public class User {
     private String id;
 
     private String pwd;
-    private String name;
     private String mail;
     private String phone;
     private String username;

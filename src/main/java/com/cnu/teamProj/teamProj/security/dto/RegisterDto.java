@@ -4,10 +4,9 @@ import lombok.Data;
 
 @Data
 public class RegisterDto {
-    private String name;
+    private String id; //학번
     private String pwd;
+    private String name;
     private String email; //mail
     private String phone;
-    private String studentNumber; //학번
-    private String id; //username(닉네임)
 }

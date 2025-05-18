@@ -98,7 +98,7 @@ public class MeetingService {
         List<String> participantsss = new ArrayList<>();
         for(Participants participants : participantsRepository.findParticipantsByScheId(scheId)) {
             User user = userRepository.findById(participants.getId()).orElseThrow();
-            participantsss.add(user.getName());
+            participantsss.add(user.getUsername());
         }
         scheduleDto.setParticipants(participantsss);
 

@@ -11,14 +11,13 @@ import java.util.Optional;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, String> {
-    Optional<User> findByMail(String mail); //test test test test test test test test test test test test test test test test test
-    Boolean existsByName(String name);
+    Optional<User> findByMail(String mail);
 
     Boolean existsByMail(String mail);
 
     @Query("select user from User user where user.id like :query")
     List<User> findUsersById(@Param("query") String query);
 
-    @Query("select user from User user where user.name like :query")
-    List<User> findUsersByName(@Param("query") String query);
+    @Query("select user from User user where user.username like :query")
+    List<User> findUsersByUsername(@Param("query") String query);
 }
