@@ -2,14 +2,12 @@ package com.cnu.teamProj.teamProj.file.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.time.ZonedDateTime;
+import java.util.List;
 
 @Data
-@NoArgsConstructor
-public class DocsDto {
+public class DocsUploadRequestDto {
     @Schema(description = "학번", example = "20211079")
     private String id;
     @Schema(description = "프로젝트 아이디", example = "cse00001")
@@ -22,13 +20,6 @@ public class DocsDto {
     private int category;
     @Schema(description = "파일 데이터가 아닌 외부 url을 저장할 경우", nullable = true)
     private String url;
-
-    public DocsDto(DocsUploadRequestDto uploadRequestDto) {
-        this.id = uploadRequestDto.getId();
-        this.projId = uploadRequestDto.getProjId();
-        this.title = uploadRequestDto.getTitle();
-        this.detail = uploadRequestDto.getDetail();
-        this.category = uploadRequestDto.getCategory();
-        this.url = uploadRequestDto.getUrl();
-    }
+    @Schema(description = "업로드 하고자 하는 파일")
+    private List<MultipartFile> files;
 }

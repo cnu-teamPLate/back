@@ -1,6 +1,6 @@
 package com.cnu.teamProj.teamProj.file.service;
 
-import com.cnu.teamProj.teamProj.common.ResultConstant;
+import static com.cnu.teamProj.teamProj.common.ResultConstant.*;
 import com.cnu.teamProj.teamProj.file.dto.DocsDto;
 import com.cnu.teamProj.teamProj.file.dto.DocsPutDto;
 import com.cnu.teamProj.teamProj.file.dto.DocsViewResponseDto;
@@ -46,19 +46,21 @@ public class DocsService {
      *      - 성공 시 1 반환
      * */
     @Transactional
-    public int uploadFileInfoToDocs(DocsDto dto, List<MultipartFile> files) {
-        if(dto == null) return 0;
+    public ResponseEntity<?> uploadFileInfoToDocs(DocsDto dto, List<MultipartFile> files) {
+        if(dto == null) return returnResult(REQUIRED_PARAM_NON);
         try{
             if(!projRepository.existsById(dto.getProjId())) {
                 logger.warn("존재하지 않는 프로젝트 아이디가 들어왔습니다");
-                return -3;
+                return returnResultCustom(NOT_EXIST, "프로젝트 아이디가 존재하지 않습니다");
             }
             FileDto fileResult = new FileDto();
             List<Docs> results = new ArrayList<>();
             if(dto.getUrl() == null) {
+                System.out.println("안으로 들어옴");
                 for(MultipartFile file : files) {
                     fileResult = s3Service.uploadFile(file, dto.getProjId());
-                    if(fileResult == null) return -5;
+                    
+                    if(fileResult == null) return returnResultCustom(INVALID_PARAM, "파일의 이름명이 잘못되었습니다");
                     else results.add(new Docs(dto.getId(), dto.getProjId(), fileResult.getUrl(), dto.getTitle(), dto.getDetail(),  dto.getCategory(), fileResult.getFilename()));
                 }
             } else {
@@ -67,10 +69,10 @@ public class DocsService {
             }
 
             docsRepostiroy.saveAll(results);
-            return 1;
+            return returnResult(OK);
         } catch (IOException e) {
             logger.warn("파일 등록에 실패하셨습니다");
-            return -1;
+            return returnResult(UNEXPECTED_ERROR);
         }
     }
 
@@ -82,10 +84,10 @@ public class DocsService {
     @Transactional
     public int deleteFile(int fileId) {
         Docs docs = docsRepostiroy.findByFileId(fileId);
-        if(docs == null) return ResultConstant.NOT_EXIST;
+        if(docs == null) return NOT_EXIST;
         String ownerId = docs.getId();
 
-        if(!SecurityUtil.getCurrentUser().equals(ownerId)) return ResultConstant.NO_PERMISSION;
+        if(!SecurityUtil.getCurrentUser().equals(ownerId)) return NO_PERMISSION;
         docsRepostiroy.delete(docs);
         String url = docs.getUrl();
         //문서가 버켓에 올라가 있는 파일일 경우 삭제
@@ -98,9 +100,9 @@ public class DocsService {
                 }
             }
         } catch(Exception e) {
-            return ResultConstant.UNEXPECTED_ERROR;
+            return UNEXPECTED_ERROR;
         }
-        return ResultConstant.OK;
+        return OK;
     }
 
     /**
@@ -221,22 +223,22 @@ public class DocsService {
      * */
     @Transactional
     public int updateDocs(DocsPutDto dto, MultipartFile file) {
-        if(dto == null) return ResultConstant.REQUIRED_PARAM_NON;
+        if(dto == null) return REQUIRED_PARAM_NON;
 
         int fileId = dto.getFileId();
         Docs docs = docsRepostiroy.findByFileId(fileId);
-        if(docs == null) return ResultConstant.NOT_EXIST;
+        if(docs == null) return NOT_EXIST;
 
         //만약 기존 작성자와 수정하려는 사람이 다르다면 권한 부족 에러 보내기
         if(!SecurityUtil.getCurrentUser().equals(docs.getId())) {
-            return ResultConstant.NO_PERMISSION;
+            return NO_PERMISSION;
         }
 
         FileDto fileResult;
         if(file != null) {
             if(Objects.requireNonNull(file.getOriginalFilename()).length() > 20) {
                 logger.error("파일명은 20자 이내여야 합니다");
-                return ResultConstant.INVALID_PARAM;
+                return INVALID_PARAM;
             }
             try{
                 //만약 업로드한 파일을 수정하는 것이라면 기존의 파일을 삭제해야 함
@@ -248,7 +250,7 @@ public class DocsService {
                 }
                 fileResult = s3Service.uploadFile(file, docs.getProjId());
             } catch(Exception e) {
-                return ResultConstant.UNEXPECTED_ERROR;
+                return UNEXPECTED_ERROR;
             }
         } else {
             //수정된 url 이 외부 링크인데 기존의 url 값이 버킷을 가리킨다면 버킷에 들어있던 객체를 삭제해야 함.
@@ -266,6 +268,6 @@ public class DocsService {
         docs.setDetail(dto.getDetail());
 
         docsRepostiroy.save(docs);
-        return ResultConstant.OK;
+        return OK;
     }
 }

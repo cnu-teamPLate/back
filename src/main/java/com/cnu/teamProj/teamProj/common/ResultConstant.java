@@ -4,13 +4,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 public class ResultConstant {
-    public static final int NOT_EXIST = -1;
-    public static final int OK = 1;
-    public static final int UNEXPECTED_ERROR = -5;
-    public static final int REQUIRED_PARAM_NON = -2;
-    public static final int NO_PERMISSION = -3;
-    public static final int INVALID_PARAM = -4;
-    public static final int ALREADY_EXIST = -6;
+    public static final int NOT_EXIST = -1; //404
+    public static final int OK = 1; //200
+    public static final int UNEXPECTED_ERROR = -5; //500
+    public static final int REQUIRED_PARAM_NON = -2; //400
+    public static final int NO_PERMISSION = -3; //401
+    public static final int INVALID_PARAM = -4; //400
+    public static final int ALREADY_EXIST = -6; //409
 
     public static ResponseEntity<ResponseDto> returnResult(int result) {
         String message = "";
@@ -38,7 +38,7 @@ public class ResultConstant {
                 break;
             case ALREADY_EXIST:
                 message = "이미 값이 존재합니다";
-                status = HttpStatus.BAD_REQUEST;
+                status = HttpStatus.CONFLICT;
                 break;
             default:
                 message = "요청이 성공적으로 처리되었습니다";
@@ -54,6 +54,7 @@ public class ResultConstant {
             case UNEXPECTED_ERROR -> HttpStatus.INTERNAL_SERVER_ERROR;
             case REQUIRED_PARAM_NON, INVALID_PARAM -> HttpStatus.BAD_REQUEST;
             case NO_PERMISSION -> HttpStatus.UNAUTHORIZED;
+            case ALREADY_EXIST -> HttpStatus.CONFLICT;
             default -> {
                 message = "요청이 성공적으로 처리되었습니다";
                 yield HttpStatus.OK;
