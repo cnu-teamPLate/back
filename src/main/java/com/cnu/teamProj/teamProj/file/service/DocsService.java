@@ -1,10 +1,8 @@
 package com.cnu.teamProj.teamProj.file.service;
 
 import static com.cnu.teamProj.teamProj.common.ResultConstant.*;
-import com.cnu.teamProj.teamProj.file.dto.DocsDto;
-import com.cnu.teamProj.teamProj.file.dto.DocsPutDto;
-import com.cnu.teamProj.teamProj.file.dto.DocsViewResponseDto;
-import com.cnu.teamProj.teamProj.file.dto.FileDto;
+
+import com.cnu.teamProj.teamProj.file.dto.*;
 import com.cnu.teamProj.teamProj.file.entity.Docs;
 import com.cnu.teamProj.teamProj.file.repository.DocsRepository;
 import com.cnu.teamProj.teamProj.proj.repository.ProjRepository;
@@ -17,13 +15,25 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.concurrent.DelegatingSecurityContextExecutorService;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionCallbackWithoutResult;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.xml.transform.Result;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 @Service
 @RequiredArgsConstructor
@@ -34,6 +44,7 @@ public class DocsService {
     private final ProjRepository projRepository;
     private final UserRepository userRepository;
     private final TaskRepository taskRepository;
+    private final PlatformTransactionManager transactionManager;
 
     @Value("${S3_ENDPOINT}")
     private String s3EndPoint;
@@ -81,7 +92,6 @@ public class DocsService {
      * @param fileId 문서 아이디
      * @return 결괏값
      */
-    @Transactional
     public int deleteFile(int fileId) {
         Docs docs = docsRepostiroy.findByFileId(fileId);
         if(docs == null) return NOT_EXIST;
@@ -103,6 +113,48 @@ public class DocsService {
             return UNEXPECTED_ERROR;
         }
         return OK;
+    }
+    @Transactional
+    public List<FileResponseDto> deleteAllFiles(List<Integer> files) {
+
+        if(files == null) return null;
+
+        SecurityContext securityContext = SecurityContextHolder.getContext();
+        ExecutorService rawExecutor = Executors.newFixedThreadPool(10);
+
+
+        ExecutorService executorService = new DelegatingSecurityContextExecutorService(rawExecutor, securityContext);
+
+        List<Future<FileResponseDto>> futures = new ArrayList<>();
+
+        for(Integer fileId : files) {
+            futures.add(executorService.submit(()->{
+                TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
+                transactionTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+                return transactionTemplate.execute(status -> {
+                    int ret = deleteFile(fileId);
+                    String cause = "";
+                    switch (ret) {
+                        case NOT_EXIST -> cause = "파일 아이디가 존재하지 않습니다";
+                        case NO_PERMISSION -> cause = "파일 삭제 권한이 없습니다";
+                        case OK -> cause = null;
+                        default -> cause = "예상치 못한 에러가 발생했습니다";
+                    }
+                    logger.info("fileId: {}, cause: {}", fileId, cause);
+                    return new FileResponseDto(fileId, cause);
+                });
+            }));
+        }
+
+        List<FileResponseDto> results = new ArrayList<>();
+        for(Future<FileResponseDto> future : futures) {
+            try{
+                results.add(future.get());
+            } catch (Exception e) {
+                logger.error("비동기 처리 과정에서 에러가 발생했습니다:{}", e.getMessage());
+            }
+        }
+        return results;
     }
 
     /**
