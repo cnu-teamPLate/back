@@ -2,6 +2,7 @@ package com.cnu.teamProj.teamProj.file.service;
 
 import static com.cnu.teamProj.teamProj.common.ResultConstant.*;
 
+import com.cnu.teamProj.teamProj.common.ResultConstant;
 import com.cnu.teamProj.teamProj.file.dto.*;
 import com.cnu.teamProj.teamProj.file.entity.Docs;
 import com.cnu.teamProj.teamProj.file.repository.DocsRepository;
@@ -50,11 +51,7 @@ public class DocsService {
     private String s3EndPoint;
     /**
      * @param dto - 파일업로드 시 사용할 기본 디티오
-     * @return
-     *      - 입력 값이 null 이면 0 반환
-     *      - 파일 등록에 실패 시 -1 반환
-     *      - 존재하지 않는 프로젝트일 경우 -2 반환
-     *      - 성공 시 1 반환
+     * @return ResponseEntity 반환
      * */
     @Transactional
     public ResponseEntity<?> uploadFileInfoToDocs(DocsDto dto, List<MultipartFile> files) {
@@ -186,7 +183,7 @@ public class DocsService {
      *  이 세 개 값 중 하나는 있어야 함
      * @return 조건에 맞는 문서 정보 리스트
      */
-    public ResponseEntity<List<DocsViewResponseDto>> getDocs(Map<String, String> param) {
+    public ResponseEntity<?> getDocs(Map<String, String> param) {
         boolean isProjectOnly = false;
         boolean isUserIdOnly = false;
         boolean isProjIdAndUserId = false;
@@ -195,6 +192,7 @@ public class DocsService {
         else if(param.containsKey("projId")) isProjectOnly = true;
         else if(param.containsKey("userId")) isUserIdOnly = true;
         else if(param.containsKey("taskId")) isTaskId = true;
+
 
         List<DocsViewResponseDto> results = new ArrayList<>();
         try{
@@ -257,13 +255,15 @@ public class DocsService {
                 }
             }
         } catch(NoSuchElementException e) {
-            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+            return returnResultCustom(NOT_EXIST, "존재하는 프로젝트 혹은 유저 혹은 과제 아이디가 아닙니다.");
         }
 
 
         return new ResponseEntity<>(results, HttpStatus.OK);
 
     }
+
+    //과제 수정 ->
 
     /**
      * @param dto - 파일업로드 시 사용할 기본 디티오
@@ -311,6 +311,8 @@ public class DocsService {
                 url = url.split("://")[1];
                 String filename = url.split(s3EndPoint)[1];
                 s3Service.deleteFile(filename);
+            } else if(dto.getUrl() == null) {
+                dto.setUrl(docs.getUrl());
             }
             fileResult = new FileDto(dto.getUrl(), docs.getFilename());
         }
