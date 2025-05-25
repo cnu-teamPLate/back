@@ -1,10 +1,8 @@
 package com.cnu.teamProj.teamProj.file.controller;
 
+import com.cnu.teamProj.teamProj.common.ResponseDto;
 import com.cnu.teamProj.teamProj.common.ResultConstant;
-import com.cnu.teamProj.teamProj.file.dto.DocsDto;
-import com.cnu.teamProj.teamProj.file.dto.DocsPutDto;
-import com.cnu.teamProj.teamProj.file.dto.DocsUploadRequestDto;
-import com.cnu.teamProj.teamProj.file.dto.DocsViewResponseDto;
+import com.cnu.teamProj.teamProj.file.dto.*;
 import com.cnu.teamProj.teamProj.file.service.DocsService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -22,6 +20,7 @@ import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -61,26 +60,19 @@ public class DocsController {
 
 
     @Operation(summary = "문서 삭제", description = "파일 삭제 시 사용하는 api로, 작성자 본인만 삭제가 가능")
-    @Parameter(name="fileId", description = "파일 레코드 아이디", example = "10")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "400", description = "필수 요청 값 없음", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class),examples = @ExampleObject(value = "{\"results\": \"null\"}"))),
+            @ApiResponse(responseCode = "500", description = "비동기 처리 중 에러 발생", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class),examples = @ExampleObject(value = "{\"results\": \"[]\"}"))),
+            @ApiResponse(responseCode = "200", description = "요청 성공", content = @Content(mediaType = "application/json", schema = @Schema(implementation = AllFilesResponseDto.class)))
+    })
     @DeleteMapping("/delete")
-    public ResponseEntity<String> deleteFile(@RequestBody Map<String, Integer> map) {
-        int ret = docsService.deleteFile(map.get("fileId"));
-        HttpStatus status;
-        String resultText;
-        if(ret == ResultConstant.NOT_EXIST) {
-            status = HttpStatus.NOT_FOUND;
-            resultText = "존재하지 않는 문서입니다";
-        } else if(ret == ResultConstant.UNEXPECTED_ERROR) {
-            status = HttpStatus.INTERNAL_SERVER_ERROR;
-            resultText = "예상치 못한 오류가 발생했습니다";
-        } else if (ret == ResultConstant.NO_PERMISSION) {
-            status = HttpStatus.NOT_ACCEPTABLE;
-            resultText = "파일에 대한 권한이 없습니다";
-        }else {
-            status = HttpStatus.OK;
-            resultText = "파일이 성공적으로 삭제되었습니다";
-        }
-        return new ResponseEntity<>(resultText, status);
+    public ResponseEntity<?> deleteFile(@io.swagger.v3.oas.annotations.parameters.RequestBody @RequestBody FileDeleteRequestDto dto) {
+        List<FileResponseDto> ret = docsService.deleteAllFiles(dto.getFiles());
+        AllFilesResponseDto retToJson = new AllFilesResponseDto();
+        retToJson.setResults(ret);
+        if(ret == null) return new ResponseEntity<>(retToJson, HttpStatus.BAD_REQUEST);
+        if(ret.isEmpty()) return new ResponseEntity<>(retToJson, HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<>(retToJson, HttpStatus.OK);
     }
 
     @Operation(summary = "문서 불러오기", description = "프로젝트에 등록된 파일을 모두 불러오고 싶다면 -> projId값<br/>특정 유저가 등록한 파일을 불러오고 싶다면 -> userId값<br/>프로젝트에 등록된 파일 중 특정 유저의 파일을 불러오고 싶다면 -> projId값과 userId모두<br/>특정 과제에 등록된 파일을 불러오고 싶다면 -> taskId값<br/>을 넘겨야 합니다.")
