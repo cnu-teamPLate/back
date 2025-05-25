@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -27,6 +28,7 @@ import java.util.Map;
 @RestController
 @Tag(name = "DocsController", description = "문서와 관련된 API")
 @RequestMapping(value = "/file" , produces = "application/json; charset=utf8")
+@Slf4j
 public class DocsController {
     private DocsService docsService;
 
@@ -75,15 +77,23 @@ public class DocsController {
         return new ResponseEntity<>(retToJson, HttpStatus.OK);
     }
 
-    @Operation(summary = "문서 불러오기", description = "프로젝트에 등록된 파일을 모두 불러오고 싶다면 -> projId값<br/>특정 유저가 등록한 파일을 불러오고 싶다면 -> userId값<br/>프로젝트에 등록된 파일 중 특정 유저의 파일을 불러오고 싶다면 -> projId값과 userId모두<br/>특정 과제에 등록된 파일을 불러오고 싶다면 -> taskId값<br/>을 넘겨야 합니다.")
-    @Parameters(value = {
-            @Parameter(name = "projId", example = "cse00001",required = true, description = "프로젝트에 "),
-            @Parameter(name = "userId", example = "01111111",required = true, description = "프로젝트 아이디 값 혹은 유저 아이디 값 중 하나는 필수로 들어가야 합니다"),
-            @Parameter(name = "taskId", example = "4", description = "파일 아이디는 필요한 경우에만 지정해주면 됩니다.")
-
-    })
+    @Operation(summary = "문서 불러오기", description = "➡️ 프로젝트에 등록된 파일을 모두 불러오고 싶다면 -> projId값<br/>➡️ 특정 유저가 등록한 파일을 불러오고 싶다면 -> userId값<br/>➡️ 프로젝트에 등록된 파일 중 특정 유저의 파일을 불러오고 싶다면 -> projId값과 userId모두<br/>➡️ 특정 과제에 등록된 파일을 불러오고 싶다면 -> taskId값")
     @GetMapping("/view")
-    public ResponseEntity<List<DocsViewResponseDto>> loadFile(@RequestParam Map<String, String> map) {
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = DocsViewResponseDto.class))),
+            @ApiResponse(responseCode = "400", description = "필수 요청 값 없음", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class), examples = @ExampleObject(name = "파일 이름 오류", value = "{\"message\": \"필수 요청 값이 존재하지 않습니다\"}"))),
+            @ApiResponse(responseCode = "404", description = "존재하는 아이디가 아님", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class), examples = @ExampleObject(name = "파일 이름 오류", value = "{\"message\": \"존재하는 프로젝트 혹은 유저 혹은 과제 아이디가 아닙니다.\"}")))
+    })
+    public ResponseEntity<?> loadFile(
+            @Parameter(name = "projId", description = "프로젝트 아이디", example = "cse00001") @RequestParam(value = "projId", required = false) String projId,
+            @Parameter(name = "userId", description = "학번 정보", example = "01111111") @RequestParam(value = "userId", required = false) String userId,
+            @Parameter(name = "taskId", description = "과제 아이디", example = "1") @RequestParam(value = "taskId", required = false) String taskId
+    ) {
+        Map<String, String> map = new HashMap<>();
+        if(projId == null && userId == null && taskId == null) return ResultConstant.returnResultCustom(ResultConstant.INVALID_PARAM, "필수 요청 값이 존재하지 않습니다");
+        if(projId != null) map.put("projId", projId);
+        if(userId != null) map.put("userId", userId);
+        if(taskId != null) map.put("taskId", taskId);
         return docsService.getDocs(map);
     }
 

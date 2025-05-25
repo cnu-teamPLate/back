@@ -2,6 +2,7 @@ package com.cnu.teamProj.teamProj.file.service;
 
 import static com.cnu.teamProj.teamProj.common.ResultConstant.*;
 
+import com.cnu.teamProj.teamProj.common.ResultConstant;
 import com.cnu.teamProj.teamProj.file.dto.*;
 import com.cnu.teamProj.teamProj.file.entity.Docs;
 import com.cnu.teamProj.teamProj.file.repository.DocsRepository;
@@ -186,7 +187,7 @@ public class DocsService {
      *  이 세 개 값 중 하나는 있어야 함
      * @return 조건에 맞는 문서 정보 리스트
      */
-    public ResponseEntity<List<DocsViewResponseDto>> getDocs(Map<String, String> param) {
+    public ResponseEntity<?> getDocs(Map<String, String> param) {
         boolean isProjectOnly = false;
         boolean isUserIdOnly = false;
         boolean isProjIdAndUserId = false;
@@ -195,6 +196,7 @@ public class DocsService {
         else if(param.containsKey("projId")) isProjectOnly = true;
         else if(param.containsKey("userId")) isUserIdOnly = true;
         else if(param.containsKey("taskId")) isTaskId = true;
+
 
         List<DocsViewResponseDto> results = new ArrayList<>();
         try{
@@ -257,7 +259,7 @@ public class DocsService {
                 }
             }
         } catch(NoSuchElementException e) {
-            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+            return returnResultCustom(NOT_EXIST, "존재하는 프로젝트 혹은 유저 혹은 과제 아이디가 아닙니다.");
         }
 
 
