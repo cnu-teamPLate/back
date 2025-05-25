@@ -98,21 +98,18 @@ public class DocsController {
     }
 
     @Operation(summary = "문서 수정", description = "문서를 수정할 때 사용되는 api 입니다")
-    @Parameters(value = {
-            @Parameter(name = "docs", description = "문서와 관련된 모든 정보", example =
-                    "{\n" +
-                            "\t\"title\" : \"펭귄에 대하여\",\n" +
-                            "\t\"detail\" : \"펭귄에 대해 자료조사한 내용입니다\",\n" +
-                            "\t\"fileId\" : \"13\",\n" +
-                            "\t\"url\" : \"https://yozm.wishket.com/magazine/detail/2955/\"\n" +
-                            "}"),
-            @Parameter(name = "file", description = "파일 데이터를 MultipartFile 형식으로 받음")
+    @PutMapping(value = "/put", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "401", description = "문서 수정은 작성자만 가능", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class),examples = @ExampleObject(value = "{\"message\": \"요청 권한이 없습니다\"}"))),
+            @ApiResponse(responseCode = "400", description = "필수 파라미터가 없거나 파일명이 20자를 넘어감", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class),examples = @ExampleObject(value = "{\"message\": \"응답에 필요한 필수 요청 값이 전달되지 않았습니다.\"}"))),
+            @ApiResponse(responseCode = "404", description = "전달된 파일 아이디값이 존재하지 않음", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class),examples = @ExampleObject(value = "{\"message\": \"해당 아이디의 값이 없습니다.\"}"))),
+            @ApiResponse(responseCode = "500", description = "서버 에러", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class),examples = @ExampleObject(value = "{\"message\": \"예상치 못한 오류가 발생했습니다.\"}"))),
+            @ApiResponse(responseCode = "200", description = "성공", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseDto.class),examples = @ExampleObject(value = "{\"message\": \"요청이 성공적으로 처리되었습니다\"}")))
+
     })
-    @PutMapping("/put")
-    public ResponseEntity<?> updateFile(
-            @RequestPart(value = "docs", required = false) DocsPutDto docsDto,
-            @RequestPart(value = "file", required = false)MultipartFile file) {
-        int ret = docsService.updateDocs(docsDto, file);
+    public ResponseEntity<?> updateFile(@ModelAttribute DocsUpdateRequestDto dto) {
+        DocsPutDto docsPutDto = new DocsPutDto(dto);
+        int ret = docsService.updateDocs(docsPutDto, dto.getFile());
         return ResultConstant.returnResult(ret);
     }
 }

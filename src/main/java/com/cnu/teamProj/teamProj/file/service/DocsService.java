@@ -51,11 +51,7 @@ public class DocsService {
     private String s3EndPoint;
     /**
      * @param dto - 파일업로드 시 사용할 기본 디티오
-     * @return
-     *      - 입력 값이 null 이면 0 반환
-     *      - 파일 등록에 실패 시 -1 반환
-     *      - 존재하지 않는 프로젝트일 경우 -2 반환
-     *      - 성공 시 1 반환
+     * @return ResponseEntity 반환
      * */
     @Transactional
     public ResponseEntity<?> uploadFileInfoToDocs(DocsDto dto, List<MultipartFile> files) {
@@ -267,6 +263,8 @@ public class DocsService {
 
     }
 
+    //과제 수정 ->
+
     /**
      * @param dto - 파일업로드 시 사용할 기본 디티오
      * @return
@@ -313,6 +311,8 @@ public class DocsService {
                 url = url.split("://")[1];
                 String filename = url.split(s3EndPoint)[1];
                 s3Service.deleteFile(filename);
+            } else if(dto.getUrl() == null) {
+                dto.setUrl(docs.getUrl());
             }
             fileResult = new FileDto(dto.getUrl(), docs.getFilename());
         }
