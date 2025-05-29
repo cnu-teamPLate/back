@@ -13,9 +13,9 @@ import java.util.Map;
 public class When2meetViewRespDto {
     @Schema(description = "웬투밋 폼 정보")
     private When2meetRequestDto form;
-    @Schema(description = "유저가 선택한 값 정보<br/>key값은 날짜 정보이고 해당 날짜에 가능하다고 표시한 유저 정보와 시간 정보를 value값으로 담아 전달함")
+    @Schema(description = "유저가 선택한 값 정보<br/>key(additionalProp) = 날짜 정보가 담김, value = 해당 날짜에 가능하다고 표시한 유저 정보와 시간 정보")
     private Map<LocalDate, List<When2meetDetailRespDto>> details;
-    @Schema(description = "타임존은 default 값으로 들어있음")
+    @Schema(description = "타임존은 default 값으로 들어있음", example = "Asia/Seoul")
     private String timeZone = "Asia/Seoul";
 
     public When2meetViewRespDto(When2meetRequestDto form, Map<LocalDate, List<When2meetDetailRespDto>> details) {
