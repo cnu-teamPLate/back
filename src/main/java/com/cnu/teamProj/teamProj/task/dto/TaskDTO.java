@@ -17,4 +17,5 @@ public class TaskDTO {
     private String detail;
     private int checkBox; // `checkbox` → `checkBox`로 수정
     private String taskName;
+
 }

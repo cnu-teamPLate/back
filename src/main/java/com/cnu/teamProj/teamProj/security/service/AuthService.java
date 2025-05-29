@@ -2,7 +2,6 @@ package com.cnu.teamProj.teamProj.security.service;
 
 import com.cnu.teamProj.teamProj.comment.Comment;
 import com.cnu.teamProj.teamProj.comment.CommentRepository;
-import com.cnu.teamProj.teamProj.common.ResponseDto;
 import com.cnu.teamProj.teamProj.common.ResultConstant;
 import com.cnu.teamProj.teamProj.file.entity.Docs;
 import com.cnu.teamProj.teamProj.file.repository.DocsRepository;
@@ -10,9 +9,7 @@ import com.cnu.teamProj.teamProj.proj.entity.ProjMem;
 import com.cnu.teamProj.teamProj.proj.repository.MemberRepository;
 import com.cnu.teamProj.teamProj.review.Review;
 import com.cnu.teamProj.teamProj.review.ReviewRepository;
-import com.cnu.teamProj.teamProj.schedule.entity.MakePlan;
 import com.cnu.teamProj.teamProj.schedule.entity.Participants;
-import com.cnu.teamProj.teamProj.schedule.repository.MakePlanRepository;
 import com.cnu.teamProj.teamProj.schedule.repository.ParticipantsRepository;
 import com.cnu.teamProj.teamProj.security.dto.RegisterDto;
 import com.cnu.teamProj.teamProj.security.entity.Role;
@@ -50,7 +47,6 @@ public class AuthService {
     private final DocsRepository docsRepository;
     private final ReviewRepository reviewRepository;
     private final TaskRepository taskRepository;
-    private final MakePlanRepository makePlanRepository;
     private final ParticipantsRepository participantsRepository;
     private final RoleRepository roleRepository;
     private final MemberRepository memberRepository;
@@ -162,9 +158,6 @@ public class AuthService {
             task.setId("null");
             taskRepository.save(task);
         }
-        //웬투밋 관련 레코드 삭제
-        List<MakePlan> makePlans = makePlanRepository.findMakePlansByUserId(user);
-        makePlanRepository.deleteAll(makePlans);
         //참가자 관련 레코드 삭제
         List<Participants> participants = participantsRepository.findAllById(userId);
         participantsRepository.deleteAll(participants);

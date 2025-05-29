@@ -36,23 +36,6 @@ public class MeetController {
     private final MakePlanService makePlanService;
     private final MeetingService meetingService;
 
-    //test test test 제발
-    @PostMapping("/adjust/upload")
-    @Operation(summary = "웬투밋 생성")
-    @Parameters({
-            @Parameter(name = "userId", description = "학번", example = "20211122"),
-            @Parameter(name = "projId", description = "프로젝트 아이디", example = "cse00001"),
-            @Parameter(name = "start", description = "가능한 시작 시간", example = "2025-01-15T00:02:27.000Z"),
-            @Parameter(name = "end", description = "가능한 종료 시간", example = "2025-01-14T00:02:27.000Z")
-    })
-    public ResponseEntity<String> inputWhen2Meet(@RequestBody MakePlanDto param) {
-        int flag = makePlanService.uploadWhen2Meet(param);
-        if(flag == 1) return new ResponseEntity<>("값이 성공적으로 등록되었습니다", HttpStatus.OK);
-        else if(flag==0) return new ResponseEntity<>("존재하지 않는 유저 혹은 프로젝트입니다", HttpStatus.BAD_REQUEST);
-        else if(flag==-2) return new ResponseEntity<>("시작 시간이 종료 시간보다 빠릅니다", HttpStatus.BAD_REQUEST);
-        else return new ResponseEntity<>("값을 저장하는 과정에서 문제가 발생했습니다", HttpStatus.BAD_REQUEST);
-    }
-
     @PostMapping("/upload/when2meet")
     @Operation(summary = "when2meet 폼 생성")
     @ApiResponses(value = {
