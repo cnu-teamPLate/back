@@ -13,9 +13,9 @@ import java.time.LocalDate;
 @NoArgsConstructor
 public class TimeRangeDto {
     @Schema(description = "시작 날짜", example = "2025-05-01")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-ss")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate startDate;
     @Schema(description = "끝 날짜", example = "2025-05-01")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-ss")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate endDate;
 }
