@@ -11,7 +11,7 @@ import java.time.ZonedDateTime;
 public class DocsViewResponseDto {
     @Schema(description = "파일 아이디", example = "4")
     private int fileId;
-    @Schema(description = "학번", example = "홍길동")
+    @Schema(description = "사용자 이름", example = "홍길동")
     private String userName;
     @Schema(description = "프로젝트명", example = "teamPlate")
     private String projName;
