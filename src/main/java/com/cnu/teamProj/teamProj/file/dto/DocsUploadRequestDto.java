@@ -19,7 +19,7 @@ public class DocsUploadRequestDto {
     @Schema(description = "특정 과제에 종속된 파일인 경우 -> 과제의 아이디<br/>문서와 관련된 파일인 경우 -> -1", defaultValue = "-1")
     private int category;
     @Schema(description = "파일 데이터가 아닌 외부 url을 저장할 경우", nullable = true)
-    private String url;
+    private List<String> url;
     @Schema(description = "업로드 하고자 하는 파일")
     private List<MultipartFile> files;
 }

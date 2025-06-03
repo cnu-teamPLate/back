@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.ZonedDateTime;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -21,7 +22,7 @@ public class DocsDto {
     @Schema(description = "특정 과제에 종속된 파일인 경우 -> 과제의 아이디<br/>문서와 관련된 파일인 경우 -> -1", defaultValue = "-1")
     private int category;
     @Schema(description = "파일 데이터가 아닌 외부 url을 저장할 경우", nullable = true)
-    private String url;
+    private List<String> url;
 
     public DocsDto(DocsUploadRequestDto uploadRequestDto) {
         this.id = uploadRequestDto.getId();

@@ -4,9 +4,15 @@ import static com.cnu.teamProj.teamProj.common.ResultConstant.*;
 
 import com.cnu.teamProj.teamProj.common.ResultConstant;
 import com.cnu.teamProj.teamProj.file.dto.*;
+import com.cnu.teamProj.teamProj.file.entity.Doc;
 import com.cnu.teamProj.teamProj.file.entity.Docs;
+import com.cnu.teamProj.teamProj.file.entity.File;
+import com.cnu.teamProj.teamProj.file.repository.DocRepository;
 import com.cnu.teamProj.teamProj.file.repository.DocsRepository;
+import com.cnu.teamProj.teamProj.file.repository.FileRepository;
+import com.cnu.teamProj.teamProj.proj.entity.Project;
 import com.cnu.teamProj.teamProj.proj.repository.ProjRepository;
+import com.cnu.teamProj.teamProj.security.entity.User;
 import com.cnu.teamProj.teamProj.security.repository.UserRepository;
 import com.cnu.teamProj.teamProj.task.repository.TaskRepository;
 import com.cnu.teamProj.teamProj.util.SecurityUtil;
@@ -45,6 +51,8 @@ public class DocsService {
     private final ProjRepository projRepository;
     private final UserRepository userRepository;
     private final TaskRepository taskRepository;
+    private final FileRepository fileRepository;
+    private final DocRepository docRepository;
     private final PlatformTransactionManager transactionManager;
 
     @Value("${S3_ENDPOINT}")
@@ -72,7 +80,7 @@ public class DocsService {
                     else results.add(new Docs(dto.getId(), dto.getProjId(), fileResult.getUrl(), dto.getTitle(), dto.getDetail(),  dto.getCategory(), fileResult.getFilename()));
                 }
             } else {
-                fileResult = new FileDto(dto.getUrl(), "");
+                fileResult = new FileDto(dto.getUrl().get(0), "");
                 results.add(new Docs(dto.getId(), dto.getProjId(), fileResult.getUrl(), dto.getTitle(), dto.getDetail(),  dto.getCategory(), fileResult.getFilename()));
             }
 
@@ -80,6 +88,43 @@ public class DocsService {
             return returnResult(OK);
         } catch (IOException e) {
             logger.warn("파일 등록에 실패하셨습니다");
+            return returnResult(UNEXPECTED_ERROR);
+        }
+    }
+    @Transactional
+    public ResponseEntity<?> uploadFileInfoToDoc(DocsDto dto, List<MultipartFile> files) {
+        if(dto == null) return returnResult(REQUIRED_PARAM_NON);
+        try{
+            if(!projRepository.existsById(dto.getProjId())) {
+                logger.warn("존재하지 않는 프로젝트 아이디가 들어왔습니다");
+                return returnResultCustom(NOT_EXIST, "프로젝트 아이디가 존재하지 않습니다");
+            }
+            Doc doc = new Doc(dto.getTitle(), dto.getDetail(), dto.getCategory());
+            doc.setCreatedBy(userRepository.findById(dto.getId()).orElse(null));
+            doc.setProjId(projRepository.findProjectByProjId(dto.getProjId()));
+
+            docRepository.save(doc);
+            FileDto fileResult = new FileDto();
+            List<File> results = new ArrayList<>();
+            String id = "doc:"+doc.getId();
+            if(files != null && !files.isEmpty()) {
+                for(MultipartFile file : files) {
+                    fileResult = s3Service.uploadFile(file, dto.getProjId());
+                    if(fileResult == null) return returnResultCustom(INVALID_PARAM, "파일의 이름명이 잘못되었습니다");
+                    else {
+                        results.add(new File(fileResult.getFilename(), fileResult.getUrl(), id));
+                    }
+                }
+            }
+            if(dto.getUrl() != null && !dto.getUrl().isEmpty()) {
+                for(String url : dto.getUrl()) {
+                    results.add(new File("", url, id));
+                }
+            }
+            fileRepository.saveAll(results);
+            return returnResult(OK);
+        } catch(IOException e) {
+            logger.warn("파일 등록에 실패했습니다");
             return returnResult(UNEXPECTED_ERROR);
         }
     }
@@ -151,6 +196,78 @@ public class DocsService {
                 logger.error("비동기 처리 과정에서 에러가 발생했습니다:{}", e.getMessage());
             }
         }
+        return results;
+    }
+
+    public int deleteDoc(int docId) {
+        Doc doc = docRepository.findById(docId).orElse(null);
+        if(doc == null) return NOT_EXIST;
+        String ownerId = doc.getCreatedBy().getId();
+//        if(!SecurityUtil.getCurrentUser().equals(ownerId)) return NO_PERMISSION;
+
+        //s3에서 관련 파일 지우기
+        String fileId = "doc:"+docId;
+        List<File> files = fileRepository.findFilesByFileType(fileId);
+
+        try {
+            for(File file : files) {
+                String url = file.getUrl();
+                if(url != null && url.contains(s3EndPoint)) {
+                    url = url.split("://")[1];
+                    String filename = url.split(s3EndPoint)[1];
+                    if(!s3Service.deleteFile(filename)) {
+                        throw new Exception();
+                    }
+                }
+            }
+        } catch(Exception e) {
+            return UNEXPECTED_ERROR;
+        }
+
+        //DB 에서 파일 정보 지우기
+        fileRepository.deleteAll(files);
+        //DB 에서 문서 지우기
+        docRepository.delete(doc);
+        return OK;
+    }
+
+    @Transactional
+    public List<FileResponseDto> deleteAllDocs(List<Integer> docs) {
+        if(docs == null || docs.isEmpty()) return null;
+
+        SecurityContext securityContext = SecurityContextHolder.getContext();
+        ExecutorService rawExecutor = Executors.newFixedThreadPool(10);
+
+        ExecutorService executorService = new DelegatingSecurityContextExecutorService(rawExecutor, securityContext);
+        List<Future<FileResponseDto>> futures = new ArrayList<>();
+
+        for(Integer docId : docs) {
+            futures.add(executorService.submit(()->{
+                TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
+                transactionTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+                return transactionTemplate.execute(status -> {
+                    int ret = deleteDoc(docId);
+                    String cause = "";
+                    switch(ret) {
+                        case NOT_EXIST -> cause = "파일 아이디가 존재하지 않습니다";
+                        case NO_PERMISSION -> cause = "파일 삭제 권한이 없습니다";
+                        case OK -> cause = null;
+                        default -> cause = "예상치 못한 에러가 발생했습니다";
+                    }
+                    return new FileResponseDto(docId, cause);
+                });
+            }));
+        }
+
+        List<FileResponseDto> results = new ArrayList<>();
+        for(Future<FileResponseDto> future : futures) {
+            try{
+                results.add(future.get());
+            } catch(Exception e) {
+                logger.error("비동기 처리 과정에서 에러가 발생했습니다:{}", e.getMessage());
+            }
+        }
+
         return results;
     }
 
@@ -263,7 +380,53 @@ public class DocsService {
 
     }
 
-    //과제 수정 ->
+    public ResponseEntity<?> getDocsNew(Map<String, String> param) {
+        boolean isProjectOnly = false;
+        boolean isUserIdOnly = false;
+        boolean isProjIdAndUserId = false;
+
+        if(param.containsKey("projId") && param.containsKey("userId")) isProjIdAndUserId = true;
+        else if(param.containsKey("projId")) isProjectOnly = true;
+        else if(param.containsKey("userId")) isUserIdOnly = true;
+        else return returnResult(REQUIRED_PARAM_NON);
+
+        List<DocViewRespDto> results = new ArrayList<>();
+        try{
+            String projId = param.get("projId");
+            String userId = param.get("userId");
+            List<Doc> docs;
+            if(isProjectOnly) { //프로젝트 아이디로 검색하는 경우
+                Project project = projRepository.findById(projId).orElseThrow();
+                docs = docRepository.findDocsByProjId(project);
+            } else if(isUserIdOnly) {
+                User user = userRepository.findById(userId).orElseThrow();
+                docs = docRepository.findDocsByCreatedBy(user);
+            } else {
+                Project project = projRepository.findById(projId).orElseThrow();
+                User user = userRepository.findById(userId).orElseThrow();
+                docs = docRepository.findDocsByProjIdAndCreatedBy(project, user);
+            }
+            insertFileInDocDto(docs,results);
+        } catch (NoSuchElementException e) {
+            return returnResultCustom(NOT_EXIST, "존재하는 프로젝트 혹은 유저 혹은 과제 아이디가 아닙니다.");
+        }
+
+        return new ResponseEntity<>(results, HttpStatus.OK);
+    }
+
+    private void insertFileInDocDto(List<Doc> docs, List<DocViewRespDto> results) {
+        for(Doc doc : docs) {
+            DocViewRespDto ret = new DocViewRespDto(doc);
+            String fileType = "doc:"+doc.getId();
+            List<FileDto> fileDtos = new ArrayList<>();
+            List<File> files = fileRepository.findFilesByFileType(fileType);
+            for(File file : files) {
+                fileDtos.add(new FileDto(file));
+            }
+            ret.setFiles(fileDtos);
+            results.add(ret);
+        }
+    }
 
     /**
      * @param dto - 파일업로드 시 사용할 기본 디티오
@@ -322,6 +485,76 @@ public class DocsService {
         docs.setDetail(dto.getDetail());
 
         docsRepostiroy.save(docs);
+        return OK;
+    }
+
+    @Transactional
+    public int updateDoc(DocUpdateReqDto dto) {
+        if(dto == null) return REQUIRED_PARAM_NON;
+
+        int docId = dto.getId();
+        String fileType = "doc:"+docId;
+        Doc doc = docRepository.findById(docId).orElse(null);
+        if(doc == null) return NOT_EXIST;
+//        if(!SecurityUtil.getCurrentUser().equals(doc.getCreatedBy().getId())) {
+//            return NO_PERMISSION;
+//        }
+
+        //기존에 있던 파일 정보
+        List<File> files = fileRepository.findFilesByFileType(fileType);
+
+        //수정 내용 반영
+        doc.setTitle(dto.getTitle());
+        doc.setCategory(dto.getCategory());
+        doc.setDetail(dto.getDetail());
+
+        //doc 과 관련되어 있던 파일 정보 불러오기
+        logger.info("전달받은 파일데이터 개수: {}", dto.getFiles());
+        if(dto.getFiles() != null && !dto.getFiles().isEmpty()) {
+            try {
+
+                //전달받은 파일에 대한 유효성 검사
+                for(MultipartFile file : dto.getFiles()) {
+                    if(Objects.requireNonNull(file.getOriginalFilename()).length() > 20) {
+                        return INVALID_PARAM;
+                    }
+                }
+
+                if(dto.getFiles() != null && !dto.getFiles().isEmpty()) {
+                    //기존에 있던 MultipartFile 타입의 데이터 삭제
+                    for(File file : files) {
+                        String url = file.getUrl();
+                        if(url.contains(s3EndPoint)) {
+                            url = url.split("://")[1];
+                            String filename = url.split(s3EndPoint)[1];
+                            s3Service.deleteFile(filename);
+                            fileRepository.delete(file);
+                        }
+                    }
+                    //전달받은 파일 업로드
+                    for(MultipartFile file : dto.getFiles()) {
+                        //S3에 업로드
+                        FileDto fileResult = s3Service.uploadFile(file, doc.getProjId().getProjId());
+                        logger.info("파일 데이터: {}", fileResult.getFilename());
+                        //파일 테이블에 업로드
+                        fileRepository.save(new File(fileResult.getUrl(), fileResult.getFilename(), fileType));
+                    }
+                }
+            } catch (Exception e) {
+                return UNEXPECTED_ERROR;
+            }
+        }
+        if(dto.getUrls() != null && !dto.getUrls().isEmpty()) {
+            //기존에 DB에 저장된 외부 url 데이터 삭제
+            for(File file : files) {
+                String url = file.getUrl();
+                if(!url.contains(s3EndPoint)) fileRepository.delete(file);
+            }
+            //새롭게 들어온 외부 url 저장
+            for(String url : dto.getUrls()) {
+                fileRepository.save(new File("", url, fileType));
+            }
+        }
         return OK;
     }
 }
