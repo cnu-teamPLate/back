@@ -414,6 +414,22 @@ public class DocsService {
         return new ResponseEntity<>(results, HttpStatus.OK);
     }
 
+
+    /**
+     * 특정 task 에 등록된 파일 리스트 불러오기
+     * @param taskId 과제 아이디
+     * @return 파일 정보에 대한 리스트 객체
+     */
+    public List<FileDto> getFilesForTask(int taskId) {
+        String fileType = "task:"+taskId;
+        List<File> files = fileRepository.findFilesByFileType(fileType);
+        List<FileDto> ret = new ArrayList<>();
+        for(File file : files) {
+            ret.add(new FileDto(file.getId(), file.getUrl(), file.getFilename(), file.getUploadDate()));
+        }
+        return ret;
+    }
+
     private void insertFileInDocDto(List<Doc> docs, List<DocViewRespDto> results) {
         for(Doc doc : docs) {
             DocViewRespDto ret = new DocViewRespDto(doc);
@@ -537,7 +553,7 @@ public class DocsService {
                         FileDto fileResult = s3Service.uploadFile(file, doc.getProjId().getProjId());
                         logger.info("파일 데이터: {}", fileResult.getFilename());
                         //파일 테이블에 업로드
-                        fileRepository.save(new File(fileResult.getUrl(), fileResult.getFilename(), fileType));
+                        fileRepository.save(new File(fileResult.getFilename(), fileResult.getUrl(), fileType));
                     }
                 }
             } catch (Exception e) {
