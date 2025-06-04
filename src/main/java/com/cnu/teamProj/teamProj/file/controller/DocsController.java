@@ -88,32 +88,14 @@ public class DocsController {
     })
     public ResponseEntity<?> loadFile(
             @Parameter(name = "projId", description = "프로젝트 아이디", example = "cse00001") @RequestParam(value = "projId", required = false) String projId,
-            @Parameter(name = "userId", description = "학번 정보", example = "01111111") @RequestParam(value = "userId", required = false) String userId,
-            @Parameter(name = "taskId", description = "과제 아이디", example = "1") @RequestParam(value = "taskId", required = false) String taskId
+            @Parameter(name = "userId", description = "학번 정보", example = "01111111") @RequestParam(value = "userId", required = false) String userId
     ) {
         Map<String, String> map = new HashMap<>();
-        if(projId == null && userId == null && taskId == null) return ResultConstant.returnResultCustom(ResultConstant.INVALID_PARAM, "필수 요청 값이 존재하지 않습니다");
+        if(projId == null && userId == null) return ResultConstant.returnResultCustom(ResultConstant.INVALID_PARAM, "필수 요청 값이 존재하지 않습니다");
         if(projId != null) map.put("projId", projId);
         if(userId != null) map.put("userId", userId);
-//        return docsService.getDocs(map);
         return docsService.getDocsNew(map);
     }
-
-//    @Operation(summary = "문서 수정", description = "문서를 수정할 때 사용되는 api 입니다")
-//    @PutMapping(value = "/put", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-//    @ApiResponses(value = {
-//            @ApiResponse(responseCode = "401", description = "문서 수정은 작성자만 가능", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class),examples = @ExampleObject(value = "{\"message\": \"요청 권한이 없습니다\"}"))),
-//            @ApiResponse(responseCode = "400", description = "필수 파라미터가 없거나 파일명이 20자를 넘어감", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class),examples = @ExampleObject(value = "{\"message\": \"응답에 필요한 필수 요청 값이 전달되지 않았습니다.\"}"))),
-//            @ApiResponse(responseCode = "404", description = "전달된 파일 아이디값이 존재하지 않음", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class),examples = @ExampleObject(value = "{\"message\": \"해당 아이디의 값이 없습니다.\"}"))),
-//            @ApiResponse(responseCode = "500", description = "서버 에러", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class),examples = @ExampleObject(value = "{\"message\": \"예상치 못한 오류가 발생했습니다.\"}"))),
-//            @ApiResponse(responseCode = "200", description = "성공", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseDto.class),examples = @ExampleObject(value = "{\"message\": \"요청이 성공적으로 처리되었습니다\"}")))
-//
-//    })
-//    public ResponseEntity<?> updateFile(@ModelAttribute DocsUpdateRequestDto dto) {
-//        DocsPutDto docsPutDto = new DocsPutDto(dto);
-//        int ret = docsService.updateDocs(docsPutDto, dto.getFile());
-//        return ResultConstant.returnResult(ret);
-//    }
 
     @Operation(summary = "문서 수정", description = "문서를 수정할 때 사용되는 api 입니다")
     @PutMapping(value = "/put", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
