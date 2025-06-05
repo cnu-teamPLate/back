@@ -79,7 +79,7 @@ public class DocsController {
         return new ResponseEntity<>(retToJson, HttpStatus.OK);
     }
 
-    @Operation(summary = "문서 불러오기", description = "➡️ 프로젝트에 등록된 파일을 모두 불러오고 싶다면 -> projId값<br/>➡️ 특정 유저가 등록한 파일을 불러오고 싶다면 -> userId값<br/>➡️ 프로젝트에 등록된 파일 중 특정 유저의 파일을 불러오고 싶다면 -> projId값과 userId모두<br/>➡️ 특정 과제에 등록된 파일을 불러오고 싶다면 -> taskId값")
+    @Operation(summary = "문서 불러오기", description = "➡️ 프로젝트에 등록된 파일을 모두 불러오고 싶다면 -> projId값<br/>➡️ 특정 유저가 등록한 파일을 불러오고 싶다면 -> userId값<br/>➡️ 프로젝트에 등록된 파일 중 특정 유저의 파일을 불러오고 싶다면 -> projId값과 userId모두")
     @GetMapping("/view")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = DocsViewResponseDto.class))),
