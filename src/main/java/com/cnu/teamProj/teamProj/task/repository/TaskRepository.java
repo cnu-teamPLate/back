@@ -16,4 +16,8 @@ public interface TaskRepository extends JpaRepository<Task, Integer> {
     Task findTaskByTaskId(int taskId);
     boolean existsByTaskId(int taskId);
 
+    List<Task> findAllByProjId(String projId);
+    List<Task> findAllById(String id);
+
+
 }
