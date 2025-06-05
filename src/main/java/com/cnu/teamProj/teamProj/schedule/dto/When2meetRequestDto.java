@@ -1,6 +1,7 @@
 package com.cnu.teamProj.teamProj.schedule.dto;
 
 import com.cnu.teamProj.teamProj.schedule.entity.When2meet;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -15,9 +16,11 @@ public class When2meetRequestDto {
     private String title;
     @Schema(description = "프로젝트 아이디", example = "cse00001")
     private String projId;
-    @Schema(description = "시작 시간", example = "09:00:00")
+    @Schema(description = "시작 시간", example = "09:00:00", type = "string")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm:ss")
     private LocalTime startTime;
-    @Schema(description = "종료 시간", example = "22:00:00")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm:ss")
+    @Schema(description = "종료 시간", example = "22:00:00", type = "string")
     private LocalTime endTime;
     @Schema(description = "생성자가 선택한 날짜 나열")
     private List<TimeRangeDto> dates;

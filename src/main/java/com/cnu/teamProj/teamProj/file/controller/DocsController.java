@@ -57,7 +57,8 @@ public class DocsController {
     })
     public ResponseEntity<?> uploadFile(@ModelAttribute DocsUploadRequestDto dto) {
         DocsDto docsDto = new DocsDto(dto);
-        return docsService.uploadFileInfoToDocs(docsDto, dto.getFiles());
+        return docsService.uploadFileInfoToDoc(docsDto, dto.getFiles());
+//        return docsService.uploadFileInfoToDocs(docsDto, dto.getFiles());
     }
 
 
@@ -69,7 +70,8 @@ public class DocsController {
     })
     @DeleteMapping("/delete")
     public ResponseEntity<?> deleteFile(@io.swagger.v3.oas.annotations.parameters.RequestBody @RequestBody FileDeleteRequestDto dto) {
-        List<FileResponseDto> ret = docsService.deleteAllFiles(dto.getFiles());
+//        List<FileResponseDto> ret = docsService.deleteAllFiles(dto.getFiles());
+        List<FileResponseDto> ret = docsService.deleteAllDocs(dto.getDocs());
         AllFilesResponseDto retToJson = new AllFilesResponseDto();
         retToJson.setResults(ret);
         if(ret == null) return new ResponseEntity<>(retToJson, HttpStatus.BAD_REQUEST);
@@ -86,15 +88,13 @@ public class DocsController {
     })
     public ResponseEntity<?> loadFile(
             @Parameter(name = "projId", description = "프로젝트 아이디", example = "cse00001") @RequestParam(value = "projId", required = false) String projId,
-            @Parameter(name = "userId", description = "학번 정보", example = "01111111") @RequestParam(value = "userId", required = false) String userId,
-            @Parameter(name = "taskId", description = "과제 아이디", example = "1") @RequestParam(value = "taskId", required = false) String taskId
+            @Parameter(name = "userId", description = "학번 정보", example = "01111111") @RequestParam(value = "userId", required = false) String userId
     ) {
         Map<String, String> map = new HashMap<>();
-        if(projId == null && userId == null && taskId == null) return ResultConstant.returnResultCustom(ResultConstant.INVALID_PARAM, "필수 요청 값이 존재하지 않습니다");
+        if(projId == null && userId == null) return ResultConstant.returnResultCustom(ResultConstant.INVALID_PARAM, "필수 요청 값이 존재하지 않습니다");
         if(projId != null) map.put("projId", projId);
         if(userId != null) map.put("userId", userId);
-        if(taskId != null) map.put("taskId", taskId);
-        return docsService.getDocs(map);
+        return docsService.getDocsNew(map);
     }
 
     @Operation(summary = "문서 수정", description = "문서를 수정할 때 사용되는 api 입니다")
@@ -107,9 +107,9 @@ public class DocsController {
             @ApiResponse(responseCode = "200", description = "성공", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseDto.class),examples = @ExampleObject(value = "{\"message\": \"요청이 성공적으로 처리되었습니다\"}")))
 
     })
-    public ResponseEntity<?> updateFile(@ModelAttribute DocsUpdateRequestDto dto) {
-        DocsPutDto docsPutDto = new DocsPutDto(dto);
-        int ret = docsService.updateDocs(docsPutDto, dto.getFile());
+    public ResponseEntity<?> updateFile(@ModelAttribute DocUpdateReqDto dto) {
+        log.info("컨트롤러에서 받는 데이터 : {}", dto.getFiles());
+        int ret = docsService.updateDoc(dto);
         return ResultConstant.returnResult(ret);
     }
 }
