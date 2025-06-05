@@ -35,6 +35,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -188,30 +189,31 @@ public class DocsService {
         boolean isUserIdOnly = false;
         boolean isProjIdAndUserId = false;
         boolean isTaskId = false;
-        if(param.containsKey("projId") && param.containsKey("userId")) isProjIdAndUserId = true;
-        else if(param.containsKey("projId")) isProjectOnly = true;
-        else if(param.containsKey("userId")) isUserIdOnly = true;
-        else if(param.containsKey("taskId")) isTaskId = true;
+        if (param.containsKey("projId") && param.containsKey("userId")) isProjIdAndUserId = true;
+        else if (param.containsKey("projId")) isProjectOnly = true;
+        else if (param.containsKey("userId")) isUserIdOnly = true;
+        else if (param.containsKey("taskId")) isTaskId = true;
 
 
         List<DocsViewResponseDto> results = new ArrayList<>();
-        try{
-            if(isProjectOnly) {
+        List<FileDto> fileList = null;
+        try {
+            if (isProjectOnly) {
                 String projId = param.get("projId");
                 //응답값에 넣어줄 프로젝트명
                 String projName = projRepository.findById(projId).orElseThrow().getProjName();
                 List<Docs> docsList = docsRepostiroy.findAllByProjId(projId);
-                for(Docs docs : docsList) {
+                for (Docs docs : docsList) {
                     DocsViewResponseDto temp = new DocsViewResponseDto(docs);
                     insertInfoToDocsViewResponseDto(temp, projName, docs.getId());
                     results.add(temp);
                 }
-            } else if(isUserIdOnly) {
+            } else if (isUserIdOnly) {
                 String userId = param.get("userId");
                 //응답값에 넣어줄 유저명
                 String userName = userRepository.findById(userId).orElseThrow().getUsername();
                 List<Docs> docsList = docsRepostiroy.findAllById(userId);
-                for(Docs docs : docsList) {
+                for (Docs docs : docsList) {
                     DocsViewResponseDto temp = new DocsViewResponseDto(docs);
                     temp.setUserName(userName);
                     //응답값에 넣어줄 프로젝트명
@@ -219,30 +221,33 @@ public class DocsService {
                     String projName = projRepository.findById(projId).orElseThrow().getProjName();
                     temp.setProjName(projName);
                     //응답값에 넣어줄 과제명
-                    if(docs.getCategory() == -1) {
+                    if (docs.getCategory() == -1) {
                         String taskName = taskRepository.findTaskByTaskId(docs.getCategory()).getTaskName();
                         temp.setTaskName(taskName);
                     }
                     results.add(temp);
                 }
-            } else if(isProjIdAndUserId) {
+            } else if (isProjIdAndUserId) {
                 String projId = param.get("projId");
                 //응답값에 넣어줄 프로젝트명
                 String projName = projRepository.findById(projId).orElseThrow().getProjName();
                 List<Docs> docsList = docsRepostiroy.findAllByProjId(projId);
-                for(Docs docs : docsList) {
-                    if(docs.getId().equals(param.get("userId"))) {
+                for (Docs docs : docsList) {
+                    if (docs.getId().equals(param.get("userId"))) {
                         DocsViewResponseDto temp = new DocsViewResponseDto(docs);
                         insertInfoToDocsViewResponseDto(temp, projName, docs.getId());
                         results.add(temp);
                     }
                 }
-            } else if(isTaskId) {
+            } else if (isTaskId) {
                 int taskId = Integer.parseInt(param.get("taskId"));
                 //응답값에 넣어줄 과제 명
                 String taskName = taskRepository.findTaskByTaskId(taskId).getTaskName();
                 List<Docs> docsList = docsRepostiroy.findAllByCategory(taskId);
-                for(Docs docs : docsList) {
+
+                fileList = new ArrayList<>();
+
+                for (Docs docs : docsList) {
                     DocsViewResponseDto temp = new DocsViewResponseDto(docs);
                     temp.setTaskName(taskName);
                     //응답값에 넣어줄 유저 명
@@ -251,15 +256,20 @@ public class DocsService {
                     //응답값에 넣어줄 프로젝트 명
                     String projName = projRepository.findProjectByProjId(docs.getProjId()).getProjName();
                     temp.setProjName(projName);
+                    //추가
+                    fileList.add(new FileDto(docs.getUrl(), docs.getFilename()));
                     results.add(temp);
                 }
             }
-        } catch(NoSuchElementException e) {
+        } catch (NoSuchElementException e) {
             return returnResultCustom(NOT_EXIST, "존재하는 프로젝트 혹은 유저 혹은 과제 아이디가 아닙니다.");
         }
 
+        Map<String, Object> response = new HashMap<>();
+        response.put("docs", results);
+        response.put("files", fileList);
 
-        return new ResponseEntity<>(results, HttpStatus.OK);
+        return new ResponseEntity<>(response, HttpStatus.OK);
 
     }
 
@@ -323,5 +333,25 @@ public class DocsService {
 
         docsRepostiroy.save(docs);
         return OK;
+    }
+
+    public List<DocsViewResponseDto> getDocsByUserAndProject(String projId, String userId) {
+        List<Docs> docsList = docsRepostiroy.findAllByProjId(projId).stream()
+                .filter(doc -> userId.equals(doc.getId()))
+                .collect(Collectors.toList());
+
+        List<DocsViewResponseDto> results = new ArrayList<>();
+
+        String projName = projRepository.findById(projId).orElseThrow().getProjName();
+        String userName = userRepository.findById(userId).orElseThrow().getUsername();
+
+        for (Docs docs : docsList) {
+            DocsViewResponseDto dto = new DocsViewResponseDto(docs);
+            dto.setProjName(projName);
+            dto.setUserName(userName);
+            results.add(dto);
+        }
+
+        return results;
     }
 }

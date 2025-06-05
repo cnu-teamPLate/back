@@ -1,6 +1,6 @@
 package com.cnu.teamProj.teamProj.security.jwt;
 
-import com.cnu.teamProj.teamProj.security.SecurityConstants;
+import com.cnu.teamProj.teamProj.security.service.SecurityConstants;
 import com.cnu.teamProj.teamProj.util.RedisUtil;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

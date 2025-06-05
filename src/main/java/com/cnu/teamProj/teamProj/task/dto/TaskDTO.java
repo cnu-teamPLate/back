@@ -1,8 +1,10 @@
 package com.cnu.teamProj.teamProj.task.dto;
 
+import com.cnu.teamProj.teamProj.file.dto.FileDto;
 import lombok.Getter;
 import lombok.Setter;
 import java.time.ZonedDateTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -17,4 +19,6 @@ public class TaskDTO {
     private String detail;
     private int checkBox; // `checkbox` → `checkBox`로 수정
     private String taskName;
+    private String userName;
+    private List<FileDto> files;
 }
