@@ -5,6 +5,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 
 @Entity
@@ -13,7 +15,7 @@ import java.time.ZonedDateTime;
 public class Project {
     @Id
     private String projId;
-    private ZonedDateTime date;
+    private LocalDateTime date;
     private String goal;
     private String projName;
     private String github;

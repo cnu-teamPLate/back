@@ -1,12 +1,18 @@
 package com.cnu.teamProj.teamProj.task.service;
 
+import com.cnu.teamProj.teamProj.file.dto.DocsViewResponseDto;
+import com.cnu.teamProj.teamProj.file.dto.FileDto;
+import com.cnu.teamProj.teamProj.file.service.DocsService;
+import com.cnu.teamProj.teamProj.security.repository.UserRepository;
 import com.cnu.teamProj.teamProj.task.dto.TaskDTO;
 import com.cnu.teamProj.teamProj.task.entity.Task;
 import com.cnu.teamProj.teamProj.task.repository.TaskRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import java.util.List;
-import java.util.Optional;
+
+import java.util.*;
 import java.util.stream.Collectors;
 import java.time.ZonedDateTime;
 
@@ -14,7 +20,9 @@ import java.time.ZonedDateTime;
 @RequiredArgsConstructor
 public class TaskService {
     private final TaskRepository taskRepository;
-
+    private final UserRepository userRepository;
+    @Autowired
+    private DocsService docsService;
     public boolean completeTask(Integer taskId) {
         Optional<Task> optionalTask=taskRepository.findById(taskId);
 
@@ -27,7 +35,7 @@ public class TaskService {
 
         return false;
     }
-
+    /*
     public List<TaskDTO> getTasksByProjIdAndId(String projId, String id) {
         List<Task> tasks = taskRepository.findByProjIdAndId(projId, id);
         return tasks.stream().map(task -> {
@@ -42,6 +50,73 @@ public class TaskService {
             dto.setDetail(task.getDetail());
             dto.setCheckBox(task.getCheckBox());
             dto.setTaskName(task.getTaskName());
+            return dto;
+        }).collect(Collectors.toList());
+    }
+    *//*
+    public List<TaskDTO> getTasksByProjIdAndId(String projId, String id) {
+        List<Task> tasks = taskRepository.findByProjIdAndId(projId, id);
+
+        return tasks.stream().map(task -> {
+            TaskDTO dto = new TaskDTO();
+            dto.setTaskId(task.getTaskId());
+            dto.setId(task.getId());
+            dto.setProjId(task.getProjId());
+            dto.setCate(task.getCate());
+            dto.setLevel(task.getLevel());
+            dto.setDate(task.getDate());
+            dto.setDetail(task.getDetail());
+            dto.setCheckBox(task.getCheckBox());
+            dto.setTaskName(task.getTaskName());
+
+            // 이름 조회해서 DTO에 set
+            userRepository.findById(task.getId())
+                    .ifPresent(user -> dto.setUserName(user.getUsername())); // 👈 여기 핵심!
+
+            return dto;
+        }).collect(Collectors.toList());
+    }
+*/
+    public List<TaskDTO> getTasksByFlexibleParams(String projId, String id) {
+        List<Task> tasks = new ArrayList<>();
+
+        if (projId != null && id != null) {
+            // projId + id
+            tasks = taskRepository.findByProjIdAndId(projId, id);
+
+        } else if (projId != null) {
+            // projId만 있을 경우
+            tasks = taskRepository.findAllByProjId(projId);
+
+        } else if (id != null) {
+            // id만 있을 경우
+            tasks = taskRepository.findAllById(id);
+        }
+
+        return tasks.stream().map(task -> {
+            TaskDTO dto = new TaskDTO();
+            dto.setTaskId(task.getTaskId());
+            dto.setId(task.getId());
+            dto.setProjId(task.getProjId());
+            dto.setCate(task.getCate());
+            dto.setLevel(task.getLevel());
+            dto.setDate(task.getDate());
+            dto.setDetail(task.getDetail());
+            dto.setCheckBox(task.getCheckBox());
+            dto.setTaskName(task.getTaskName());
+
+            userRepository.findById(task.getId())
+                    .ifPresent(user -> dto.setUserName(user.getUsername()));
+
+            List<DocsViewResponseDto> docs = docsService.getDocsByUserAndProject(task.getProjId(), task.getId());
+
+            List<FileDto> files = docs.stream()
+                    .map(doc -> new FileDto(doc.getUrl(), doc.getFilename()))
+                    .collect(Collectors.toList());
+
+            dto.setFiles(files);
+
+
             return dto;
         }).collect(Collectors.toList());
     }

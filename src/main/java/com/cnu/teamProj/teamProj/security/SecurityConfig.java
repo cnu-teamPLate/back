@@ -1,5 +1,5 @@
 package com.cnu.teamProj.teamProj.security;
-import static com.cnu.teamProj.teamProj.security.SecurityConstants.*;
+import static com.cnu.teamProj.teamProj.security.service.SecurityConstants.*;
 
 import com.cnu.teamProj.teamProj.security.handler.CustomLogoutHandler;
 import com.cnu.teamProj.teamProj.security.handler.CustomLogoutSuccessHandler;

@@ -7,6 +7,8 @@ import com.cnu.teamProj.teamProj.proj.service.ProjectService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -35,21 +37,13 @@ public class ProjectController {
 
     @PostMapping("/create")
     @Operation(summary = "프로젝트 생성")
-    @Parameters(
-            {
-                    @Parameter(name = "date", description = "프로젝트 마감 날짜", example = "2025-01-15T00:02:27.000Z"),
-                    @Parameter(name="goal", description = "목표", example = "A+"),
-                    @Parameter(name="projName", description = "프로젝트 이름", example = "최강"),
-                    @Parameter(name = "github", description = "깃헙 주소", example = "https://github.com"),
-                    @Parameter(name = "classId", description = "수업 코드", example = "1")
-            }
-    )
-    public ResponseEntity<String> createProjs(@RequestBody ProjCreateDto dto) {
-        int flag = projectService.createProject(dto);
-        if(flag == -1) return new ResponseEntity<>("등록되지 않은 수업입니다", HttpStatus.BAD_REQUEST);
-        if(flag == 1) return new ResponseEntity<>("정상적으로 등록되었습니다", HttpStatus.OK);
-        if(flag == -2) return new ResponseEntity<>("날짜 형식이 잘못되었습니다", HttpStatus.BAD_REQUEST);
-        return new ResponseEntity<>("예상치 못한 오류가 발생했습니다",HttpStatus.BAD_REQUEST);
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "요청이 성공적으로 처리되었습니다<br/>단, 존재하지 않는 학번이 들어올 경우 저장에 실패한 학번 정보가 같이 반환됨"),
+            @ApiResponse(responseCode = "400", description = "응답에 필요한 필수 요청 값이 전달되지 않았습니다"),
+            @ApiResponse(responseCode = "404", description = "응답에 필요한 필수 요청 값이 전달되지 않았습니다")
+    })
+    public ResponseEntity<?> createProjs(@io.swagger.v3.oas.annotations.parameters.RequestBody @RequestBody ProjCreateDto dto) {
+        return projectService.createProject(dto);
     }
 
     @PutMapping("/update/{projectId}")

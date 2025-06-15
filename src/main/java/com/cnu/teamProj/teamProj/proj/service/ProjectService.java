@@ -1,5 +1,6 @@
 package com.cnu.teamProj.teamProj.proj.service;
 
+import com.cnu.teamProj.teamProj.common.ResultConstant;
 import com.cnu.teamProj.teamProj.manage.entity.ClassInfo;
 import com.cnu.teamProj.teamProj.manage.repository.ClassRepository;
 import com.cnu.teamProj.teamProj.proj.dto.ProjCreateDto;
@@ -13,8 +14,12 @@ import com.cnu.teamProj.teamProj.proj.repository.ProjRepository;
 import com.cnu.teamProj.teamProj.security.entity.User;
 import com.cnu.teamProj.teamProj.security.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import javax.xml.transform.Result;
+import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -62,20 +67,11 @@ public class ProjectService {
         return ret;
     }
 
-    public int createProject(ProjCreateDto dto) {
+    public ResponseEntity<?> createProject(ProjCreateDto dto) {
         //입력값 체크
-        if(dto==null) return 0;
+        if(dto==null) return ResultConstant.returnResult(ResultConstant.REQUIRED_PARAM_NON);
         //등록된 수업이 아니라면 바로 -1반환
-        if(!classRepository.existsById(dto.getClassId())) return -1;
-        //날짜 형식 체크
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssX");
-        ZonedDateTime date;
-        try{
-            date = ZonedDateTime.parse(dto.getDate().toString(), formatter);
-        } catch(DateTimeParseException e){
-            return -2;
-        }
-
+        if(!classRepository.existsById(dto.getClassId())) ResultConstant.returnResultCustom(ResultConstant.NOT_EXIST, "등록되지 않은 수업입니다");
 
         //프로젝트 아이디 생성 및 project 테이블에 반영
         ClassInfo classInfo = classRepository.findById(dto.getClassId()).stream().toList().get(0);
@@ -85,7 +81,7 @@ public class ProjectService {
 
         Project project = new Project();
         project.setScheCnt(0);
-        project.setDate(date);
+        project.setDate(dto.getDate());
         project.setGoal(dto.getGoal());
         project.setGithub(dto.getGithub());
         project.setProjId(projId);
@@ -93,7 +89,21 @@ public class ProjectService {
         project.setProjName(dto.getProjName());
         if(dto.getTeamName() != null) project.setTeamName(dto.getTeamName());
         projRepository.save(project);
-        return 1;
+
+        List<String> unExistUser = new ArrayList<>();
+        for(String userId : dto.getMembers()) {
+            User user = userRepository.findById(userId).orElse(null);
+            if(user != null) {
+                memberRepository.save(new ProjMem(user, project));
+            } else {
+                unExistUser.add(userId);
+            }
+        }
+        if(!unExistUser.isEmpty()) {
+            String message = "해당 유저는 존재하지 않습니다 : " + unExistUser.toString();
+            return ResultConstant.returnResultCustom(ResultConstant.OK, message);
+        }
+        return ResultConstant.returnResult(ResultConstant.OK);
     }
 
     public boolean updateProject(ProjUpdateDto dto) {
