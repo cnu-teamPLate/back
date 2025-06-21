@@ -1,17 +1,21 @@
 package com.cnu.teamProj.teamProj.schedule.controller;
 
-import com.cnu.teamProj.teamProj.schedule.dto.CalendarScheduleDto;
-import com.cnu.teamProj.teamProj.schedule.dto.ScheduleDto;
-import com.cnu.teamProj.teamProj.schedule.dto.ScheduleUpdateDto;
-import com.cnu.teamProj.teamProj.schedule.dto.TaskUpdateDto;
+import com.cnu.teamProj.teamProj.schedule.dto.*;
 import com.cnu.teamProj.teamProj.schedule.service.ScheduleService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.ZonedDateTime;
@@ -42,28 +46,53 @@ public class ScheduleController {
      * */
     @GetMapping("/weekly")
     @Operation(summary = "주간 일정 불러오기 api")
-    @Parameters({
-            @Parameter(name = "projId", example = "cse00001"),
-            @Parameter(name = "date", example = "2025-01-01T00:02:27.Z", description = "기준일로, 해당일로부터 일주일에 해당하는 데이터를 불러옴"),
-            @Parameter(name = "cate", example = "meeting", description = "회의 = meeting<br/>과제 = task<br/>일정 = plan")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", content=@Content(schema = @Schema(implementation = CalendarScheduleDto.class))),
+            @ApiResponse(responseCode = "404", content=@Content(
+                    mediaType = "application/json",
+                    schema = @Schema(implementation = ErrorResponse.class),
+                    examples = {
+                            @ExampleObject(name = "존재하지 않는 프로젝트", value = "{\"message\": \"파일의 이름명이 잘못되었습니다\", \"code\": 404}"),
+                            @ExampleObject(name = "존재하지 않는 유저", value = "{\"message\": \"존재하는 유저가 아닙니다\", \"code\": 404}")
+                    }
+            )),
+            @ApiResponse(responseCode = "400", content = @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(implementation = ErrorResponse.class),
+                    examples = {
+                            @ExampleObject(name = "필수 요청 값이 없음", value = "{\"message\": \"응답에 필요한 필수 요청 값이 전달되지 않았습니다.\", \"code\": 400}")
+                    }
+            ))
     })
-    public ResponseEntity<Object> viewWeekly(@RequestBody Map<String, Object> param) {
-        param.put("term", "w");
-        return scheduleService.getObjectResponseEntity(param);
+    public ResponseEntity<?> viewWeekly(@ParameterObject ScheduleViewReqDto param) {
+        return scheduleService.getSchedule(param, "w");
     }
 
 
 
     @GetMapping("/monthly")
     @Operation(summary = "월간 일정 불러오기 api")
-    @Parameters({
-            @Parameter(name = "projId", example = "cse00001"),
-            @Parameter(name = "date", example = "2025-01-01T00:02:27.Z", description = "기준일로, 해당일로부터 한 달에 해당하는 데이터를 불러옴"),
-            @Parameter(name = "cate", example = "meeting", description = "회의 = meeting<br/>과제 = task<br/>일정 = plan")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", content=@Content(schema = @Schema(implementation = CalendarScheduleDto.class))),
+            @ApiResponse(responseCode = "404", content=@Content(
+                    mediaType = "application/json",
+                    schema = @Schema(implementation = ErrorResponse.class),
+                    examples = {
+                            @ExampleObject(name = "존재하지 않는 프로젝트", value = "{\"message\": \"파일의 이름명이 잘못되었습니다\", \"code\": 404}"),
+                            @ExampleObject(name = "존재하지 않는 유저", value = "{\"message\": \"존재하는 유저가 아닙니다\", \"code\": 404}")
+                    }
+            )),
+            @ApiResponse(responseCode = "400", content = @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(implementation = ErrorResponse.class),
+                    examples = {
+                            @ExampleObject(name = "필수 요청 값이 없음", value = "{\"message\": \"응답에 필요한 필수 요청 값이 전달되지 않았습니다.\", \"code\": 400}"),
+                            @ExampleObject(name = "날짜 형식이 잘못됨", value = "{\"message\": \"요청 형식이 잘못되었습니다\", \"code\": 400}")
+                    }
+            ))
     })
-    public ResponseEntity<Object> viewMonthly(@RequestBody Map<String, Object> param) {
-        param.put("term", "m");
-        return scheduleService.getObjectResponseEntity(param);
+    public ResponseEntity<?> viewMonthly(@ParameterObject ScheduleViewReqDto dto) {
+        return scheduleService.getSchedule(dto, "m");
     }
 
 

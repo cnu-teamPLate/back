@@ -4,6 +4,7 @@ import com.cnu.teamProj.teamProj.schedule.entity.Schedule;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.List;
 
@@ -12,7 +13,7 @@ import java.util.List;
 public class ScheduleDto {
     private String scheId;
     private String projId;
-    private ZonedDateTime date;
+    private LocalDateTime date;
     private String scheName;
     private String place;
     private String category;

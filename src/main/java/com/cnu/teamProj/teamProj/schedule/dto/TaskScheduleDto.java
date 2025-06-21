@@ -10,11 +10,14 @@ import java.time.ZonedDateTime;
 @Data
 @AllArgsConstructor
 public class TaskScheduleDto {
+
+    private int taskId;
     private String projName;
     private String role;
     private String deadLine;
 
     public TaskScheduleDto(Task task) {
+        this.taskId = task.getTaskId();
         this.role = task.getRole();
         this.deadLine = task.getDate().toString();
     }

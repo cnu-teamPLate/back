@@ -3,6 +3,7 @@ package com.cnu.teamProj.teamProj.schedule.dto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
+import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
@@ -13,8 +14,8 @@ public class ScheduleUpdateDto {
     private String scheId;
     @Schema(description = "프로젝트 아이디", example = "cse00001")
     private String projId;
-    @Schema(description = "스케줄 날짜", example = "2025-01-14T00:02:27.000Z")
-    private ZonedDateTime date;
+    @Schema(description = "스케줄 날짜", example = "2025-01-14T00:02:27")
+    private LocalDateTime date;
     @Schema(description = "스케줄 이름", example = "비대면 회의")
     private String scheName;
     @Schema(description = "스케줄 장소", example = "구글 밋")
