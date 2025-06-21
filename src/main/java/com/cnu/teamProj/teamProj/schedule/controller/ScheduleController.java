@@ -105,7 +105,7 @@ public class ScheduleController {
             @Parameter(name = "place", example = "온라인", description = "약속 장소"),
             @Parameter(name = "category", example = "meeting", description = "회의 = meeting<br/>과제 = task<br/>일정 = plan"),
             @Parameter(name = "detail", example = "발표 파일, 발표자 리스트 제출해야 함", description = "스케줄 관련 설명"),
-            @Parameter(name = "participants", example = "[\"00000000\", \"01111111\"]", description = "참여자의 학번을 배열로 넘겨야 함")
+            @Parameter(name = "participants", example = "[\"00000000\", \"01111111\"]", description = "참여자의 학번을 배열로 넘겨야 함.")
     })
     public ResponseEntity<String> uploadSchedule(@RequestBody ScheduleDto dto) {
         int ret = scheduleService.createSchedule(dto);
