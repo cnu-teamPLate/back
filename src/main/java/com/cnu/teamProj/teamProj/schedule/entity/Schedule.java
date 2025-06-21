@@ -8,7 +8,9 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.cglib.core.Local;
 
+import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 
 @Entity
@@ -18,7 +20,7 @@ public class Schedule {
     @Id
     private String scheId;
 
-    private ZonedDateTime date;
+    private LocalDateTime date;
     private String scheName;
     private String place;
     private String category;
@@ -28,7 +30,7 @@ public class Schedule {
     @JoinColumn(name = "PROJ_ID", referencedColumnName = "projId")
     private Project projId;
 
-    public Schedule(String scheId, ZonedDateTime date, String scheName, String place, String category, String detail, Project projId) {
+    public Schedule(String scheId, LocalDateTime date, String scheName, String place, String category, String detail, Project projId) {
         this.scheId = scheId;
         this.date = date;
         this.scheName = scheName;
