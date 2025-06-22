@@ -1,17 +1,15 @@
 package com.cnu.teamProj.teamProj.schedule.entity;
 
 import com.cnu.teamProj.teamProj.proj.entity.Project;
-import com.cnu.teamProj.teamProj.schedule.dto.ScheduleUpdateDto;
+import com.cnu.teamProj.teamProj.schedule.dto.ScheduleUpdateReqDto;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.cglib.core.Local;
 
 import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
 
 @Entity
 @Getter
@@ -43,7 +41,7 @@ public class Schedule {
     public Schedule() {
     }
 
-    public Schedule(ScheduleUpdateDto scheduleDto) {
+    public Schedule(ScheduleUpdateReqDto scheduleDto) {
         this.scheId = scheduleDto.getScheId();
         this.date = scheduleDto.getDate();
         this.scheName = scheduleDto.getScheName();

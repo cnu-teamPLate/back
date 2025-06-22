@@ -4,16 +4,14 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 
 @Data
-public class ScheduleUpdateDto {
+@Schema(name = "스케줄 수정 시 요청 값")
+public class ScheduleUpdateReqDto {
     @Schema(description = "스케줄 아이디", example = "cse00001_3")
     private String scheId;
-    @Schema(description = "프로젝트 아이디", example = "cse00001")
-    private String projId;
     @Schema(description = "스케줄 날짜", example = "2025-01-14T00:02:27")
     private LocalDateTime date;
     @Schema(description = "스케줄 이름", example = "비대면 회의")
@@ -24,9 +22,6 @@ public class ScheduleUpdateDto {
     private String category;
     @Schema(description = "스케줄 설명", example = "역할 분담 해야함")
     private String detail;
-    @Schema(description = "참여자들의 학번을 배열로 전달", example = " {\n" +
-            "                        \"00000000\":-1,\n" +
-            "                        \"01111111\":1\n" +
-            "                    }")
-    private Map<String, Integer> participants; //userId:변동여부 (0 -> 변동x, 1->추가, -1->삭제)
+    @Schema(description = "참여자들의 학번을 배열로 전달", example = "[\"20241121\", \"20251234\"]", type = "array", implementation = String.class)
+    private List<String> participants;
 }

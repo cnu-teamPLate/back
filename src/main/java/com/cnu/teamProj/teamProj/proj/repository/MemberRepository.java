@@ -24,4 +24,5 @@ public interface MemberRepository extends JpaRepository<ProjMem, ProjMemId> {
     //유저가 참여중인 프로젝트 반환
     List<ProjMem> findProjMemsById(User user);
 
+
 }
