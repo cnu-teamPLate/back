@@ -5,7 +5,6 @@ import com.cnu.teamProj.teamProj.schedule.dto.*;
 import com.cnu.teamProj.teamProj.schedule.service.ScheduleService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -19,7 +18,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.ZonedDateTime;
 import java.util.Map;
 
 @RestController
@@ -100,7 +98,7 @@ public class ScheduleController {
     @PostMapping("/upload")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", content=@Content(schema = @Schema(implementation = ResponseDto.class), examples = {@ExampleObject(name = "요청 성공", value="{\"message\": \"요청이 성공적으로 처리되었습니다\", \"code\": 200}")})),
-            @ApiResponse(responseCode = "400", content=@Content(schema = @Schema(implementation = ErrorResponse.class), examples = {@ExampleObject(name = "필수 파라미터 없음", value="{\"message\": \"응답에 필요한 필수 요청 값이 전달되지 않았습니다.\", \"code\": 400}")})),
+            @ApiResponse(responseCode = "400", content=@Content(schema = @Schema(implementation = ErrorResponse.class), examples = {@ExampleObject(name = "필수 파라미터 없음", value="{\"message\": \"응답에 필요한 필수 요청 값이 전달되지 않았습니다.\", \"code\": 400}"), @ExampleObject(name = "날짜 형식이 잘못됨", value = "{\"message\": \"요청 형식이 잘못되었습니다\", \"code\": 400}")})),
             @ApiResponse(responseCode = "404", content=@Content(
                     mediaType = "application/json",
                     schema = @Schema(implementation = ErrorResponse.class),
@@ -131,7 +129,18 @@ public class ScheduleController {
 
     @PutMapping("/update/team-schedule")
     @Operation(summary = "팀 스케줄 수정")
-    public ResponseEntity<?> updateSchedule(@io.swagger.v3.oas.annotations.parameters.RequestBody(description = "스케줄 수정 시 요청 값") @RequestBody ScheduleUpdateDto dto) {
+    @ApiResponses(value = {
+           @ApiResponse(responseCode = "404", content = @Content(
+                   mediaType = "application/json",
+                   schema=@Schema(implementation = ErrorResponse.class),
+                   examples = {
+                           @ExampleObject(name = "없는 스케줄 아이디", value = "{\"message\": \"해당 아이디의 스케줄 레코드가 존재하지 않습니다\", \"code\": 404}"),
+                           @ExampleObject(name = "없는 프로젝트 아이디", value = "{\"message\": \"존재하는 프로젝트가 아닙니다\", \"code\": 404}")
+                   }
+           )),
+            @ApiResponse(responseCode = "400", content=@Content(mediaType = "application/json", schema=@Schema(implementation = ErrorResponse.class), examples = {@ExampleObject(name="잘못된 유저 값", value = "{\"message\": \"프로젝트 구성원이 아닌 유저는 참여자로 추가할 수 없습니다\", \"code\": 400}")}))
+    })
+    public ResponseEntity<?> updateSchedule(@io.swagger.v3.oas.annotations.parameters.RequestBody(description = "스케줄 수정 시 요청 값") @RequestBody ScheduleUpdateReqDto dto) {
         return scheduleService.updateSchedule(dto);
     }
 

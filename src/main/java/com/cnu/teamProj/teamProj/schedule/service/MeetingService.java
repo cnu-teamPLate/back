@@ -93,8 +93,8 @@ public class MeetingService {
         //회의에 대한 정보 가져오기 -> scheduleDto
         ScheduleCreateReqDto scheduleDto = new ScheduleCreateReqDto(schedule);
         List<String> participantsss = new ArrayList<>();
-        for(Participants participants : participantsRepository.findParticipantsByScheId(scheId)) {
-            User user = userRepository.findById(participants.getId()).orElseThrow();
+        for(Participants participants : participantsRepository.findParticipantsByScheId(schedule)) {
+            User user = userRepository.findById(participants.getId().getId()).orElseThrow();
             participantsss.add(user.getUsername());
         }
         scheduleDto.setParticipants(participantsss);

@@ -27,4 +27,9 @@ public class GlobalExceptionHandler {
     public ResponseEntity<?> handleInvalidFormat(MethodArgumentNotValidException ex) {
         return ResultConstant.returnResultCustom(ResultConstant.INVALID_PARAM, "요청 형식이 잘못되었습니다");
     }
+
+    @ExceptionHandler(BadRequestException.class)
+    public ResponseEntity<?> handleBadRequestException(Exception ex) {
+        return ResultConstant.returnResultCustom(ResultConstant.INVALID_PARAM, ex.getMessage());
+    }
 }
