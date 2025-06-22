@@ -22,9 +22,6 @@ public class ScheduleUpdateReqDto {
     private String category;
     @Schema(description = "스케줄 설명", example = "역할 분담 해야함")
     private String detail;
-    @Schema(description = "참여자들의 학번을 배열로 전달", example = " {\n" +
-            "                        \"00000000\":-1,\n" +
-            "                        \"01111111\":1\n" +
-            "                    }")
-    private List<String> participants; //userId:변동여부 (0 -> 변동x, 1->추가, -1->삭제)
+    @Schema(description = "참여자들의 학번을 배열로 전달", example = "[\"20241121\", \"20251234\"]", type = "array", implementation = String.class)
+    private List<String> participants;
 }

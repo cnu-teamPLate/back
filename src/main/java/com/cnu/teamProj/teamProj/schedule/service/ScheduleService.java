@@ -290,21 +290,24 @@ public class ScheduleService {
     }
 
     /**
-     * @param scheId - 삭제하려는 스케쥴 아이디
+     * @param param - 삭제하려는 스케쥴 아이디 리스트
      * @return
      * -1 = 존재하는 스케줄이 없을 때
      * 1 = 성공적으로 삭제됐을 때
      * */
     @Transactional
-    public int deleteSchedule(String scheId) {
-        Schedule schedule = scheduleRepository.findByScheId(scheId);
-        if(schedule == null) return -1;
-        //참가자 먼저 지우기
-        List<Participants> participants = participantsRepository.findParticipantsByScheId(schedule);
-        participantsRepository.deleteAll(participants);
-        //스케줄 지우기
-        scheduleRepository.delete(schedule);
-        return 1;
+    public ResponseEntity<?> deleteSchedule(ScheduleDeleteReqDto param) {
+
+        for(String scheduleId : param.getScheId()) {
+            Schedule schedule = scheduleRepository.findByScheId(scheduleId);
+            if(schedule == null) throw new UserNotFoundException("존재하지 않는 스케줄 아이디입니다");
+            //참가자 제거
+            List<Participants> participants = participantsRepository.findParticipantsByScheId(schedule);
+            participantsRepository.deleteAll(participants);
+            //스케줄 삭제
+            scheduleRepository.delete(schedule);
+        }
+        return ResultConstant.returnResult(ResultConstant.OK);
     }
 
     @Transactional

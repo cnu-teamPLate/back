@@ -112,23 +112,17 @@ public class ScheduleController {
     }
 
     @DeleteMapping("/delete/schedule")
-    @Operation(summary = "스케줄 삭제")
-    @Parameter(name = "scheId", example = "cse00001_1")
-    public ResponseEntity<String> deleteSchedule( @RequestBody Map<String, Object> param) {
-        int ret;
-        if(param.containsKey("taskId")) {
-            ret = scheduleService.deleteTask((Integer)param.get("taskId"));
-        } else if (param.containsKey("scheId")) {
-            ret = scheduleService.deleteSchedule(param.get("scheId").toString());
-        } else ret = 0;
-
-        if(ret == 1) return new ResponseEntity<>("성공적으로 삭제되었습니다", HttpStatus.OK);
-        else if(ret == -1) return new ResponseEntity<>("존재하는 일정이 없습니다", HttpStatus.NOT_FOUND);
-        else return new ResponseEntity<>("예상치 못한 문제가 발생했습니다", HttpStatus.INTERNAL_SERVER_ERROR);
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "404", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class), examples = {@ExampleObject(name = "존재하지 않는 스케줄", value = "{\"message\": \"존재하지 않는 스케줄 아이디입니다\", \"code\": 404}")})),
+            @ApiResponse(responseCode = "200", content=@Content(schema = @Schema(implementation = ResponseDto.class), examples = {@ExampleObject(name = "요청 성공", value="{\"message\": \"요청이 성공적으로 처리되었습니다\", \"code\": 200}")}))
+    })
+    @Operation(summary = "스케줄 삭제", description = "⚠️scheId 값은 [\"CSE00011_4\",\"CSE00011_3\"] 형태로 보내줘야 함!")
+    public ResponseEntity<?> deleteSchedule(@io.swagger.v3.oas.annotations.parameters.RequestBody @RequestBody ScheduleDeleteReqDto dto) {
+        return scheduleService.deleteSchedule(dto);
     }
 
     @PutMapping("/update/team-schedule")
-    @Operation(summary = "팀 스케줄 수정")
+    @Operation(summary = "팀 스케줄 수정", description = "⚠️participants 값은 [\"20241121\",\"20251234\"] 형태로 보내줘야 함!")
     @ApiResponses(value = {
            @ApiResponse(responseCode = "404", content = @Content(
                    mediaType = "application/json",
