@@ -2,9 +2,9 @@ package com.cnu.teamProj.teamProj.schedule.service;
 
 import com.cnu.teamProj.teamProj.comment.Comment;
 import com.cnu.teamProj.teamProj.comment.CommentRepository;
-import com.cnu.teamProj.teamProj.common.DateToStringMapping;
 import com.cnu.teamProj.teamProj.common.ResultConstant;
 import com.cnu.teamProj.teamProj.common.UserNotFoundException;
+import com.cnu.teamProj.teamProj.proj.entity.ProjMem;
 import com.cnu.teamProj.teamProj.proj.entity.Project;
 import com.cnu.teamProj.teamProj.proj.repository.MemberRepository;
 import com.cnu.teamProj.teamProj.proj.repository.ProjRepository;
@@ -20,15 +20,13 @@ import com.cnu.teamProj.teamProj.task.repository.TaskRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.cglib.core.Local;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.RequestBody;
 
+import javax.xml.transform.Result;
 import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
 import java.util.*;
 
 @Service
@@ -51,14 +49,16 @@ public class ScheduleService {
      *  - 존재하지 않는 유저가 참여자로 들어가 있으면 -2 반환
      *  - 정상 저장되었으면 1 반환
      * */
-    public int createSchedule(ScheduleDto scheduleDto) {
-        if(scheduleDto == null) return 0;
-        if(projRepository.findById(scheduleDto.getProjId()).isEmpty()) return -1;
-        Project project = projRepository.findById(scheduleDto.getProjId()).get();
+    @Transactional
+    public ResponseEntity<?> createSchedule(ScheduleCreateReqDto scheduleDto) {
+        //필수 요청 값 유효성 검사
+        if(scheduleDto == null) return ResultConstant.returnResult(ResultConstant.REQUIRED_PARAM_NON);
+        if(scheduleDto.getProjId() == null || scheduleDto.getProjId().isEmpty()) return ResultConstant.returnResult(ResultConstant.REQUIRED_PARAM_NON);
+        Project project = projRepository.findById(scheduleDto.getProjId()).orElse(null);
+        if(project == null) return ResultConstant.returnResultCustom(ResultConstant.NOT_EXIST, "존재하는 프로젝트 아이디가 아닙니다");
         //schedule 아이디 생성
         int scheCnt = project.getScheCnt()+1;
         project.setScheCnt(scheCnt);
-        projRepository.save(project);
         String scheId = String.format("%s_%d", project.getProjId(), scheCnt);
         //schedule 테이블에 값 저장
         Schedule schedule = new Schedule(scheId, scheduleDto.getDate(), scheduleDto.getScheName(), scheduleDto.getPlace(), scheduleDto.getCategory(), scheduleDto.getDetail(), project);
@@ -66,11 +66,18 @@ public class ScheduleService {
         //participants 테이블에 값 저장
         List<String> people = scheduleDto.getParticipants();
         for(String teamone : people) {
-            if(userRepository.findById(teamone).isEmpty()) return -2;
+            if(userRepository.findById(teamone).isEmpty()) throw new UserNotFoundException(String.format("%s : 존재하지 않는 유저 아이디입니다", teamone));
             Participants participants = new Participants(scheId, teamone, project.getProjId());
             participantsRepository.save(participants);
         }
-        return 1;
+        if(people.isEmpty()) {
+            List<ProjMem> participants = projMemRepository.findProjMemsByProjId(project);
+            for(ProjMem member : participants) {
+                Participants participants1 = new Participants(scheId, member.getId().getId(), project.getProjId());
+                participantsRepository.save(participants1);
+            }
+        }
+        return ResultConstant.returnResult(ResultConstant.OK);
     }
     /**
      * 스케쥴을 조회하는 메소드
