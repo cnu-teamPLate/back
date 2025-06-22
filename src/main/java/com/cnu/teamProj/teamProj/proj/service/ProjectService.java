@@ -1,6 +1,7 @@
 package com.cnu.teamProj.teamProj.proj.service;
 
 import com.cnu.teamProj.teamProj.common.ResultConstant;
+import com.cnu.teamProj.teamProj.common.UserNotFoundException;
 import com.cnu.teamProj.teamProj.manage.entity.ClassInfo;
 import com.cnu.teamProj.teamProj.manage.repository.ClassRepository;
 import com.cnu.teamProj.teamProj.proj.dto.ProjCreateDto;
@@ -39,14 +40,15 @@ public class ProjectService {
         List<ProjDto> ret = new ArrayList<>();
 
         //userId를 통해 user가 참여중인 프로젝트 리스트 반환
-        if(!userRepository.existsById(userId)) return null;
-        User user = userRepository.findById(userId).get();
+        User user = userRepository.findById(userId).orElse(null);
+        if(user == null) throw new UserNotFoundException("존재하는 유저 아이디가 아닙니다");
         List<ProjMem> projs = memberRepository.findProjMemsById(user);
         for(ProjMem proj : projs) {
             String projId = proj.getProjId().getProjId();
-            Project project = projRepository.findById(projId).stream().toList().get(0);
+            Project project = projRepository.findById(projId).orElse(null);
+            if(project == null) return null;
             //반환값에 맞게 필터링
-            ProjDto newProject = new ProjDto(project.getClassId().getClassId(), project.getProjName(), project.getDate().toString(), project.getGoal(), project.getGithub(), project.getTeamName(), null);
+            ProjDto newProject = new ProjDto(project.getProjId(), project.getClassId().getClassId(), project.getProjName(), project.getDate().toString(), project.getGoal(), project.getGithub(), project.getTeamName(), null);
             List<StudentInfoDto> newProjectTeamOnes = new ArrayList<>();
             //프로젝트 id로 프로젝트 정보 불러오기
             List<ProjMem> projMems = memberRepository.findProjMemsByProjId(project);
