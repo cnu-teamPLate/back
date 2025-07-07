@@ -1,10 +1,7 @@
 package com.cnu.teamProj.teamProj.task.entity;
 
 import com.cnu.teamProj.teamProj.schedule.dto.TaskUpdateDto;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -14,6 +11,7 @@ import java.time.ZonedDateTime;
 @Getter
 @Setter
 @Table(name = "task") // DB 테이블명과 일치시킴
+
 public class Task {
     @Id
     @Column(name = "TASK_ID") // DB 컬럼명과 정확히 매핑

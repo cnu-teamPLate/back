@@ -1,7 +1,6 @@
 package com.cnu.teamProj.teamProj.security.service;
 
 import com.cnu.teamProj.teamProj.common.ResultConstant;
-import com.cnu.teamProj.teamProj.security.SecurityConstants;
 import com.cnu.teamProj.teamProj.security.dto.RegisterDto;
 import com.cnu.teamProj.teamProj.security.dto.UserInfoResponseDto;
 import com.cnu.teamProj.teamProj.security.entity.User;

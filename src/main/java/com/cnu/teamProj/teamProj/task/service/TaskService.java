@@ -123,13 +123,18 @@ public class TaskService {
 
     public String createTask(TaskDTO taskDTO) {
         try {
+
+
             // taskId가 숫자로 변환 가능한지 체크
+
             int parsedTaskId;
+            /*
             try {
                 parsedTaskId = Integer.parseInt(String.valueOf(taskDTO.getTaskId()));
             } catch (NumberFormatException e) {
                 return "과제 ID(taskId)는 숫자로 변환할 수 없습니다.";
             }
+*/
 
             // Task 엔터티 생성 및 필드 설정
             Task task = new Task();
