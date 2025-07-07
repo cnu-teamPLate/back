@@ -1,5 +1,6 @@
 package com.cnu.teamProj.teamProj.task.service;
 
+import com.cnu.teamProj.teamProj.common.ResultConstant;
 import com.cnu.teamProj.teamProj.file.dto.DocsViewResponseDto;
 import com.cnu.teamProj.teamProj.file.dto.FileDto;
 import com.cnu.teamProj.teamProj.file.service.DocsService;
@@ -121,19 +122,19 @@ public class TaskService {
         }).collect(Collectors.toList());
     }
 
-    public String createTask(TaskDTO taskDTO) {
+    public ResponseEntity<?> createTask(TaskDTO taskDTO) {
         try {
             // taskId가 숫자로 변환 가능한지 체크
-            int parsedTaskId;
-            try {
-                parsedTaskId = Integer.parseInt(String.valueOf(taskDTO.getTaskId()));
-            } catch (NumberFormatException e) {
-                return "과제 ID(taskId)는 숫자로 변환할 수 없습니다.";
-            }
+//            int parsedTaskId;
+//            try {
+//                parsedTaskId = Integer.parseInt(String.valueOf(taskDTO.getTaskId()));
+//            } catch (NumberFormatException e) {
+//                return "과제 ID(taskId)는 숫자로 변환할 수 없습니다.";
+//            }
 
             // Task 엔터티 생성 및 필드 설정
             Task task = new Task();
-            task.setTaskId(parsedTaskId); // `TASK_ID`는 int
+//            task.setTaskId(parsedTaskId); // `TASK_ID`는 int
             task.setId(taskDTO.getId()); // 유저 아이디
             task.setProjId(taskDTO.getProjId()); // 프로젝트 ID
             task.setRole(taskDTO.getRole()); // 역할
@@ -145,9 +146,9 @@ public class TaskService {
             task.setTaskName(taskDTO.getTaskName());
 
             taskRepository.save(task);
-            return "과제가 성공적으로 등록되었습니다.";
+            return ResultConstant.returnResultCustom(ResultConstant.OK, "과제 등록 성공");
         } catch (Exception e) {
-            return "과제 등록 중 오류 발생: " + e.getMessage();
+            return ResultConstant.returnResultCustom(ResultConstant.UNEXPECTED_ERROR, "과제 등록 실패");
         }
     }
 }
