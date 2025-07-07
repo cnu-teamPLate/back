@@ -28,14 +28,8 @@ public class TaskController {
     private final DocsService docsService;
 
     @PostMapping("/post")
-    public ResponseEntity<String> createTask(@RequestBody TaskDTO taskDTO) {
-        String result = taskService.createTask(taskDTO);
-
-        if (result.startsWith("과제가 성공적으로 등록되었습니다!")) {
-            return ResponseEntity.ok(result);
-        } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result);
-        }
+    public ResponseEntity<?> createTask(@RequestBody TaskDTO taskDTO) {
+        return taskService.createTask(taskDTO);
     }
 
     @Operation(summary = "유저에게 할당된 과제를 불러오는 api")
