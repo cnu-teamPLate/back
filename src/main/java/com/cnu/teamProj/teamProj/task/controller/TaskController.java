@@ -1,13 +1,16 @@
 package com.cnu.teamProj.teamProj.task.controller;
 
+import com.cnu.teamProj.teamProj.common.ResponseDto;
 import com.cnu.teamProj.teamProj.file.dto.DocsViewResponseDto;
 import com.cnu.teamProj.teamProj.file.service.DocsService;
+import com.cnu.teamProj.teamProj.task.dto.DetailTaskDto;
 import com.cnu.teamProj.teamProj.task.dto.TaskDTO;
 import com.cnu.teamProj.teamProj.task.service.TaskService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -52,6 +55,7 @@ public class TaskController {
     }
 
     @PutMapping("{taskId}")
+    @Operation()
     public ResponseEntity<String> completeTask(@PathVariable Integer taskId) {
         boolean updated=taskService.completeTask(taskId);
 
@@ -60,6 +64,18 @@ public class TaskController {
 
         }
         return ResponseEntity.ok("과제가 완료되었습니다.");
+    }
+
+    //특정 과제 아이디에 대한 디테일한 정보 가져오기
+    @GetMapping("/view-detail/{taskId}")
+    @Operation(summary = "특정 과제에 대한 디테일 정보 api")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "404", description = "해당 아이디의 값이 없습니다.", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "500", description = "더 이상 존재하지 않는 유저 혹은 프로젝트의 과제 입니다", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "200", description = "과제의 디테일한 정보", content = @Content(schema = @Schema(implementation = DetailTaskDto.class)))
+    })
+    public ResponseEntity<?> getDetailTaskByTaskId(@PathVariable(value = "taskId") String taskId) {
+        return taskService.getTaskByTaskId(taskId);
     }
 
 }
