@@ -16,6 +16,7 @@ import java.util.Objects;
 import java.util.Optional;
 @Service
 public class UserInfoManageService {
+    //TODO test
     UserRepository userRepository;
     PasswordEncoder passwordEncoder;
 
