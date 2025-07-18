@@ -4,12 +4,17 @@ import com.cnu.teamProj.teamProj.common.ResultConstant;
 import com.cnu.teamProj.teamProj.file.dto.DocsViewResponseDto;
 import com.cnu.teamProj.teamProj.file.dto.FileDto;
 import com.cnu.teamProj.teamProj.file.service.DocsService;
+import com.cnu.teamProj.teamProj.proj.entity.Project;
+import com.cnu.teamProj.teamProj.proj.repository.ProjRepository;
+import com.cnu.teamProj.teamProj.security.entity.User;
 import com.cnu.teamProj.teamProj.security.repository.UserRepository;
+import com.cnu.teamProj.teamProj.task.dto.DetailTaskDto;
 import com.cnu.teamProj.teamProj.task.dto.TaskDTO;
 import com.cnu.teamProj.teamProj.task.entity.Task;
 import com.cnu.teamProj.teamProj.task.repository.TaskRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -22,8 +27,8 @@ import java.time.ZonedDateTime;
 public class TaskService {
     private final TaskRepository taskRepository;
     private final UserRepository userRepository;
-    @Autowired
-    private DocsService docsService;
+    private final ProjRepository projRepository;
+    private final DocsService docsService;
     public boolean completeTask(Integer taskId) {
         Optional<Task> optionalTask=taskRepository.findById(taskId);
 
@@ -150,5 +155,30 @@ public class TaskService {
         } catch (Exception e) {
             return ResultConstant.returnResultCustom(ResultConstant.UNEXPECTED_ERROR, "과제 등록 실패");
         }
+    }
+
+    public ResponseEntity<?> getTaskByTaskId(String param) {
+        //⬇️유효성 검사
+        int taskId = 0;
+        try {
+            taskId = Integer.parseInt(param);
+        } catch(Exception e) {
+            return ResultConstant.returnResult(ResultConstant.NOT_EXIST);
+        }
+        Task task = taskRepository.findTaskByTaskId(taskId);
+        if(task == null) return ResultConstant.returnResult(ResultConstant.NOT_EXIST);
+
+        DetailTaskDto taskData = new DetailTaskDto(task);
+        User user = userRepository.findById(task.getId()).orElse(null);
+        Project project = projRepository.findProjectByProjId(task.getProjId());
+        if(user == null || project == null) {
+            return ResultConstant.returnResultCustom(ResultConstant.UNEXPECTED_ERROR, "더 이상 존재하지 않는 유저 혹은 프로젝트의 과제 입니다");
+        }
+
+        taskData.setProjName(project.getProjName());
+        taskData.setUserName(user.getUsername());
+        taskData.setFiles(docsService.getFilesForTask(taskId));
+
+        return new ResponseEntity<>(taskData, HttpStatus.OK);
     }
 }
