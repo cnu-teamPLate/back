@@ -1,6 +1,7 @@
 package com.cnu.teamProj.teamProj.task.entity;
 
 import com.cnu.teamProj.teamProj.schedule.dto.TaskUpdateDto;
+import com.cnu.teamProj.teamProj.security.entity.User;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -43,6 +44,7 @@ public class Task {
 
     @Column(name = "task_name")
     private String taskName;
+    private boolean completed;
 
     public Task(TaskUpdateDto dto) {
         this.taskId = dto.getTaskId();
@@ -59,5 +61,13 @@ public class Task {
     public Task() {
 
     }
+    public void setCompleted(boolean completed) {
+        this.completed = completed;
+    }
 
+    public void setDescription(String description) {
+    }
+
+    public void setAssignee(User user) {
+    }
 }

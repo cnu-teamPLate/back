@@ -4,17 +4,14 @@ import com.cnu.teamProj.teamProj.common.ResultConstant;
 import com.cnu.teamProj.teamProj.file.dto.DocsViewResponseDto;
 import com.cnu.teamProj.teamProj.file.dto.FileDto;
 import com.cnu.teamProj.teamProj.file.service.DocsService;
-import com.cnu.teamProj.teamProj.proj.entity.Project;
-import com.cnu.teamProj.teamProj.proj.repository.ProjRepository;
 import com.cnu.teamProj.teamProj.security.entity.User;
 import com.cnu.teamProj.teamProj.security.repository.UserRepository;
-import com.cnu.teamProj.teamProj.task.dto.DetailTaskDto;
 import com.cnu.teamProj.teamProj.task.dto.TaskDTO;
+import com.cnu.teamProj.teamProj.task.dto.TaskUpdateRequest;
 import com.cnu.teamProj.teamProj.task.entity.Task;
 import com.cnu.teamProj.teamProj.task.repository.TaskRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -26,9 +23,11 @@ import java.time.ZonedDateTime;
 @RequiredArgsConstructor
 public class TaskService {
     private final TaskRepository taskRepository;
+
+    @Autowired
+    private DocsService docsService;
     private final UserRepository userRepository;
-    private final ProjRepository projRepository;
-    private final DocsService docsService;
+    /*
     public boolean completeTask(Integer taskId) {
         Optional<Task> optionalTask=taskRepository.findById(taskId);
 
@@ -40,6 +39,20 @@ public class TaskService {
         }
 
         return false;
+    }
+    */
+
+    public Task findById(Integer taskId) {
+        return taskRepository.findById(taskId).orElse(null);
+    }
+
+    public boolean updateCheckStatus(Integer taskId, boolean checked) {
+        Task task = findById(taskId);
+        if (task == null) return false;
+
+        task.setCompleted(checked);
+        taskRepository.save(task);
+        return true;
     }
     /*
     public List<TaskDTO> getTasksByProjIdAndId(String projId, String id) {
@@ -130,16 +143,16 @@ public class TaskService {
     public ResponseEntity<?> createTask(TaskDTO taskDTO) {
         try {
             // taskId가 숫자로 변환 가능한지 체크
-//            int parsedTaskId;
-//            try {
-//                parsedTaskId = Integer.parseInt(String.valueOf(taskDTO.getTaskId()));
-//            } catch (NumberFormatException e) {
-//                return "과제 ID(taskId)는 숫자로 변환할 수 없습니다.";
-//            }
+   //         int parsedTaskId;
+   //         try {
+    //            parsedTaskId = Integer.parseInt(String.valueOf(taskDTO.getTaskId()));
+     //       } catch (NumberFormatException e) {
+       //         return "과제 ID(taskId)는 숫자로 변환할 수 없습니다.";
+         //   }
 
             // Task 엔터티 생성 및 필드 설정
             Task task = new Task();
-//            task.setTaskId(parsedTaskId); // `TASK_ID`는 int
+           // task.setTaskId(parsedTaskId); // `TASK_ID`는 int
             task.setId(taskDTO.getId()); // 유저 아이디
             task.setProjId(taskDTO.getProjId()); // 프로젝트 ID
             task.setRole(taskDTO.getRole()); // 역할
@@ -157,28 +170,24 @@ public class TaskService {
         }
     }
 
-    public ResponseEntity<?> getTaskByTaskId(String param) {
-        //⬇️유효성 검사
-        int taskId = 0;
-        try {
-            taskId = Integer.parseInt(param);
-        } catch(Exception e) {
-            return ResultConstant.returnResult(ResultConstant.NOT_EXIST);
+    public boolean updateTask(Integer taskId, TaskUpdateRequest request) {
+        Task task = findById(taskId);
+        if (task == null) return false;
+
+        // description 수정
+        task.setDescription(request.getDescription());
+
+        // assignee 수정
+        if (request.getAssigneeId() != null) {
+            Optional<User> assigneeOpt = userRepository.findById(String.valueOf(request.getAssigneeId()));
+            if (assigneeOpt.isPresent()) {
+                task.setAssignee(assigneeOpt.get());
+            } else {
+                return false; // 없는 사용자
+            }
         }
-        Task task = taskRepository.findTaskByTaskId(taskId);
-        if(task == null) return ResultConstant.returnResult(ResultConstant.NOT_EXIST);
 
-        DetailTaskDto taskData = new DetailTaskDto(task);
-        User user = userRepository.findById(task.getId()).orElse(null);
-        Project project = projRepository.findProjectByProjId(task.getProjId());
-        if(user == null || project == null) {
-            return ResultConstant.returnResultCustom(ResultConstant.UNEXPECTED_ERROR, "더 이상 존재하지 않는 유저 혹은 프로젝트의 과제 입니다");
-        }
-
-        taskData.setProjName(project.getProjName());
-        taskData.setUserName(user.getUsername());
-        taskData.setFiles(docsService.getFilesForTask(taskId));
-
-        return new ResponseEntity<>(taskData, HttpStatus.OK);
+        taskRepository.save(task);
+        return true;
     }
 }
