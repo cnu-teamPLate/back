@@ -1,13 +1,18 @@
 package com.cnu.teamProj.teamProj.proj.controller;
 
+import com.cnu.teamProj.teamProj.common.ResponseDto;
+import com.cnu.teamProj.teamProj.common.ResultConstant;
 import com.cnu.teamProj.teamProj.proj.dto.AcceptMemberMessageDto;
 import com.cnu.teamProj.teamProj.proj.dto.ProjMemDto;
 import com.cnu.teamProj.teamProj.proj.dto.StudentInfoDto;
+import com.cnu.teamProj.teamProj.proj.dto.UserProjMapDto;
 import com.cnu.teamProj.teamProj.proj.service.MemberServiceImpl;
 import io.lettuce.core.dynamic.annotation.Param;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -62,19 +67,26 @@ public class MemberController {
 
     @DeleteMapping("/delete")
     @Operation(summary = "멤버 삭제", description = "userId와 projId를 기반으로 특정 멤버를 삭제")
-    public ResponseEntity<String> deleteMember(@RequestParam Map<String, String> params) {
-        String userId = params.get("userId");
-        String projId = params.get("projId");
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "400", description = "응답에 필요한 필수 요청 값이 전달되지 않았습니다.",  content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "404", description = "멤버를 찾을 수 없습니다.", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "200", description = "요청이 성공적으로 처리되었습니다", content = @Content(schema = @Schema(implementation = ResponseDto.class)))
+    })
+    public ResponseEntity<?> deleteMember(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody
+            @RequestBody UserProjMapDto params) {
+        String userId = params.getUserId();
+        String projId = params.getProjId();
 
         if (userId == null || projId == null) {
-            return ResponseEntity.badRequest().body("userId와 projId를 모두 제공해야 합니다.");
+            return ResultConstant.returnResult(ResultConstant.INVALID_PARAM);
         }
 
         boolean isDeleted = memberService.deleteMemberByUserAndProj(userId, projId);
         if (isDeleted) {
-            return ResponseEntity.ok("멤버 삭제 성공");
+            return ResultConstant.returnResult(ResultConstant.OK);
         } else {
-            return ResponseEntity.status(404).body("멤버를 찾을 수 없습니다.");
+            return ResultConstant.returnResultCustom(ResultConstant.NOT_EXIST, "멤버를 찾을 수 없습니다.");
         }
     }
 

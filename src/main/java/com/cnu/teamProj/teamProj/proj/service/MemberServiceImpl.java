@@ -120,10 +120,10 @@ public class MemberServiceImpl {
             return false;
         }
 
-        User user = userRepository.findById(userId).get();
-        Project project = projRepository.findById(projId).get();
+        User user = userRepository.findById(userId).orElse(null);
+        Project project = projRepository.findById(projId).orElse(null);
         // 사용자와 프로젝트 ID로 멤버 존재 여부 확인
-        if (memberRepository.existsByIdAndProjId(user, project)) {
+        if (user != null && project != null && memberRepository.existsByIdAndProjId(user, project)) {
             memberRepository.deleteByIdAndProjId(user, project);
             return true;
         }

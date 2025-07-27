@@ -109,7 +109,7 @@ public class AuthController {
 
     //내 정보 수정
     @PutMapping(value = "/update-my-info", produces = "application/json; charset=utf8")
-    @Operation(summary = "내 정보 수정", description = "수정되지 않은 정보까지 모두 전달하면, 전달된 학번으로 유저를 조회한 후 수정된 정보를 업데이트 (학번은 변경 불가)")
+    @Operation(summary = "내 정보 수정", description = "수정되지 않은 정보까지 모두 전달하면, 전달된 학번으로 유저를 조회한 후 수정된 정보를 업데이트 (⚠️학번 및 비밀번호는 변경 불가)")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "404", description = "해당 학번의 회원이 존재하지 않습니다", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
             @ApiResponse(responseCode = "400", description = "이미 존재하는 이메일 입니다", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
@@ -120,6 +120,19 @@ public class AuthController {
             @io.swagger.v3.oas.annotations.parameters.RequestBody
             @RequestBody RegisterDto dto) {
         return userInfoManageService.updateMyInfo(dto);
+    }
+
+    //비밀번호 수정하기
+    @PutMapping(value = "/update-pwd", produces = "application/json; charset=utf8")
+    @Operation(summary = "비밀번호 수정", description = "비밀번호를 수정하고자 하는 유저의 아이디를 같이 전달합니다\n해당 api를 테스트 하기 전에는 로그인 요청을 먼저 보내 헤더에 토큰 정보를 담아 해당 api를 요청해야 합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "요청이 성공적으로 처리되었습니다", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "401", description = "요청 권한이 없습니다", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "404", description = "존재하지 않는 유저 입니다", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "500", description = "예상치 못한 오류가 발생했습니다.", content = @Content(schema = @Schema(implementation = ResponseDto.class)))
+    })
+    public ResponseEntity<?> updatePwd(@RequestBody LoginDto dto) {
+        return userInfoManageService.updatePwd(dto);
     }
 
     //내 정보 보기
