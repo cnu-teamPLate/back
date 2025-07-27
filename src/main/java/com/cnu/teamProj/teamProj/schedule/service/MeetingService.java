@@ -1,11 +1,10 @@
 package com.cnu.teamProj.teamProj.schedule.service;
 
-import com.cnu.teamProj.teamProj.common.ResultConstant;
 import com.cnu.teamProj.teamProj.proj.entity.Project;
 import com.cnu.teamProj.teamProj.proj.repository.MemberRepository;
 import com.cnu.teamProj.teamProj.proj.repository.ProjRepository;
 import com.cnu.teamProj.teamProj.schedule.dto.MeetingLogDto;
-import com.cnu.teamProj.teamProj.schedule.dto.ScheduleDto;
+import com.cnu.teamProj.teamProj.schedule.dto.ScheduleCreateReqDto;
 import com.cnu.teamProj.teamProj.schedule.entity.MeetingLog;
 import com.cnu.teamProj.teamProj.schedule.entity.MeetingLogId;
 import com.cnu.teamProj.teamProj.schedule.entity.Participants;
@@ -17,8 +16,6 @@ import com.cnu.teamProj.teamProj.security.entity.User;
 import com.cnu.teamProj.teamProj.security.repository.UserRepository;
 import com.cnu.teamProj.teamProj.util.STTUtil;
 import com.cnu.teamProj.teamProj.util.SecurityUtil;
-import com.google.api.Http;
-import com.google.cloud.speech.v1.SpeechSettings;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -94,10 +91,10 @@ public class MeetingService {
             return new ResponseEntity<>(result, HttpStatus.BAD_REQUEST);
         }
         //회의에 대한 정보 가져오기 -> scheduleDto
-        ScheduleDto scheduleDto = new ScheduleDto(schedule);
+        ScheduleCreateReqDto scheduleDto = new ScheduleCreateReqDto(schedule);
         List<String> participantsss = new ArrayList<>();
-        for(Participants participants : participantsRepository.findParticipantsByScheId(scheId)) {
-            User user = userRepository.findById(participants.getId()).orElseThrow();
+        for(Participants participants : participantsRepository.findParticipantsByScheId(schedule)) {
+            User user = userRepository.findById(participants.getId().getId()).orElseThrow();
             participantsss.add(user.getUsername());
         }
         scheduleDto.setParticipants(participantsss);

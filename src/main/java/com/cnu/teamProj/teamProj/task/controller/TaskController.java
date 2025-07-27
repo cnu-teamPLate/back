@@ -1,8 +1,11 @@
 package com.cnu.teamProj.teamProj.task.controller;
-
+import com.cnu.teamProj.teamProj.task.dto.TaskUpdateRequest;
+import com.cnu.teamProj.teamProj.util.SecurityUtil;
 import com.cnu.teamProj.teamProj.file.dto.DocsViewResponseDto;
 import com.cnu.teamProj.teamProj.file.service.DocsService;
+import com.cnu.teamProj.teamProj.security.entity.User;
 import com.cnu.teamProj.teamProj.task.dto.TaskDTO;
+import com.cnu.teamProj.teamProj.task.entity.Task;
 import com.cnu.teamProj.teamProj.task.service.TaskService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -19,6 +22,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.cnu.teamProj.teamProj.util.SecurityUtil.getCurrentUser;
+
 @RestController
 @RequestMapping(value = "/task", produces = "application/json; charset=utf8") // 추가됨
 @RequiredArgsConstructor
@@ -28,14 +33,8 @@ public class TaskController {
     private final DocsService docsService;
 
     @PostMapping("/post")
-    public ResponseEntity<String> createTask(@RequestBody TaskDTO taskDTO) {
-        String result = taskService.createTask(taskDTO);
-
-        if (result.startsWith("과제가 성공적으로 등록되었습니다!")) {
-            return ResponseEntity.ok(result);
-        } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result);
-        }
+    public ResponseEntity<?> createTask(@RequestBody TaskDTO taskDTO) {
+        return taskService.createTask(taskDTO);
     }
 
     @Operation(summary = "유저에게 할당된 과제를 불러오는 api")
@@ -56,7 +55,7 @@ public class TaskController {
 
         return ResponseEntity.ok(tasks);
     }
-
+    /*
     @PutMapping("{taskId}")
     public ResponseEntity<String> completeTask(@PathVariable Integer taskId) {
         boolean updated=taskService.completeTask(taskId);
@@ -67,6 +66,57 @@ public class TaskController {
         }
         return ResponseEntity.ok("과제가 완료되었습니다.");
     }
+    */
+    @PutMapping("/{taskId}")
+    public ResponseEntity<String> updateTaskCheckStatus(
+            @PathVariable Integer taskId,
+            @RequestParam("checkBox") int checkBox) {
+
+        // 현재 로그인한 사용자
+        String currentUser = getCurrentUser();
+
+        Task task = taskService.findById(taskId);
+        if (task == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("해당 taskId가 존재하지 않습니다.");
+        }
+
+        // 체크를 하는 경우 (1)
+        if (checkBox == 1) {
+            if (!task.getId().equals(currentUser)) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body("과제 담당자만 체크할 수 있습니다.");
+            }
+        }
+
+        // 체크 또는 체크 해제 반영
+        boolean updated = taskService.updateCheckStatus(taskId, checkBox == 1);
+        if (!updated) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("체크 상태 변경에 실패했습니다.");
+        }
+
+        String message = (checkBox == 1) ? "과제가 체크되었습니다." : "과제 체크가 해제되었습니다.";
+        return ResponseEntity.ok(message);
+    }
+
+    @PutMapping("/edit/{taskId}")
+    public ResponseEntity<String> updateTask(
+            @PathVariable Integer taskId,
+            @RequestBody TaskUpdateRequest request) {
+
+        boolean updated = taskService.updateTask(taskId, request);
+
+        if (!updated) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("해당 taskId가 존재하지 않거나 수정에 실패했습니다.");
+        }
+
+        return ResponseEntity.ok("과제가 성공적으로 수정되었습니다.");
+    }
+
+
+
 
 }
 

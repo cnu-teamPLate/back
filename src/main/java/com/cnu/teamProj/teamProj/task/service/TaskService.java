@@ -1,10 +1,13 @@
 package com.cnu.teamProj.teamProj.task.service;
 
+import com.cnu.teamProj.teamProj.common.ResultConstant;
 import com.cnu.teamProj.teamProj.file.dto.DocsViewResponseDto;
 import com.cnu.teamProj.teamProj.file.dto.FileDto;
 import com.cnu.teamProj.teamProj.file.service.DocsService;
+import com.cnu.teamProj.teamProj.security.entity.User;
 import com.cnu.teamProj.teamProj.security.repository.UserRepository;
 import com.cnu.teamProj.teamProj.task.dto.TaskDTO;
+import com.cnu.teamProj.teamProj.task.dto.TaskUpdateRequest;
 import com.cnu.teamProj.teamProj.task.entity.Task;
 import com.cnu.teamProj.teamProj.task.repository.TaskRepository;
 import lombok.RequiredArgsConstructor;
@@ -20,9 +23,11 @@ import java.time.ZonedDateTime;
 @RequiredArgsConstructor
 public class TaskService {
     private final TaskRepository taskRepository;
-    private final UserRepository userRepository;
+
     @Autowired
     private DocsService docsService;
+    private final UserRepository userRepository;
+    /*
     public boolean completeTask(Integer taskId) {
         Optional<Task> optionalTask=taskRepository.findById(taskId);
 
@@ -34,6 +39,20 @@ public class TaskService {
         }
 
         return false;
+    }
+    */
+
+    public Task findById(Integer taskId) {
+        return taskRepository.findById(taskId).orElse(null);
+    }
+
+    public boolean updateCheckStatus(Integer taskId, boolean checked) {
+        Task task = findById(taskId);
+        if (task == null) return false;
+
+        task.setCompleted(checked);
+        taskRepository.save(task);
+        return true;
     }
     /*
     public List<TaskDTO> getTasksByProjIdAndId(String projId, String id) {
@@ -121,24 +140,19 @@ public class TaskService {
         }).collect(Collectors.toList());
     }
 
-    public String createTask(TaskDTO taskDTO) {
+    public ResponseEntity<?> createTask(TaskDTO taskDTO) {
         try {
-
-
             // taskId가 숫자로 변환 가능한지 체크
-
-            int parsedTaskId;
-            /*
-            try {
-                parsedTaskId = Integer.parseInt(String.valueOf(taskDTO.getTaskId()));
-            } catch (NumberFormatException e) {
-                return "과제 ID(taskId)는 숫자로 변환할 수 없습니다.";
-            }
-*/
+   //         int parsedTaskId;
+   //         try {
+    //            parsedTaskId = Integer.parseInt(String.valueOf(taskDTO.getTaskId()));
+     //       } catch (NumberFormatException e) {
+       //         return "과제 ID(taskId)는 숫자로 변환할 수 없습니다.";
+         //   }
 
             // Task 엔터티 생성 및 필드 설정
             Task task = new Task();
-            task.setTaskId(parsedTaskId); // `TASK_ID`는 int
+           // task.setTaskId(parsedTaskId); // `TASK_ID`는 int
             task.setId(taskDTO.getId()); // 유저 아이디
             task.setProjId(taskDTO.getProjId()); // 프로젝트 ID
             task.setRole(taskDTO.getRole()); // 역할
@@ -150,9 +164,30 @@ public class TaskService {
             task.setTaskName(taskDTO.getTaskName());
 
             taskRepository.save(task);
-            return "과제가 성공적으로 등록되었습니다.";
+            return ResultConstant.returnResultCustom(ResultConstant.OK, "과제 등록 성공");
         } catch (Exception e) {
-            return "과제 등록 중 오류 발생: " + e.getMessage();
+            return ResultConstant.returnResultCustom(ResultConstant.UNEXPECTED_ERROR, "과제 등록 실패");
         }
+    }
+
+    public boolean updateTask(Integer taskId, TaskUpdateRequest request) {
+        Task task = findById(taskId);
+        if (task == null) return false;
+
+        // description 수정
+        task.setDescription(request.getDescription());
+
+        // assignee 수정
+        if (request.getAssigneeId() != null) {
+            Optional<User> assigneeOpt = userRepository.findById(String.valueOf(request.getAssigneeId()));
+            if (assigneeOpt.isPresent()) {
+                task.setAssignee(assigneeOpt.get());
+            } else {
+                return false; // 없는 사용자
+            }
+        }
+
+        taskRepository.save(task);
+        return true;
     }
 }

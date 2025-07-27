@@ -1,7 +1,7 @@
 package com.cnu.teamProj.teamProj.schedule.entity;
 
 import com.cnu.teamProj.teamProj.proj.entity.Project;
-import com.cnu.teamProj.teamProj.schedule.dto.ScheduleUpdateDto;
+import com.cnu.teamProj.teamProj.schedule.dto.ScheduleUpdateReqDto;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
@@ -9,7 +9,7 @@ import jakarta.persistence.ManyToOne;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -18,7 +18,7 @@ public class Schedule {
     @Id
     private String scheId;
 
-    private ZonedDateTime date;
+    private LocalDateTime date;
     private String scheName;
     private String place;
     private String category;
@@ -28,7 +28,7 @@ public class Schedule {
     @JoinColumn(name = "PROJ_ID", referencedColumnName = "projId")
     private Project projId;
 
-    public Schedule(String scheId, ZonedDateTime date, String scheName, String place, String category, String detail, Project projId) {
+    public Schedule(String scheId, LocalDateTime date, String scheName, String place, String category, String detail, Project projId) {
         this.scheId = scheId;
         this.date = date;
         this.scheName = scheName;
@@ -41,7 +41,7 @@ public class Schedule {
     public Schedule() {
     }
 
-    public Schedule(ScheduleUpdateDto scheduleDto) {
+    public Schedule(ScheduleUpdateReqDto scheduleDto) {
         this.scheId = scheduleDto.getScheId();
         this.date = scheduleDto.getDate();
         this.scheName = scheduleDto.getScheName();

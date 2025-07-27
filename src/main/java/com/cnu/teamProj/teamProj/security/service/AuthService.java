@@ -159,7 +159,7 @@ public class AuthService {
             taskRepository.save(task);
         }
         //참가자 관련 레코드 삭제
-        List<Participants> participants = participantsRepository.findAllById(userId);
+        List<Participants> participants = participantsRepository.findAllById(user);
         participantsRepository.deleteAll(participants);
         //프로젝트 멤버에서 삭제
         List<ProjMem> projMems = memberRepository.findProjMemsById(user);
