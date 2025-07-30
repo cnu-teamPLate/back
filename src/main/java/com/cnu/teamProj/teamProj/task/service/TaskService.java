@@ -50,7 +50,7 @@ public class TaskService {
         Task task = findById(taskId);
         if (task == null) return false;
 
-        task.setCompleted(checked);
+        task.setCheckBox(checked ? 1 : 0);
         taskRepository.save(task);
         return true;
     }
@@ -172,14 +172,18 @@ public class TaskService {
 
     public boolean updateTask(Integer taskId, TaskUpdateRequest request) {
         Task task = findById(taskId);
-        if (task == null) return false;
+        if (task == null) {
+            return false;
+        }
 
         // description 수정
         task.setDescription(request.getDescription());
 
         // assignee 수정
         if (request.getAssigneeId() != null) {
-            Optional<User> assigneeOpt = userRepository.findById(String.valueOf(request.getAssigneeId()));
+            System.out.println(request.getAssigneeId());
+
+            Optional<User> assigneeOpt = userRepository.findById(request.getAssigneeId());
             if (assigneeOpt.isPresent()) {
                 task.setAssignee(assigneeOpt.get());
             } else {

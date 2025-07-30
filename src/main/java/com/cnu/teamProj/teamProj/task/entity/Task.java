@@ -44,7 +44,6 @@ public class Task {
 
     @Column(name = "task_name")
     private String taskName;
-    private boolean completed;
 
     public Task(TaskUpdateDto dto) {
         this.taskId = dto.getTaskId();
@@ -61,10 +60,6 @@ public class Task {
     public Task() {
 
     }
-    public void setCompleted(boolean completed) {
-        this.completed = completed;
-    }
-
     public void setDescription(String description) {
     }
 
