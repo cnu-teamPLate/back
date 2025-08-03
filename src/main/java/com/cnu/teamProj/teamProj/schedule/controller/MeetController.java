@@ -18,6 +18,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.parameters.P;
 import org.springframework.web.ErrorResponse;
@@ -25,6 +26,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.xml.transform.Result;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 @RestController
@@ -106,10 +109,17 @@ public class MeetController {
         return meetingService.updateMeetingLog(param);
     }
 
-    @PostMapping("/convert-speech")
-    @Operation(summary = "녹음파일을 텍스트로 변환해주는 api")
-    @Parameter(name = "file", description = "MultipartFile 형태의 변수로 보내줘야 합니다")
-    public ResponseEntity<String> convertSpeechToText(@RequestPart("file")MultipartFile file) {
-        return meetingService.convertSpeechToText(file);
+    @PostMapping(value = "/convert-speech", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "녹음파일을 텍스트로 변환해주는 api", description = "⚠️아직은 wave, x-flac 형식만 가능합니다 <br/>-> m4a, mp3 타입도 받을 수 있게 방법을 모색중입니다..<br/>테스트를 위한 변환 사이트: https://cloudconvert.com/m4a-to-flac , https://cloudconvert.com/m4a-to-flac")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "500", description = "서버 에러", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class),examples = @ExampleObject(value = "{\"message\": \"인코딩 중 문제가 발생했습니다\"}"))),
+            @ApiResponse(responseCode = "400", description = "요청 변수 관련 오류", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class),examples = {
+                    @ExampleObject(name = "오디오 형식 오류", value = "{\"message\": \"지원되지 않는 오디오 형식입니다 (지원되는 오디오 형식: wave, x-flac)\"}"),
+                    @ExampleObject(name = "필수값 누락", value = "{\"message\": \"파일 데이터가 없습니다\"}")
+            })),
+            @ApiResponse(responseCode = "200", description = "성공", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ResponseDto.class),examples = @ExampleObject(value = "{\"result\": \"변환된 텍스트 파일\"}")))
+    })
+    public ResponseEntity<?> convertSpeechToText(@ModelAttribute RecordRequestDto params) {
+        return meetingService.convertSpeechToText(params.getRecord());
     }
 }

@@ -1,5 +1,6 @@
 package com.cnu.teamProj.teamProj.schedule.service;
 
+import com.cnu.teamProj.teamProj.common.ResultConstant;
 import com.cnu.teamProj.teamProj.proj.entity.Project;
 import com.cnu.teamProj.teamProj.proj.repository.MemberRepository;
 import com.cnu.teamProj.teamProj.proj.repository.ProjRepository;
@@ -113,22 +114,25 @@ public class MeetingService {
     /**
      * 회의 녹음본 문자로 변환
      */
-    public ResponseEntity<String> convertSpeechToText(MultipartFile audioFile) {
+    public ResponseEntity<?> convertSpeechToText(MultipartFile audioFile) {
         try{
             if(audioFile.isEmpty()) {
-                return new ResponseEntity<>("파일 데이터가 없습니다", HttpStatus.BAD_REQUEST);
+                return ResultConstant.returnResultCustom(ResultConstant.REQUIRED_PARAM_NON, "파일 데이터가 없습니다");
             }
             String fileType = audioFile.getContentType();
             assert fileType != null;
-            if(!fileType.equalsIgnoreCase("audio/wave") && !fileType.equalsIgnoreCase("audio/x-flac")) {
+            if(!fileType.equalsIgnoreCase("audio/wave") && !fileType.equalsIgnoreCase("audio/x-flac") && !fileType.equalsIgnoreCase("audio/flac")) {
                 log.info("파일형식: {}", fileType);
-                return new ResponseEntity<>("지원되지 않는 오디오 형식입니다", HttpStatus.BAD_REQUEST);
+                return ResultConstant.returnResultCustom(ResultConstant.INVALID_PARAM, "지원되지 않는 오디오 형식입니다 (지원되는 오디오 형식: wave, x-flac)");
             }
             String text = sttUtil.asyncRecognizeGcs(audioFile);
-            return new ResponseEntity<>(text, HttpStatus.OK);
+            System.out.println(text);
+            Map<String, String> ret = new HashMap<>();
+            ret.put("result", text);
+            return new ResponseEntity<>(ret, HttpStatus.OK);
         } catch(Exception e) {
             log.error("인코딩 중 문제가 발생했습니다: {}", e.getMessage());
-            return new ResponseEntity<>("인코딩 중 문제가 발생했습니다", HttpStatus.INTERNAL_SERVER_ERROR);
+            return ResultConstant.returnResultCustom(ResultConstant.UNEXPECTED_ERROR, "인코딩 중 문제가 발생했습니다");
         }
     }
 }
