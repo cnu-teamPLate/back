@@ -88,24 +88,31 @@ public class MeetController {
     }
 
     @GetMapping("/view/log")
-    @Operation(summary = "회의록 불러오기", description = "필요에 따라 스케줄 아이디 또는 프로젝트 아이디 또는 둘 다 담아 요청값으로 넘겨주면 됨.<br/>둘 중 하나는 있어야 함.")
+    @Operation(summary = "회의록 불러오기", description = "필요에 따라 스케줄 아이디 또는 프로젝트 아이디를 요청값으로 넘겨주면 됨.<br/>둘 중 하나는 있어야 함.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200(1)", description = "프로젝트 아이디에 대한 반환값이 리스트 형태로 반환됨", content = @Content(schema = @Schema(implementation = MeetingListDto.class))),
+            @ApiResponse(responseCode = "200(2)", description = "스케줄 아이디에 대한 자세한 회의록 정보가 반환됨", content = @Content(schema = @Schema(implementation = MeetingLogDto.class))),
+            @ApiResponse(responseCode = "400", description = "응답에 필요한 필수 요청 값이 전달되지 않았습니다.", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "404", description = "프로젝트 아이디나 스케줄 아이디가 존재하지 않음", content = @Content(schema = @Schema(implementation = ResponseDto.class)))
+    })
     @Parameters({
             @Parameter(name = "scheId", description = "스케줄 레코드 아이디", example = "cse00001_2"),
             @Parameter(name = "projId", description = "프로젝트 아이디", example = "cse00001")
     })
-    public ResponseEntity<Map<String, Object>> getMeetingLog(@RequestParam Map<String, String> param) {
+    public ResponseEntity<?> getMeetingLog(@RequestParam(value = "scheId", required = false) String scheId, @RequestParam(value = "projId", required = false) String projId) {
+        Map<String, String> param = new HashMap<>();
+        param.put("scheId", scheId);
+        param.put("projId", projId);
         return meetingService.getMeetingLog(param);
     }
 
     @PostMapping("/upload/log")
     @Operation(summary = "회의록 올리기")
-    @Parameters({
-            @Parameter(name = "scheId", example = "cse00001_3"),
-            @Parameter(name = "projId", example = "cse00001"),
-            @Parameter(name = "contents", example = "예시입니다", description = "회의 내용"),
-            @Parameter(name = "fix", example = "5월 6일(월): UI 개선 시안 검토 회의 / 5월 8일(수): QA 팀의 버그 테스트 결과 공유 / 5월 13일(월): 다음 정기 회의 (기능 확정 및 개발 착수)", description = "회의 후 확정된 내용")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "요청 성공", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "404", description = "존재하는 유저 or 프로젝트 or 스케줄 아이디가 아닙니다", content = @Content(schema = @Schema(implementation = ResponseDto.class)))
     })
-    public ResponseEntity<String> uploadMeetingLog(@RequestBody MeetingLogDto param) {
+    public ResponseEntity<?> uploadMeetingLog(@RequestBody MeetingLogDto param) {
         return meetingService.updateMeetingLog(param);
     }
 

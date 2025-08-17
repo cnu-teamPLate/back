@@ -38,6 +38,14 @@ public class Schedule {
         this.projId = projId;
     }
 
+    public Schedule(String scheId, Project projId, LocalDateTime date, String scheName, String category) {
+        this.scheId = scheId;
+        this.date = date;
+        this.scheName = scheName;
+        this.projId = projId;
+        this.category = category;
+    }
+
     public Schedule() {
     }
 
