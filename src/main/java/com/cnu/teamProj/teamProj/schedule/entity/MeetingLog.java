@@ -2,6 +2,7 @@ package com.cnu.teamProj.teamProj.schedule.entity;
 
 import com.cnu.teamProj.teamProj.proj.entity.Project;
 import com.cnu.teamProj.teamProj.schedule.dto.MeetingLogDto;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -26,8 +27,10 @@ public class MeetingLog {
 
     private String contents;
     private String fix;
+    private String sttContents;
 
     public MeetingLog() {
 
     }
+
 }

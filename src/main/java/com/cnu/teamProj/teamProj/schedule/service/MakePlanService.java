@@ -108,4 +108,24 @@ public class MakePlanService {
         return new ResponseEntity<>(resp, HttpStatus.OK);
     }
 
+    public List<When2meetListDto> getWhen2meetList(String projID) {
+        Project project = projRepository.findProjectByProjId(projID);
+        if(project == null) {
+            throw new UserNotFoundException("프로젝트 아이디가 존재하지 않습니다");
+        }
+        List<When2meet> when2meets = when2meetRepo.findWhen2meetsByProjId(project);
+        List<When2meetListDto> ret = new ArrayList<>();
+        for(When2meet meet : when2meets) {
+            //when2meet의 구체적인 날짜 정보 가져오기
+            List<TimeRangeDto> times = new ArrayList<>(); //반환값에 넣어줄 데이터
+            List<When2meetDate> dates = when2meetDateRepo.findWhen2meetDatesByWhen2meetId(meet);
+            for(When2meetDate date : dates) {
+                times.add(new TimeRangeDto(date.getStartDate(), date.getEndDate()));
+            }
+            //when2meet 폼 정보 저장
+            ret.add(new When2meetListDto(meet, times, meet.getId()));
+        }
+        return ret;
+    }
+
 }

@@ -98,13 +98,16 @@ public class ScheduleController {
     @PostMapping("/upload")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", content=@Content(schema = @Schema(implementation = ResponseDto.class), examples = {@ExampleObject(name = "요청 성공", value="{\"message\": \"요청이 성공적으로 처리되었습니다\", \"code\": 200}")})),
-            @ApiResponse(responseCode = "400", content=@Content(schema = @Schema(implementation = ErrorResponse.class), examples = {@ExampleObject(name = "필수 파라미터 없음", value="{\"message\": \"응답에 필요한 필수 요청 값이 전달되지 않았습니다.\", \"code\": 400}"), @ExampleObject(name = "날짜 형식이 잘못됨", value = "{\"message\": \"요청 형식이 잘못되었습니다\", \"code\": 400}")})),
+            @ApiResponse(responseCode = "400", content=@Content(schema = @Schema(implementation = ErrorResponse.class), examples = {@ExampleObject(name = "필수 파라미터 없음", value="{\"message\": \"응답에 필요한 필수 요청 값이 전달되지 않았습니다.\", \"code\": 400}"),
+                    @ExampleObject(name = "날짜 형식이 잘못됨", value = "{\"message\": \"요청 형식이 잘못되었습니다\", \"code\": 400}")})),
             @ApiResponse(responseCode = "404", content=@Content(
                     mediaType = "application/json",
                     schema = @Schema(implementation = ErrorResponse.class),
                     examples = {
                         @ExampleObject(name = "없는 프로젝트", value="{\"message\": \"존재하는 프로젝트 아이디가 아닙니다\", \"code\": 404}"),
-                        @ExampleObject(name = "없는 유저", value="{\"message\": \"존재하지 않는 유저 아이디입니다\", \"code\": 404}")}))
+                        @ExampleObject(name = "없는 유저", value="{\"message\": \"존재하지 않는 유저 아이디입니다\", \"code\": 404}"),
+                        @ExampleObject(name = "형식 불일치", value="{\"message\": \"category 필드는 meeting또는 plan 값을 할당해주세요\", \"code\": 404}")
+                    }))
     })
     @Operation(summary = "스케줄 업로드 api", description = "⚠️participants 값은 [\"20241121\",\"20251234\"] 형태로 보내줘야 함!")
     public ResponseEntity<?> uploadSchedule(@io.swagger.v3.oas.annotations.parameters.RequestBody @RequestBody ScheduleCreateReqDto dto) {

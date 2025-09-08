@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -40,11 +41,16 @@ public class MeetingLogDto {
     private String fix;
     @Schema(description = "참여자 목록")
     private List<SimpleUserInfoDto> participants;
+    @Schema(description = "녹음본", nullable = true)
+    private String fileUrl;
+    @Schema(description = "녹음파일에서 추출한 텍스트 데이터", nullable = true)
+    private String sttContents;
 
     public MeetingLogDto(MeetingLog entity) {
         this.scheId = entity.getScheId().getScheId();
         this.projId = entity.getProjId().getProjId();
         this.contents = entity.getContents();
         this.fix = entity.getFix();
+        this.sttContents = getSttContents();
     }
 }

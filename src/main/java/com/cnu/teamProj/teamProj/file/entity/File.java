@@ -1,5 +1,6 @@
 package com.cnu.teamProj.teamProj.file.entity;
 
+import com.cnu.teamProj.teamProj.security.entity.User;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -15,18 +16,25 @@ import java.time.LocalDateTime;
 public class File {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    @Column(name = "file_id")
+    private int fileId;
+
     private String filename;
     private String url;
     private String fileType;
 
+    @ManyToOne
+    @JoinColumn(name = "created_by", referencedColumnName = "id")
+    private User createdBy;
+
     @LastModifiedDate
     private LocalDateTime uploadDate;
 
-    public File(String filename, String url, String fileType) {
+    public File(String filename, String url, String fileType, User user) {
         this.filename = filename;
         this.url = url;
         this.fileType = fileType;
+        this.createdBy = user;
     }
 
     public File() {

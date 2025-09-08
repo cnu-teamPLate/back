@@ -7,4 +7,5 @@ import java.util.List;
 
 public interface FileRepository extends JpaRepository<File, Integer> {
     List<File> findFilesByFileType(String fileType);
+    File findByFileType(String filetType);
 }

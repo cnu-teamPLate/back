@@ -31,4 +31,12 @@ public class When2meetRequestDto {
         this.startTime = when2meet.getStartTime();
         this.endTime = when2meet.getEndTime();
     }
+
+    public When2meetRequestDto(When2meet when2meet, List<TimeRangeDto> dates) {
+        this.title = when2meet.getTitle();
+        this.projId = when2meet.getProjId().getProjId();
+        this.startTime = when2meet.getStartTime();
+        this.endTime = when2meet.getEndTime();
+        this.dates = dates;
+    }
 }

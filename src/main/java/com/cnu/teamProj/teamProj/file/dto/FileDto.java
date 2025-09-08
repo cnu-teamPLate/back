@@ -29,7 +29,7 @@ public class FileDto {
     }
 
     public FileDto(File file) {
-        this.id = file.getId();
+        this.id = file.getFileId();
         this.url = file.getUrl();
         this.filename = file.getFilename();
         this.uploadDate = file.getUploadDate();

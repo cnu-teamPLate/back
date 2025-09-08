@@ -20,11 +20,12 @@ public class GlobalExceptionHandler {
     public ResponseEntity<?> handleUnexpectedException(Exception ex) {
         log.error(ex.getMessage());
         ex.printStackTrace();
-        return ResultConstant.returnResultCustom(ResultConstant.UNEXPECTED_ERROR, "예상치 못한 오류가 발생했습니다");
+        return ResultConstant.returnResultCustom(ResultConstant.UNEXPECTED_ERROR, ex.getMessage());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<?> handleInvalidFormat(MethodArgumentNotValidException ex) {
+        log.error(ex.getMessage());
         return ResultConstant.returnResultCustom(ResultConstant.INVALID_PARAM, "요청 형식이 잘못되었습니다");
     }
 

@@ -1,7 +1,13 @@
 package com.cnu.teamProj.teamProj.schedule.service;
 
+import com.cnu.teamProj.teamProj.common.ResponseDto;
 import com.cnu.teamProj.teamProj.common.ResultConstant;
 import com.cnu.teamProj.teamProj.common.UserNotFoundException;
+import com.cnu.teamProj.teamProj.file.dto.FileDto;
+import com.cnu.teamProj.teamProj.file.entity.File;
+import com.cnu.teamProj.teamProj.file.repository.FileRepository;
+import com.cnu.teamProj.teamProj.file.service.DocsService;
+import com.cnu.teamProj.teamProj.file.service.S3Service;
 import com.cnu.teamProj.teamProj.proj.entity.Project;
 import com.cnu.teamProj.teamProj.proj.repository.MemberRepository;
 import com.cnu.teamProj.teamProj.proj.repository.ProjRepository;
@@ -37,21 +43,33 @@ import java.util.*;
 public class MeetingService {
     private final MeetingLogRepository meetingLogRepository;
     private final ScheduleRepository scheduleRepository;
+    private final FileRepository fileRepository;
+    private final ScheduleService scheduleService;
     private final ProjRepository projRepository;
     private final ParticipantsRepository participantsRepository;
     private final UserRepository userRepository;
     private final MemberRepository memberRepository;
     private final STTUtil sttUtil;
+    private final DocsService docsService;
 
     /**
      * 회의록 업로드
      */
     @Transactional
-    public ResponseEntity<?> updateMeetingLog(MeetingLogDto dto) {
+    public ResponseEntity<?> updateMeetingLog(MeetingLogDto dto, MultipartFile file) {
         String scheId = dto.getScheId();
-        Schedule schedule = scheduleRepository.findByScheId(scheId);
-        if(schedule == null) {
-            return ResultConstant.returnResultCustom(ResultConstant.NOT_EXIST, "올바른 스케줄 아이디가 아닙니다");
+        Schedule schedule;
+        if(scheId == null) {
+            ResponseEntity<?> createRet = scheduleService.createSchedule(new ScheduleCreateReqDto(dto));
+            if(createRet.getBody() == null) {
+                return ResultConstant.returnResultCustom(ResultConstant.UNEXPECTED_ERROR, "스케줄을 생성하는 중 에러가 발생했습니다");
+            }
+            schedule = (Schedule) createRet.getBody();
+        } else {
+            schedule = scheduleRepository.findByScheId(scheId);
+            if(schedule == null) {
+                return ResultConstant.returnResultCustom(ResultConstant.NOT_EXIST, "올바른 스케줄 아이디가 아닙니다");
+            }
         }
         if(!schedule.getCategory().equalsIgnoreCase("meeting")) {
             return ResultConstant.returnResultCustom(ResultConstant.NOT_EXIST, "존재하는 회의가 없습니다");
@@ -62,7 +80,7 @@ public class MeetingService {
             return ResultConstant.returnResultCustom(ResultConstant.NOT_EXIST, "존재하는 프로젝트가 없습니다");
         }
         //회의록 엔티티에 레코드 추가
-        meetingLogRepository.save(new MeetingLog(schedule, project, dto.getContents(), dto.getFix()));
+        meetingLogRepository.save(new MeetingLog(schedule, project, dto.getContents(), dto.getFix(), dto.getSttContents()));
         //제목, 날짜 스케줄 엔티티에 반영
         schedule.setDate(dto.getDate());
         schedule.setScheName(dto.getTitle());
@@ -79,6 +97,23 @@ public class MeetingService {
             }
             participantsRepository.save(new Participants(schedule, user, project));
         }
+        //파일 데이터 저장
+        try{
+            //TODO DocsService에서 saveFileToS3nDB 함수 로직 마무리
+            //TODO 해당 함수 호출
+            if(file != null) {
+                List<MultipartFile> files = new ArrayList<>();
+                files.add(file);
+                ResponseDto fileRetDto = docsService.saveFileToS3nDB(files, "meeting", schedule.getScheId(), dto.getProjId());
+                if(fileRetDto.getCode() != 200) {
+                    throw new Exception(fileRetDto.getMessage());
+                }
+            }
+        } catch(Exception e) {
+            log.error(e.getMessage());
+            return ResultConstant.returnResultCustom(ResultConstant.UNEXPECTED_ERROR, "녹음본 저장 중 에러가 발생했습니다");
+        }
+
         return ResultConstant.returnResult(ResultConstant.OK);
     }
 
@@ -129,6 +164,12 @@ public class MeetingService {
             ret.setParticipants(participantsForMeeting);
             ret.setTitle(schedule.getScheName());
             ret.setDate(schedule.getDate());
+
+            String fileType = String.format("meeting:%s", meetingLog.getScheId().getScheId());
+            System.out.println("fileType: "+fileType);
+            File file = fileRepository.findByFileType(fileType);
+            if(file != null) ret.setFileUrl(file.getUrl());
+
             return new ResponseEntity<>(ret, HttpStatus.OK);
         }
 
@@ -139,7 +180,9 @@ public class MeetingService {
         List<MeetingLog> allMeetings = meetingLogRepository.findAllByProjId(project);
         List<MeetingListDto> ret = new ArrayList<>(); //반환해줄 값
         for(MeetingLog log : allMeetings) {
-            ret.add(new MeetingListDto(log.getScheId().getScheId(), log.getScheId().getScheName(), log.getScheId().getDate()));
+            String fileType = String.format("meeting:%s", log.getScheId().getScheId());
+            File file = fileRepository.findByFileType(fileType);
+            ret.add(new MeetingListDto(log.getScheId().getScheId(), log.getScheId().getScheName(), log.getScheId().getDate(), file.getUrl()));
         }
 
         return new ResponseEntity<>(ret, HttpStatus.OK);

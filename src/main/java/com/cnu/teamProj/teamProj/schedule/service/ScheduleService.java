@@ -41,6 +41,7 @@ public class ScheduleService {
     private final ParticipantsRepository participantsRepository;
     private final UserRepository userRepository;
     private final CommentRepository commentRepository;
+
     /**
      * @param scheduleDto - 업로드용 디티오
      * @return
@@ -56,13 +57,16 @@ public class ScheduleService {
         if(scheduleDto.getProjId() == null || scheduleDto.getProjId().isEmpty()) return ResultConstant.returnResult(ResultConstant.REQUIRED_PARAM_NON);
         Project project = projRepository.findById(scheduleDto.getProjId()).orElse(null);
         if(project == null) return ResultConstant.returnResultCustom(ResultConstant.NOT_EXIST, "존재하는 프로젝트 아이디가 아닙니다");
+        if(!scheduleDto.getCategory().equalsIgnoreCase(("meeting")) && !scheduleDto.getCategory().equalsIgnoreCase(("plan"))) {
+            return ResultConstant.returnResultCustom(ResultConstant.INVALID_PARAM, "category 필드는 meeting또는 plan 값을 할당해주세요");
+        }
         //schedule 아이디 생성
         int scheCnt = project.getScheCnt()+1;
         project.setScheCnt(scheCnt);
         String scheId = String.format("%s_%d", project.getProjId(), scheCnt);
         //schedule 테이블에 값 저장
         Schedule schedule = new Schedule(scheId, scheduleDto.getDate(), scheduleDto.getScheName(), scheduleDto.getPlace(), scheduleDto.getCategory(), scheduleDto.getDetail(), project);
-        scheduleRepository.save(schedule);
+        Schedule createdSchedule = scheduleRepository.save(schedule);
         //participants 테이블에 값 저장
         List<String> people = scheduleDto.getParticipants();
         for(String teamone : people) {
@@ -71,6 +75,7 @@ public class ScheduleService {
             Participants participants = new Participants(schedule, user, project);
             participantsRepository.save(participants);
         }
+        //참여자 목록이 비어 있으면 모든 팀원들을 스케줄 참여원으로 넣음
         if(people.isEmpty()) {
             List<ProjMem> participants = projMemRepository.findProjMemsByProjId(project);
             for(ProjMem member : participants) {
@@ -78,7 +83,9 @@ public class ScheduleService {
                 participantsRepository.save(participants1);
             }
         }
-        return ResultConstant.returnResult(ResultConstant.OK);
+
+        return new ResponseEntity<Schedule>(createdSchedule, HttpStatus.OK);
+//        return ResultConstant.returnResultCustom(ResultConstant.OK, scheId);
     }
     /**
      * 스케쥴을 조회하는 메소드

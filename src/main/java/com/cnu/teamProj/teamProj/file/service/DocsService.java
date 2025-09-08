@@ -2,7 +2,7 @@ package com.cnu.teamProj.teamProj.file.service;
 
 import static com.cnu.teamProj.teamProj.common.ResultConstant.*;
 
-import com.cnu.teamProj.teamProj.common.ResultConstant;
+import com.cnu.teamProj.teamProj.common.ResponseDto;
 import com.cnu.teamProj.teamProj.file.dto.*;
 import com.cnu.teamProj.teamProj.file.entity.Doc;
 import com.cnu.teamProj.teamProj.file.entity.Docs;
@@ -28,16 +28,12 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.xml.transform.Result;
 import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -101,7 +97,8 @@ public class DocsService {
                 return returnResultCustom(NOT_EXIST, "프로젝트 아이디가 존재하지 않습니다");
             }
             Doc doc = new Doc(dto.getTitle(), dto.getDetail(), dto.getCategory());
-            doc.setCreatedBy(userRepository.findById(dto.getId()).orElse(null));
+            User user = userRepository.findById(dto.getId()).orElse(null);
+            doc.setCreatedBy(user);
             doc.setProjId(projRepository.findProjectByProjId(dto.getProjId()));
 
             docRepository.save(doc);
@@ -113,13 +110,14 @@ public class DocsService {
                     fileResult = s3Service.uploadFile(file, dto.getProjId());
                     if(fileResult == null) return returnResultCustom(INVALID_PARAM, "파일의 이름명이 잘못되었습니다");
                     else {
-                        results.add(new File(fileResult.getFilename(), fileResult.getUrl(), id));
+                        results.add(new File(fileResult.getFilename(), fileResult.getUrl(), id, user));
                     }
                 }
             }
             if(dto.getUrl() != null && !dto.getUrl().isEmpty()) {
                 for(String url : dto.getUrl()) {
-                    results.add(new File("", url, id));
+
+                    results.add(new File("", url, id, user));
                 }
             }
             fileRepository.saveAll(results);
@@ -435,7 +433,7 @@ public class DocsService {
         List<File> files = fileRepository.findFilesByFileType(fileType);
         List<FileDto> ret = new ArrayList<>();
         for(File file : files) {
-            ret.add(new FileDto(file.getId(), file.getUrl(), file.getFilename(), file.getUploadDate()));
+            ret.add(new FileDto(file.getFileId(), file.getUrl(), file.getFilename(), file.getUploadDate()));
         }
         return ret;
     }
@@ -582,7 +580,8 @@ public class DocsService {
                         FileDto fileResult = s3Service.uploadFile(file, doc.getProjId().getProjId());
                         logger.info("파일 데이터: {}", fileResult.getFilename());
                         //파일 테이블에 업로드
-                        fileRepository.save(new File(fileResult.getFilename(), fileResult.getUrl(), fileType));
+                        User user = userRepository.findById(SecurityUtil.getCurrentUser()).orElse(null);
+                        fileRepository.save(new File(fileResult.getFilename(), fileResult.getUrl(), fileType, user));
                     }
                 }
             } catch (Exception e) {
@@ -597,9 +596,41 @@ public class DocsService {
             }
             //새롭게 들어온 외부 url 저장
             for(String url : dto.getUrls()) {
-                fileRepository.save(new File("", url, fileType));
+                User user = userRepository.findById(SecurityUtil.getCurrentUser()).orElse(null);
+                fileRepository.save(new File("", url, fileType, user));
             }
         }
         return OK;
+    }
+
+    /**
+     * 파일 데이터를 S3Bucket과 DB에 저장
+     * @param files 파일 데이터 배열
+     * @param type 과제 관련이라면 task, 회의록 녹음본이라면 meeting
+     * @param typeId 관련된 과제 혹은 회의록의 아이디
+     * @param projId 프로젝트 아이디
+     * @return 성공, 실패 여부
+     * @throws Exception s3에 파일 업로드 실패 시 예외 처리
+     */
+    @Transactional
+    public ResponseDto saveFileToS3nDB(List<MultipartFile> files, String type, String typeId, String projId) throws Exception {
+        if(!type.equalsIgnoreCase("meeting") && !type.equalsIgnoreCase("task")) {
+            return new ResponseDto("type 형식 오류", 400);
+        }
+        if(!files.isEmpty()) {
+            for(MultipartFile file : files) {
+                try {
+                    FileDto fileInfo = s3Service.uploadFile(file, projId);
+                    //String filename, String url, String fileType, User user
+                    User createdBy = userRepository.findById(SecurityUtil.getCurrentUser()).orElse(null);
+                    String fileType = String.format("%s:%s", type, typeId);
+                    fileRepository.save(new File(fileInfo.getFilename(), fileInfo.getUrl(), fileType, createdBy));
+                } catch (Exception e) {
+                    throw new Exception("s3 버킷에 파일 업로드 중 에러 발생:" + e.getMessage());
+                }
+            }
+        }
+
+        return new ResponseDto("파일 저장 성공", 200);
     }
 }

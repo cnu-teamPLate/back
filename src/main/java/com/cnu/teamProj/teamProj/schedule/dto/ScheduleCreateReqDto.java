@@ -1,12 +1,15 @@
 package com.cnu.teamProj.teamProj.schedule.dto;
 
+import com.cnu.teamProj.teamProj.schedule.entity.MeetingLog;
 import com.cnu.teamProj.teamProj.schedule.entity.Schedule;
+import com.cnu.teamProj.teamProj.security.dto.SimpleUserInfoDto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -21,7 +24,7 @@ public class ScheduleCreateReqDto {
     private String scheName;
     @Schema(description = "스케줄 진행 장소", example = "서강대학교 P관 라운지")
     private String place;
-    @Schema(description = "스케줄 종류<br/>🤝회의 = meeting<br/>📜과제 = task<br/>📅일정 = plan", example = "meeting")
+    @Schema(description = "스케줄 종류<br/>🤝회의 = meeting<br/>📅일정 = plan", example = "meeting")
     private String category;
     @Schema(description = "스케줄 설명", example = "회의 안건 : DB를 어떤 것을 사용할지, 배포 일정 관련 하여 회의 진행")
     private String detail;
@@ -35,5 +38,18 @@ public class ScheduleCreateReqDto {
         this.place = schedule.getPlace();
         this.category = schedule.getCategory();
         this.detail = schedule.getDetail();
+    }
+
+    public ScheduleCreateReqDto(MeetingLogDto dto) {
+        this.projId = dto.getProjId();
+        this.date = dto.getDate();
+        this.scheName = String.format("[회의]%s", dto.getTitle());
+        this.category = "meeting";
+        this.detail = dto.getFix();
+        List<String> participants = new ArrayList<String>();
+        for(SimpleUserInfoDto user : dto.getParticipants()) {
+            participants.add(user.getId());
+        }
+        this.participants = participants;
     }
 }
