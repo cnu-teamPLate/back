@@ -182,7 +182,7 @@ public class MeetingService {
         for(MeetingLog log : allMeetings) {
             String fileType = String.format("meeting:%s", log.getScheId().getScheId());
             File file = fileRepository.findByFileType(fileType);
-            ret.add(new MeetingListDto(log.getScheId().getScheId(), log.getScheId().getScheName(), log.getScheId().getDate(), file.getUrl()));
+            ret.add(new MeetingListDto(log.getScheId().getScheId(), log.getScheId().getScheName(), log.getScheId().getDate(), file==null ? "" : file.getUrl()));
         }
 
         return new ResponseEntity<>(ret, HttpStatus.OK);
