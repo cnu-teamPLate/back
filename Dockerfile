@@ -4,7 +4,7 @@ WORKDIR /app
 COPY . .
 RUN ls -la /app
 RUN chmod +x gradlew
-RUN ./gradle dependencies
+RUN ./gradlew dependencies
 RUN ./gradlew clean bootJar -x test --no-daemon
 
 # 2️⃣ 실행 스테이지
