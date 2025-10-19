@@ -2,10 +2,7 @@
 FROM gradle:8.5-jdk17 AS builder
 WORKDIR /app
 COPY . .
-RUN ls -la /app
-RUN chmod +x gradlew
-RUN ./gradlew dependencies
-RUN ./gradlew clean bootJar -x test --no-daemon
+RUN gradle clean bootJar -x test --no-daemon
 
 # 2️⃣ 실행 스테이지
 FROM gcr.io/distroless/java17-debian12
