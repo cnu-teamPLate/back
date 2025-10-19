@@ -27,7 +27,7 @@ jobs:
       - name: Build Docker image
         run: |
           IMAGE_URI=${{steps.login-ecr.outputs.registry}}/teamplate-api:latest
-          docker build -t $IMAGE_URI .
+          docker build -t $IMAGE_URI . --progress-plain
 
       - name: push to ecr
         run: |
