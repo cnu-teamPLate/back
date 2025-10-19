@@ -34,11 +34,6 @@ jobs:
         uses: webfactory/ssh-agent@v0.5.3
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-      #test
-      - name: deploy
-        if: steps.check_deleted.outputs.has_deleted == 'false'
-        run: |
-          ssh -o StrictHostKeyChecking=no ec2-user@3.34.140.89 'bash /home/ubuntu/deploy.sh'
 
       - name: Skip deploy
         if: steps.check_deleted.outputs.has_deleted == 'true'
