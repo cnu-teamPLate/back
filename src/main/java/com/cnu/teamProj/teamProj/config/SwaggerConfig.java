@@ -6,6 +6,7 @@ import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.servers.Server;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
@@ -15,6 +16,8 @@ import java.util.List;
 @Configuration
 @EnableWebMvc
 public class SwaggerConfig {
+    @Value("${spring.profiles.active}")
+    private String profile;
     @Bean
     public OpenAPI openAPI(){
         String jwt = "JWT";
@@ -24,15 +27,23 @@ public class SwaggerConfig {
                 .type(SecurityScheme.Type.HTTP)
                 .scheme("bearer")
                 .bearerFormat("JWT"));
+//        String deploy = System.getenv("DEPLOY");
+        System.out.println("profile값 확인: "+profile);
+        if("deploy".equalsIgnoreCase(profile)) {
+            Server server = new Server();
+            server.setUrl("https://www.teamplate-api.site");
 
-        //https 접근 가능 설정
-        Server server = new Server();
-        server.setUrl("https://www.teamplate-api.site");
+            return new OpenAPI()
+                .components(new Components())
+                .info(apiInfo())
+                .servers(List.of(server))
+                .addSecurityItem(securityRequirement)
+                .components(components);
+        }
 
         return new OpenAPI()
                 .components(new Components())
                 .info(apiInfo())
-                .servers(List.of(server))
                 .addSecurityItem(securityRequirement)
                 .components(components);
 

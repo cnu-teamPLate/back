@@ -11,31 +11,37 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
-      - name: Check for deleted files
-        id: check_deleted
-        run: |
-          echo "삭제된 파일 검사 중"
-          git fetch origin main
-          DELETED=$(git diff --name-status ${{ github.event.before }} ${{ github.sha }} | grep '^D' | awk '{print $2}' || true)
-          
-          if [ -n "$DELETED" ]; then
-            echo "삭제된 파일 발견됨"
-            echo "$DELETED"
-            echo "has_deleted=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "삭제된 파일 없음"
-            echo "has_deleted=false" >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: Set up SSH
-        if: steps.check_deleted.outputs.has_deleted == 'false'
-        uses: webfactory/ssh-agent@v0.5.3
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+          aws-access-key-id: ${{secrets.AWS_ACCESS_KEY_ID}}
+          aws-secret-access-key: ${{secrets.AWS_SECRET_ACCESS_KEY}}
+          aws-region: ap-northeast-2
 
-      - name: Skip deploy
-        if: steps.check_deleted.outputs.has_deleted == 'true'
+      - name: Login to ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build Docker image
         run: |
-          echo "삭제된 파일이 있어 배포를 중단합니다"
+          IMAGE_URI=${{steps.login-ecr.outputs.registry}}/teamplate-api:latest
+          docker build -t $IMAGE_URI
+
+      - name: push to ecr
+        run: |
+          IMAGE_URI=${{steps.login-ecr.outputs.registry}}/teamplate-api:latest
+          docker push $IMAGE_URI
+
+      - name: ssh into ec2 and deploy new image
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{secrets.EC2_HOST}}
+          username: ec2-user
+          key: ${{secrets.SSH_PRIVATE_KEY}}
+          scripts: |
+            cd /home/ec2-user/api-app/
+            docker-compose down -v
+            docker-compose pull
+            docker-compose up -d
