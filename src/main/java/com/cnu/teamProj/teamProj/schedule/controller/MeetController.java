@@ -136,7 +136,7 @@ public class MeetController {
     }
 
     @PutMapping("/update/log")
-    @Operation(summary = "회의록 수정하기", description = "수정할 필드에 대해서만 값을 넣어 보내면 됩니다.")
+    @Operation(summary = "회의록 수정하기", description = "수정할 필드에 대해서만 값을 넣어 보내면 됩니다.\n⚠️단 scheId는 필수임")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "요청 성공", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
             @ApiResponse(responseCode = "404", description = "존재하는 유저 or 프로젝트 or 스케줄 아이디가 아닙니다", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
