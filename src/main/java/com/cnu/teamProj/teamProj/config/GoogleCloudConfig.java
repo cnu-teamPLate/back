@@ -18,7 +18,7 @@ import java.io.IOException;
 @Configuration
 @Slf4j
 public class GoogleCloudConfig {
-    @Value("classpath:stt-google.json")
+    @Value("${spring.cloud.gcp.credentials.location}")
     Resource gcsCredentials;
 
 
