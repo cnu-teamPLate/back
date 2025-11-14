@@ -3,10 +3,8 @@ package com.cnu.teamProj.teamProj.schedule.controller;
 import com.cnu.teamProj.teamProj.common.ResponseDto;
 import com.cnu.teamProj.teamProj.common.ResultConstant;
 import com.cnu.teamProj.teamProj.schedule.dto.*;
-import com.cnu.teamProj.teamProj.schedule.entity.MeetingLog;
 import com.cnu.teamProj.teamProj.schedule.service.MakePlanService;
 import com.cnu.teamProj.teamProj.schedule.service.MeetingService;
-import com.cnu.teamProj.teamProj.security.dto.AuthResponseDto;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
@@ -23,14 +21,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.parameters.P;
 import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
-import javax.xml.transform.Result;
-import java.nio.charset.StandardCharsets;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -139,7 +132,20 @@ public class MeetController {
             @ModelAttribute ScheduleUploadReqDto dto
     ) throws JsonProcessingException {
         MeetingLogDto param = objectMapper.readValue(dto.getParam(), MeetingLogDto.class);
-        return meetingService.updateMeetingLog(param, dto.getFile());
+        return meetingService.uploadMeetingLog(param, dto.getFile());
+    }
+
+    @PutMapping("/update/log")
+    @Operation(summary = "회의록 수정하기", description = "수정할 필드에 대해서만 값을 넣어 보내면 됩니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "요청 성공", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "404", description = "존재하는 유저 or 프로젝트 or 스케줄 아이디가 아닙니다", content = @Content(schema = @Schema(implementation = ResponseDto.class))),
+            @ApiResponse(responseCode = "400", description = "둥록되지 않은 회의록이 들어왔을 때", content = @Content(schema = @Schema(implementation = ResponseDto.class)))
+    })
+    public ResponseEntity<?> updateMeetingLog(
+            @RequestBody MeetingLogReqDto dto
+    ) {
+        return meetingService.updateMeetingLog(dto);
     }
 
     @PostMapping(value = "/convert-speech", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

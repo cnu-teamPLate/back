@@ -1,21 +1,20 @@
 package com.cnu.teamProj.teamProj.schedule.service;
 
+import com.cnu.teamProj.teamProj.common.BadRequestException;
 import com.cnu.teamProj.teamProj.common.ResponseDto;
 import com.cnu.teamProj.teamProj.common.ResultConstant;
 import com.cnu.teamProj.teamProj.common.UserNotFoundException;
-import com.cnu.teamProj.teamProj.file.dto.FileDto;
 import com.cnu.teamProj.teamProj.file.entity.File;
 import com.cnu.teamProj.teamProj.file.repository.FileRepository;
 import com.cnu.teamProj.teamProj.file.service.DocsService;
-import com.cnu.teamProj.teamProj.file.service.S3Service;
 import com.cnu.teamProj.teamProj.proj.entity.Project;
 import com.cnu.teamProj.teamProj.proj.repository.MemberRepository;
 import com.cnu.teamProj.teamProj.proj.repository.ProjRepository;
 import com.cnu.teamProj.teamProj.schedule.dto.MeetingListDto;
 import com.cnu.teamProj.teamProj.schedule.dto.MeetingLogDto;
+import com.cnu.teamProj.teamProj.schedule.dto.MeetingLogReqDto;
 import com.cnu.teamProj.teamProj.schedule.dto.ScheduleCreateReqDto;
 import com.cnu.teamProj.teamProj.schedule.entity.MeetingLog;
-import com.cnu.teamProj.teamProj.schedule.entity.MeetingLogId;
 import com.cnu.teamProj.teamProj.schedule.entity.Participants;
 import com.cnu.teamProj.teamProj.schedule.entity.Schedule;
 import com.cnu.teamProj.teamProj.schedule.repository.MeetingLogRepository;
@@ -34,7 +33,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.xml.transform.Result;
 import java.util.*;
 
 @Service
@@ -56,7 +54,7 @@ public class MeetingService {
      * 회의록 업로드
      */
     @Transactional
-    public ResponseEntity<?> updateMeetingLog(MeetingLogDto dto, MultipartFile file) {
+    public ResponseEntity<?> uploadMeetingLog(MeetingLogDto dto, MultipartFile file) {
         String scheId = dto.getScheId();
         Schedule schedule;
         if(scheId == null) {
@@ -211,5 +209,35 @@ public class MeetingService {
             log.error("인코딩 중 문제가 발생했습니다: {}", e.getMessage());
             return ResultConstant.returnResultCustom(ResultConstant.UNEXPECTED_ERROR, "인코딩 중 문제가 발생했습니다");
         }
+    }
+
+    @Transactional
+    public ResponseEntity<?> updateMeetingLog(MeetingLogReqDto dto) {
+        Schedule meetingSchedule = scheduleRepository.findByScheId(dto.getScheId());
+        if(meetingSchedule == null || !meetingSchedule.getCategory().equalsIgnoreCase("meeting")) {
+            return ResultConstant.returnResultCustom(ResultConstant.NOT_EXIST, "해당 아이디의 회의가 존재하지 않습니다");
+        }
+        if(dto.getTitle() != null) meetingSchedule.setScheName(dto.getTitle());
+        if(dto.getDate() != null) meetingSchedule.setDate(dto.getDate());
+        if(dto.getParticipants() != null) {
+            List<Participants> participants = participantsRepository.findParticipantsByScheId(meetingSchedule);
+            participantsRepository.deleteAll(participants);
+            for(SimpleUserInfoDto member : dto.getParticipants()) {
+                User memberInfo = userRepository.findById(member.getId()).orElse(null);
+                if(memberInfo == null) {
+                    throw new UserNotFoundException("존재하지 않는 유저가 참여자 목록으로 들어왔습니다");
+                }
+                participantsRepository.save(new Participants(meetingSchedule, memberInfo, meetingSchedule.getProjId()));
+            }
+        }
+        MeetingLog meetingLog = meetingLogRepository.findByScheId(meetingSchedule);
+        if(meetingLog == null) {
+            throw new BadRequestException("등록된 회의록 정보가 없습니다. 수정은 생성된 회의록에 한하여 가능합니다");
+        }
+        if(dto.getContents() != null) meetingLog.setContents(dto.getContents());
+        if(dto.getFix() != null) meetingLog.setFix(dto.getFix());
+        if(dto.getSttContents() != null) meetingLog.setSttContents(dto.getSttContents());
+
+        return ResultConstant.returnResult(ResultConstant.OK);
     }
 }
