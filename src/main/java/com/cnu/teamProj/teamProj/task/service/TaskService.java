@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.time.ZonedDateTime;
@@ -178,6 +179,10 @@ public class TaskService {
 
         // description 수정
         task.setDescription(request.getDescription());
+        if(request.getDeadline() != null) {
+            ZoneId seoulZoneId = ZoneId.of("Asia/Seoul");
+            task.setDate(request.getDeadline().atZone(seoulZoneId));
+        }
 
         // assignee 수정
         if (request.getAssigneeId() != null) {

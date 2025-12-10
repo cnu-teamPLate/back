@@ -1,0 +1,36 @@
+services:
+  mysql:
+    image: mysql:8.0.32
+    container_name: teamplate-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: djkddjksa123
+      MYSQL_DATABASE: teamplate
+      MYSQL_USER: user
+      MYSQL_PASSWORD: teamPlateWkdWkd!
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./mysql_data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-u", "root", "-"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+
+
+  app:
+    image: 816069131609.dkr.ecr.ap-northeast-2.amazonaws.com/teamplate-api:latest
+    container_name: teamplate-back
+    restart: always
+    env_file:
+      - ./.env
+    ports:
+      - "8080:8080"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    volumes:
+      - ./stt-google.json:/app/credentials/stt-google.json:ro

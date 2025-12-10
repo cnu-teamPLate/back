@@ -7,6 +7,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 @Data
 @Getter
 @Setter
@@ -16,5 +18,8 @@ public class TaskUpdateRequest {
     private String description;
     @Schema(description = "수정한 사람 아이디", example = "01111111", type = "string")
     private String assigneeId;
+    @Schema(description = "업로드 날짜", example = "2025-05-27T14:30:00", type = "string")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    private LocalDateTime deadline;
 }
 

@@ -8,6 +8,7 @@ src/main/test
 !**/src/test/**/build/
 
 .env
+.prod.env
 src/main/resources/stt-google.json
 
 ### STS ###
