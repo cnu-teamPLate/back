@@ -11,6 +11,7 @@ import com.cnu.teamProj.teamProj.task.dto.TaskUpdateRequest;
 import com.cnu.teamProj.teamProj.task.entity.Task;
 import com.cnu.teamProj.teamProj.task.repository.TaskRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -22,6 +23,7 @@ import java.time.ZonedDateTime;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class TaskService {
     private final TaskRepository taskRepository;
 
@@ -121,6 +123,9 @@ public class TaskService {
             dto.setCate(task.getCate());
             dto.setLevel(task.getLevel());
             dto.setDate(task.getDate());
+
+            log.info("등록된 과제 아이디: {}, 등록된 과제 날짜: {}", task.getTaskId(), task.getDate());
+
             dto.setDetail(task.getDetail());
             dto.setCheckBox(task.getCheckBox());
             dto.setTaskName(task.getTaskName());

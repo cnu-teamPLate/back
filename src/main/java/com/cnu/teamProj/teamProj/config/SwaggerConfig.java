@@ -32,7 +32,7 @@ public class SwaggerConfig {
         System.out.println("profile값 확인: "+profile);
         if("deploy".equalsIgnoreCase(profile)) {
             Server server = new Server();
-            server.setUrl("https://www.teamplate-api.site");
+            server.setUrl("https://teamplate-api.site");
 
             return new OpenAPI()
                 .components(new Components())
