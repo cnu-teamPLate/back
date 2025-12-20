@@ -38,16 +38,17 @@ public class UserInfoManageService {
         Optional<User> user = userRepository.findById(userID);
         if(user.isPresent()){
             User existUser = user.get();
-            if(userRepository.findByMail(paramUser.getEmail()).isPresent()) {
+            if(!existUser.getMail().equalsIgnoreCase(paramUser.getEmail()) && userRepository.findByMail(paramUser.getEmail()).isPresent()) {
                 if(!Objects.equals(userRepository.findByMail(paramUser.getEmail()).orElseThrow().getId(), existUser.getId())) {
                     return ResultConstant.returnResultCustom(ResultConstant.ALREADY_EXIST, "이미 존재하는 이메일 입니다");
                 }
-            }
-            existUser.setMail(paramUser.getEmail());
-            existUser.setPhone(paramUser.getPhone());
+            } else if(!existUser.getMail().equalsIgnoreCase(paramUser.getEmail())) existUser.setMail(paramUser.getEmail());
 
-//            existUser.setPwd(passwordEncoder.encode(paramUser.getPwd()));
-            existUser.setUsername(paramUser.getId());
+            if(!existUser.getPhone().equalsIgnoreCase(paramUser.getPhone())) existUser.setPhone(paramUser.getPhone());
+            if(!existUser.getUsername().equalsIgnoreCase(paramUser.getName())) existUser.setUsername(paramUser.getName());
+
+            existUser.setPwd(passwordEncoder.encode(paramUser.getPwd()));
+
             userRepository.save(existUser);
             return ResultConstant.returnResult(ResultConstant.OK);
         }
