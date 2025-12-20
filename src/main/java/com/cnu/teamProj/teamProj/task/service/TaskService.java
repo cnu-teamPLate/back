@@ -163,7 +163,7 @@ public class TaskService {
             task.setProjId(taskDTO.getProjId()); // 프로젝트 ID
             task.setRole(taskDTO.getRole()); // 역할
             task.setDetail(taskDTO.getDetail()); // 상세 내용
-            task.setDate(ZonedDateTime.now()); // 현재 시간
+            task.setDate(taskDTO.getDate()); // 마감기한
             task.setLevel(taskDTO.getLevel()); // 난이도
             task.setCate(taskDTO.getCate()); // 카테고리
             task.setCheckBox(taskDTO.getCheckBox()); // 체크 여부 (기본값 0)
@@ -177,6 +177,7 @@ public class TaskService {
     }
 
     public boolean updateTask(Integer taskId, TaskUpdateRequest request) {
+        log.info("요청으로 들어온 taskID: {}", taskId);
         Task task = findById(taskId);
         if (task == null) {
             return false;
