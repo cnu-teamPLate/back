@@ -46,8 +46,7 @@ public class UserInfoManageService {
 
             if(!existUser.getPhone().equalsIgnoreCase(paramUser.getPhone())) existUser.setPhone(paramUser.getPhone());
             if(!existUser.getUsername().equalsIgnoreCase(paramUser.getName())) existUser.setUsername(paramUser.getName());
-
-            existUser.setPwd(passwordEncoder.encode(paramUser.getPwd()));
+            if(paramUser.getPwd() != null && !paramUser.getPwd().isEmpty()) existUser.setPwd(passwordEncoder.encode(paramUser.getPwd()));
 
             userRepository.save(existUser);
             return ResultConstant.returnResult(ResultConstant.OK);
